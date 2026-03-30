@@ -10,7 +10,7 @@ import json
 import csv
 import io
 from datetime import date
-import anthropic
+from openai import OpenAI
 
 app = FastAPI()
 
@@ -215,18 +215,22 @@ async def get_products():
 @app.post("/api/match")
 async def match_product(req: MatchRequest):
     """Use Claude to match voice transcript to product(s)."""
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     products_json = json.dumps(PRODUCTS)
 
-    message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+    response = client.chat.completions.create(
+        model="gpt-4o",
         max_tokens=1000,
-        messages=[{
-            "role": "user",
-            "content": f"""You are a stock management assistant for a construction company.
-
-A worker has spoken this transcript: "{req.transcript}"
+        response_format={"type": "json_object"},
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a stock management assistant for a construction company. Always respond with valid JSON only."
+            },
+            {
+                "role": "user",
+                "content": f"""A worker has spoken this transcript: "{req.transcript}"
 
 Here is the product catalogue (JSON):
 {products_json}
@@ -239,7 +243,7 @@ Your job is to extract from the transcript:
 
 If the product is ambiguous (multiple matches), return all matches so the user can choose.
 
-Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
+Respond ONLY with valid JSON in this exact format:
 {{
   "matches": [
     {{"code": "...", "description": "...", "supplier": "...", "unit": "..."}}
@@ -253,16 +257,12 @@ Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 
 If a field is not mentioned in the transcript, set it to null and add it to missing[].
 """
-        }]
+            }
+        ]
     )
 
-    raw = message.content[0].text.strip()
-    # Strip markdown fences if present
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-    return json.loads(raw.strip())
+    raw = response.choices[0].message.content.strip()
+    return json.loads(raw)
 
 
 @app.post("/api/entries")

@@ -47,7 +47,7 @@ In Railway → your web service → **Variables**, add:
 
 | Variable | Value |
 |---|---|
-| `ANTHROPIC_API_KEY` | Your Anthropic API key (from console.anthropic.com) |
+| `OPENAI_API_KEY` | Your OpenAI API key (from platform.openai.com) |
 | `DATABASE_URL` | Auto-injected by Railway PostgreSQL plugin |
 
 ### Step 5 — Deploy
