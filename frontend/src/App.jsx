@@ -390,33 +390,33 @@ export default function App() {
   }
 
   // ── Voice ────────────────────────────────────────────────────────────────
-  function toggleListening() {
-    if (listening) {
-      recognitionRef.current?.stop()
-      setListening(false)
-      return
-    }
+  const transcriptRef = useRef('')
 
+  function startListening() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) { alert('Speech recognition not supported. Try Chrome on Android or desktop.'); return }
 
     const rec = new SR()
-    rec.continuous = false
+    rec.continuous = true
     rec.interimResults = true
     rec.lang = 'en-NZ'
     recognitionRef.current = rec
+    transcriptRef.current = ''
 
     rec.onstart = () => setListening(true)
     rec.onresult = (e) => {
       const t = Array.from(e.results).map(r => r[0].transcript).join('')
+      transcriptRef.current = t
       setTranscript(t)
-    }
-    rec.onend = () => {
-      setListening(false)
-      if (transcript.trim()) handleTranscript(transcript)
     }
     rec.onerror = () => setListening(false)
     rec.start()
+  }
+
+  function stopListening() {
+    recognitionRef.current?.stop()
+    setListening(false)
+    if (transcriptRef.current.trim()) handleTranscript(transcriptRef.current)
   }
 
   async function handleTranscript(text) {
@@ -535,16 +535,23 @@ export default function App() {
             <div style={S.voiceCard}>
               <div style={S.voiceTitle}>Voice Entry</div>
               <div style={S.voiceHint}>
-                Tap the mic and say the product name, job number, quantity and your name.<br/>
+                Hold the mic button and say the product name, job number, quantity and your name.<br/>
                 <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job 2847, 3 cans, taken by Dave"</em>
               </div>
 
-              <button style={S.micBtn(listening)} onClick={toggleListening}>
+              <button
+                style={S.micBtn(listening)}
+                onMouseDown={startListening}
+                onMouseUp={stopListening}
+                onMouseLeave={listening ? stopListening : undefined}
+                onTouchStart={(e) => { e.preventDefault(); startListening() }}
+                onTouchEnd={(e) => { e.preventDefault(); stopListening() }}
+              >
                 {listening ? '⏹' : '🎤'}
               </button>
 
               <div style={{fontSize:13,color:listening?'var(--danger)':'var(--muted)',fontFamily:'var(--font-head)',letterSpacing:1}}>
-                {listening ? 'LISTENING — TAP TO STOP' : 'TAP TO SPEAK'}
+                {listening ? 'LISTENING — RELEASE TO SUBMIT' : 'HOLD TO SPEAK'}
               </div>
 
               {transcript && (
