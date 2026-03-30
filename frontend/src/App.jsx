@@ -429,6 +429,10 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transcript: text }),
       })
+      if (!r.ok) {
+        const errText = await r.text()
+        throw new Error(`Server error ${r.status}: ${errText.slice(0, 200)}`)
+      }
       const data = await r.json()
       setMatchResult(data)
       // Pre-fill form with extracted values
@@ -442,7 +446,8 @@ export default function App() {
         setSelectedProduct(data.matches[0])
       }
     } catch (e) {
-      showToast('Error contacting server')
+      showToast('Error: ' + (e?.message || 'contacting server'))
+      console.error('Match error:', e)
     }
     setProcessing(false)
   }
