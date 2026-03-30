@@ -28,22 +28,31 @@ async def get_db():
 
 @app.on_event("startup")
 async def startup():
-    conn = await get_db()
-    await conn.execute("""
-        CREATE TABLE IF NOT EXISTS stock_entries (
-            id SERIAL PRIMARY KEY,
-            item_code TEXT NOT NULL,
-            entry_date DATE NOT NULL,
-            job TEXT NOT NULL,
-            supplier TEXT,
-            description TEXT NOT NULL,
-            cost_quantity NUMERIC NOT NULL,
-            unit TEXT,
-            comments TEXT,
-            created_at TIMESTAMPTZ DEFAULT NOW()
-        )
-    """)
-    await conn.close()
+    import time
+    for attempt in range(10):
+        try:
+            conn = await get_db()
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS stock_entries (
+                    id SERIAL PRIMARY KEY,
+                    item_code TEXT NOT NULL,
+                    entry_date DATE NOT NULL,
+                    job TEXT NOT NULL,
+                    supplier TEXT,
+                    description TEXT NOT NULL,
+                    cost_quantity NUMERIC NOT NULL,
+                    unit TEXT,
+                    comments TEXT,
+                    created_at TIMESTAMPTZ DEFAULT NOW()
+                )
+            """)
+            await conn.close()
+            print("Database ready.")
+            return
+        except Exception as e:
+            print(f"DB not ready (attempt {attempt+1}/10): {e}")
+            time.sleep(3)
+    print("WARNING: Could not connect to database on startup.")
 
 # ── Products (embedded from CSV) ─────────────────────────────────────────────
 
