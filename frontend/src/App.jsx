@@ -391,32 +391,55 @@ export default function App() {
 
   // ── Voice ────────────────────────────────────────────────────────────────
   const transcriptRef = useRef('')
+  const langRef = useRef('en-NZ')
+  const recognitionRef2 = useRef(null)
 
   function startListening() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) { alert('Speech recognition not supported. Try Chrome on Android or desktop.'); return }
 
-    const rec = new SR()
-    rec.continuous = true
-    rec.interimResults = true
-    rec.lang = 'en-NZ'
-    recognitionRef.current = rec
     transcriptRef.current = ''
+    langRef.current = 'en-NZ'
 
-    rec.onstart = () => setListening(true)
-    rec.onresult = (e) => {
-      const t = Array.from(e.results).map(r => r[0].transcript).join('')
-      transcriptRef.current = t
-      setTranscript(t)
+    // Start two recognisers in parallel — English and Filipino
+    // Whichever gets a result first wins
+    let settled = false
+
+    function makeRec(lang) {
+      const rec = new SR()
+      rec.continuous = true
+      rec.interimResults = true
+      rec.lang = lang
+      rec.onstart = () => setListening(true)
+      rec.onresult = (e) => {
+        if (settled) return
+        const t = Array.from(e.results).map(r => r[0].transcript).join('')
+        if (t.trim().length > 3) {
+          settled = true
+          langRef.current = lang
+        }
+        transcriptRef.current = t
+        setTranscript(t)
+      }
+      rec.onerror = () => {}
+      return rec
     }
-    rec.onerror = () => setListening(false)
-    rec.start()
+
+    const recEN = makeRec('en-NZ')
+    const recFIL = makeRec('fil-PH')
+    recognitionRef.current = recEN
+    recognitionRef2.current = recFIL
+
+    try { recEN.start() } catch(e) {}
+    // Slight delay so browsers don't block two simultaneous mic requests
+    setTimeout(() => { try { recFIL.start() } catch(e) {} }, 200)
   }
 
   function stopListening() {
-    recognitionRef.current?.stop()
+    try { recognitionRef.current?.stop() } catch(e) {}
+    try { recognitionRef2.current?.stop() } catch(e) {}
     setListening(false)
-    if (transcriptRef.current.trim()) handleTranscript(transcriptRef.current)
+    if (transcriptRef.current.trim()) handleTranscript(transcriptRef.current, langRef.current)
   }
 
   async function handleTranscript(text) {
@@ -558,6 +581,9 @@ export default function App() {
                 <div style={S.transcript}>
                   <span style={{color:'var(--muted)',fontSize:12,fontFamily:'var(--font-head)',letterSpacing:1}}>HEARD: </span>
                   {transcript}
+                  <div style={{marginTop:6,fontSize:11,color:'var(--accent)',fontFamily:'var(--font-head)',letterSpacing:.5}}>
+                    ↳ AI will translate & match automatically
+                  </div>
                 </div>
               )}
             </div>

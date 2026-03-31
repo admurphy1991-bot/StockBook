@@ -239,16 +239,18 @@ async def match_product(req: MatchRequest):
             },
             {
                 "role": "user",
-                "content": f"""A worker has spoken this transcript: "{req.transcript}"
+                "content": f"""A worker has spoken this transcript (may be in English or Filipino/Tagalog): "{req.transcript}"
 
 Here is the product catalogue (JSON):
 {products_json}
 
-Your job is to extract from the transcript:
-1. The product(s) being referred to (match by name, partial name, or common nickname)
-2. Job number (usually a number like "2847" or "job 123")
-3. Quantity taken (a number)
-4. Person's name (who took the goods) - this goes in comments
+Your job is to:
+1. Translate the transcript to English if it is in Filipino/Tagalog (or a mix of both)
+2. Extract the following fields from the transcript:
+   - The product(s) being referred to (match by name, partial name, common nickname, or Filipino equivalent)
+   - Job number (usually a number like "2847" or "job 123" - in Filipino may be said as "trabaho" or "job")
+   - Quantity taken (a number - in Filipino may be said as "tatlo" for 3, "dalawa" for 2, "isa" for 1, etc.)
+   - Person's name (who took the goods) - this goes in comments
 
 If the product is ambiguous (multiple matches), return all matches so the user can choose.
 
@@ -265,6 +267,7 @@ Respond ONLY with valid JSON in this exact format:
 }}
 
 If a field is not mentioned in the transcript, set it to null and add it to missing[].
+All output fields must be in English regardless of input language.
 """
             }
         ]
