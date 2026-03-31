@@ -1,16 +1,16 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #0f1115;
-  --surface:   #181c22;
-  --surface2:  #1f242d;
-  --border:    #2a3040;
-  --accent:    #f5a623;
-  --accent2:   #e8891a;
+  --bg:        #0a0e12;
+  --surface:   #111820;
+  --surface2:  #182030;
+  --border:    #1e3048;
+  --accent:    #1B9ED4;
+  --accent2:   #1588b8;
   --danger:    #e05252;
   --success:   #4caf7d;
   --text:      #e8ecf2;
-  --muted:     #7a8699;
+  --muted:     #6a8099;
   --font-head: 'Barlow Condensed', sans-serif;
   --font-body: 'Barlow', sans-serif;
 }

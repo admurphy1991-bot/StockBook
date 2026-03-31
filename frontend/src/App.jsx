@@ -89,7 +89,7 @@ const S = {
     height: 96,
     borderRadius: '50%',
     background: listening ? 'var(--danger)' : 'var(--accent)',
-    color: listening ? '#fff' : '#0f1115',
+    color: '#fff',
     fontSize: 36,
     display: 'flex',
     alignItems: 'center',
@@ -179,7 +179,7 @@ const S = {
     flex: 1,
     padding: '13px 0',
     background: 'var(--accent)',
-    color: '#0f1115',
+    color: '#fff',
     fontFamily: 'var(--font-head)',
     fontSize: 16,
     fontWeight: 800,
@@ -263,7 +263,7 @@ const S = {
   exportBtn: {
     padding: '7px 16px',
     background: 'var(--accent)',
-    color: '#0f1115',
+    color: '#fff',
     fontFamily: 'var(--font-head)',
     fontSize: 13,
     fontWeight: 700,
@@ -313,7 +313,7 @@ const S = {
     transform: `translateX(-50%) translateY(${show ? 0 : 80}px)`,
     opacity: show ? 1 : 0,
     background: 'var(--success)',
-    color: '#0f1115',
+    color: '#fff',
     padding: '12px 28px',
     borderRadius: 8,
     fontFamily: 'var(--font-head)',
@@ -490,8 +490,8 @@ export default function App() {
       `}</style>
 
       <header style={S.header}>
-        <div>
-          <div style={S.logo}>Sansom</div>
+        <div style={{display:'flex', alignItems:'center', gap:12}}>
+          <img src="/sansom-logo.jpg" alt="Sansom" style={{height:36, filter:'brightness(0) invert(1)'}} />
           <div style={S.logoSub}>Stock Book</div>
         </div>
         <div style={S.tabs}>
