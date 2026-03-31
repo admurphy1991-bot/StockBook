@@ -61,7 +61,6 @@ const S = {
     padding: '32px 20px',
   },
 
-  // Voice section
   voiceCard: {
     background: 'var(--surface)',
     border: '1px solid var(--border)',
@@ -101,6 +100,9 @@ const S = {
       ? '0 0 0 12px rgba(224,82,82,0.15), 0 0 0 24px rgba(224,82,82,0.07)'
       : '0 4px 20px rgba(245,166,35,0.3)',
     animation: listening ? 'pulse 1.4s ease-in-out infinite' : 'none',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    touchAction: 'none',
   }),
   transcript: {
     background: 'var(--surface2)',
@@ -115,23 +117,6 @@ const S = {
     textAlign: 'left',
   },
 
-  // State chips
-  chip: (color) => ({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '3px 10px',
-    borderRadius: 20,
-    fontSize: 12,
-    fontWeight: 600,
-    fontFamily: 'var(--font-head)',
-    letterSpacing: .5,
-    background: color === 'orange' ? 'rgba(245,166,35,.15)' : color === 'green' ? 'rgba(76,175,125,.15)' : 'rgba(224,82,82,.15)',
-    color: color === 'orange' ? 'var(--accent)' : color === 'green' ? 'var(--success)' : 'var(--danger)',
-    border: `1px solid ${color === 'orange' ? 'rgba(245,166,35,.3)' : color === 'green' ? 'rgba(76,175,125,.3)' : 'rgba(224,82,82,.3)'}`,
-  }),
-
-  // Confirm card
   confirmCard: {
     background: 'var(--surface)',
     border: '1px solid var(--accent)',
@@ -217,7 +202,6 @@ const S = {
     transition: 'all .15s',
   },
 
-  // Disambiguation
   disambigCard: {
     background: 'var(--surface)',
     border: '1px solid var(--border)',
@@ -255,7 +239,6 @@ const S = {
     marginTop: 2,
   },
 
-  // Log
   logCard: {
     background: 'var(--surface)',
     border: '1px solid var(--border)',
@@ -364,21 +347,21 @@ const S = {
   },
 }
 
-// ── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [tab, setTab] = useState('capture')
   const [listening, setListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [processing, setProcessing] = useState(false)
-  const [matchResult, setMatchResult] = useState(null)   // AI response
+  const [matchResult, setMatchResult] = useState(null)
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [form, setForm] = useState({ job: '', quantity: '', comments: '' })
   const [entries, setEntries] = useState([])
   const [toast, setToast] = useState('')
   const [toastShow, setToastShow] = useState(false)
   const recognitionRef = useRef(null)
+  const transcriptRef = useRef('')
+  const holdingRef = useRef(false)
 
-  // Load entries on mount
   useEffect(() => { loadEntries() }, [])
 
   async function loadEntries() {
@@ -390,56 +373,33 @@ export default function App() {
   }
 
   // ── Voice ────────────────────────────────────────────────────────────────
-  const transcriptRef = useRef('')
-  const langRef = useRef('en-NZ')
-  const recognitionRef2 = useRef(null)
-
-  function startListening() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) { alert('Speech recognition not supported. Try Chrome on Android or desktop.'); return }
-
-    transcriptRef.current = ''
-    langRef.current = 'en-NZ'
-
-    // Start two recognisers in parallel — English and Filipino
-    // Whichever gets a result first wins
-    let settled = false
-
-    function makeRec(lang) {
-      const rec = new SR()
-      rec.continuous = true
-      rec.interimResults = true
-      rec.lang = lang
-      rec.onstart = () => setListening(true)
-      rec.onresult = (e) => {
-        if (settled) return
-        const t = Array.from(e.results).map(r => r[0].transcript).join('')
-        if (t.trim().length > 3) {
-          settled = true
-          langRef.current = lang
-        }
-        transcriptRef.current = t
-        setTranscript(t)
-      }
-      rec.onerror = () => {}
-      return rec
+  function toggleListening() {
+    if (listening) {
+      recognitionRef.current?.stop()
+      setListening(false)
+      return
     }
 
-    const recEN = makeRec('en-NZ')
-    const recFIL = makeRec('fil-PH')
-    recognitionRef.current = recEN
-    recognitionRef2.current = recFIL
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) { alert('Speech recognition not supported. Try Safari on iPhone or Chrome on desktop.'); return }
 
-    try { recEN.start() } catch(e) {}
-    // Slight delay so browsers don't block two simultaneous mic requests
-    setTimeout(() => { try { recFIL.start() } catch(e) {} }, 200)
-  }
+    const rec = new SR()
+    rec.continuous = true
+    rec.interimResults = true
+    rec.lang = 'en-NZ'
+    recognitionRef.current = rec
 
-  function stopListening() {
-    try { recognitionRef.current?.stop() } catch(e) {}
-    try { recognitionRef2.current?.stop() } catch(e) {}
-    setListening(false)
-    if (transcriptRef.current.trim()) handleTranscript(transcriptRef.current, langRef.current)
+    rec.onstart = () => setListening(true)
+    rec.onresult = (e) => {
+      const t = Array.from(e.results).map(r => r[0].transcript).join('')
+      setTranscript(t)
+    }
+    rec.onend = () => {
+      setListening(false)
+      if (transcript.trim()) handleTranscript(transcript)
+    }
+    rec.onerror = () => setListening(false)
+    rec.start()
   }
 
   async function handleTranscript(text) {
@@ -458,24 +418,20 @@ export default function App() {
       }
       const data = await r.json()
       setMatchResult(data)
-      // Pre-fill form with extracted values
       setForm({
         job: data.job || '',
         quantity: data.quantity != null ? String(data.quantity) : '',
         comments: data.comments || '',
       })
-      // Auto-select if unambiguous single match
       if (!data.ambiguous && data.matches?.length === 1) {
         setSelectedProduct(data.matches[0])
       }
     } catch (e) {
       showToast('Error: ' + (e?.message || 'contacting server'))
-      console.error('Match error:', e)
     }
     setProcessing(false)
   }
 
-  // ── Submit ───────────────────────────────────────────────────────────────
   async function submitEntry() {
     if (!selectedProduct || !form.job || !form.quantity) return
     try {
@@ -522,7 +478,6 @@ export default function App() {
   const isAmbiguous = matchResult?.ambiguous && matchResult?.matches?.length > 1
   const canSubmit = selectedProduct && form.job && form.quantity
 
-  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div style={S.app}>
       <style>{`
@@ -535,7 +490,6 @@ export default function App() {
         input:focus { border-color: var(--accent) !important; }
       `}</style>
 
-      {/* Header */}
       <header style={S.header}>
         <div>
           <div style={S.logo}>Sansom</div>
@@ -551,44 +505,31 @@ export default function App() {
       </header>
 
       <main style={S.main}>
-
-        {/* ── CAPTURE TAB ─────────────────────────────────────────────── */}
         {tab === 'capture' && (
           <>
             <div style={S.voiceCard}>
               <div style={S.voiceTitle}>Voice Entry</div>
               <div style={S.voiceHint}>
-                Hold the mic button and say the product name, job number, quantity and your name.<br/>
+                Tap the mic and say the product name, job number, quantity and your name.<br/>
                 <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job 2847, 3 cans, taken by Dave"</em>
               </div>
 
-              <button
-                style={S.micBtn(listening)}
-                onMouseDown={startListening}
-                onMouseUp={stopListening}
-                onMouseLeave={listening ? stopListening : undefined}
-                onTouchStart={(e) => { e.preventDefault(); startListening() }}
-                onTouchEnd={(e) => { e.preventDefault(); stopListening() }}
-              >
+              <button style={S.micBtn(listening)} onClick={toggleListening}>
                 {listening ? '⏹' : '🎤'}
               </button>
 
-              <div style={{fontSize:13,color:listening?'var(--danger)':'var(--muted)',fontFamily:'var(--font-head)',letterSpacing:1}}>
-                {listening ? 'LISTENING — RELEASE TO SUBMIT' : 'HOLD TO SPEAK'}
+              <div style={{fontSize:13, color:listening?'var(--danger)':'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1}}>
+                {listening ? 'LISTENING — TAP TO STOP' : 'TAP TO SPEAK'}
               </div>
 
               {transcript && (
                 <div style={S.transcript}>
                   <span style={{color:'var(--muted)',fontSize:12,fontFamily:'var(--font-head)',letterSpacing:1}}>HEARD: </span>
                   {transcript}
-                  <div style={{marginTop:6,fontSize:11,color:'var(--accent)',fontFamily:'var(--font-head)',letterSpacing:.5}}>
-                    ↳ AI will translate & match automatically
-                  </div>
                 </div>
               )}
             </div>
 
-            {/* Processing */}
             {processing && (
               <div style={S.processing}>
                 <div style={S.spinner} />
@@ -596,7 +537,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Disambiguation */}
             {!processing && isAmbiguous && (
               <div style={S.disambigCard}>
                 <div style={{...S.confirmTitle, color:'var(--text)', fontSize:15}}>
@@ -616,12 +556,10 @@ export default function App() {
               </div>
             )}
 
-            {/* Confirm form */}
             {!processing && hasMatches && (
               <div style={S.confirmCard}>
                 <div style={S.confirmTitle}>Confirm Entry</div>
 
-                {/* Product display */}
                 {selectedProduct && (
                   <div style={{...S.field, background:'var(--surface2)', borderRadius:8, padding:'12px 16px', marginBottom:20, border:'1px solid var(--border)'}}>
                     <span style={{...S.fieldLabel, marginBottom:2}}>Product</span>
@@ -656,10 +594,9 @@ export default function App() {
                     placeholder="e.g. Dave" />
                 </div>
 
-                {/* Missing fields warning */}
                 {matchResult?.missing?.length > 0 && (
                   <div style={{padding:'10px 14px', background:'rgba(224,82,82,.1)', border:'1px solid rgba(224,82,82,.3)', borderRadius:6, marginBottom:16, fontSize:13, color:'#f08080'}}>
-                    ⚠ Not heard in transcript — please fill in: <strong>{matchResult.missing.join(', ')}</strong>
+                    ⚠ Not heard — please fill in: <strong>{matchResult.missing.join(', ')}</strong>
                   </div>
                 )}
 
@@ -672,7 +609,6 @@ export default function App() {
               </div>
             )}
 
-            {/* No match */}
             {!processing && matchResult && !hasMatches && (
               <div style={{...S.confirmCard, border:'1px solid var(--danger)'}}>
                 <div style={{color:'var(--danger)', fontFamily:'var(--font-head)', fontWeight:700, fontSize:16, marginBottom:8}}>
@@ -687,7 +623,6 @@ export default function App() {
           </>
         )}
 
-        {/* ── LOG TAB ─────────────────────────────────────────────────── */}
         {tab === 'log' && (
           <div style={S.logCard}>
             <div style={S.logHeader}>
@@ -727,7 +662,6 @@ export default function App() {
         )}
       </main>
 
-      {/* Toast */}
       <div style={S.toast(toastShow)}>{toast}</div>
     </div>
   )
