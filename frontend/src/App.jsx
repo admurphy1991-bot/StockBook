@@ -396,7 +396,6 @@ export default function App() {
     }
     rec.onend = () => {
       setListening(false)
-      if (transcript.trim()) handleTranscript(transcript)
     }
     rec.onerror = () => setListening(false)
     rec.start()
@@ -526,6 +525,16 @@ export default function App() {
                 <div style={S.transcript}>
                   <span style={{color:'var(--muted)',fontSize:12,fontFamily:'var(--font-head)',letterSpacing:1}}>HEARD: </span>
                   {transcript}
+                </div>
+              )}
+              {transcript && !listening && (
+                <div style={{display:'flex', gap:10, marginTop:14, justifyContent:'center'}}>
+                  <button style={{...S.btnSecondary, padding:'10px 20px'}} onClick={() => setTranscript('')}>
+                    Clear
+                  </button>
+                  <button style={{...S.btnPrimary, padding:'10px 28px', flex:'none'}} onClick={() => handleTranscript(transcript)}>
+                    Submit ✓
+                  </button>
                 </div>
               )}
             </div>
