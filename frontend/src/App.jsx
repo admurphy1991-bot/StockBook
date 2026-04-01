@@ -491,13 +491,13 @@ export default function App() {
 
       <header style={S.header}>
         <div style={{display:'flex', alignItems:'center', gap:12}}>
-          <img src="/sansom-logo.jpg" alt="Sansom" style={{height:36, filter:'brightness(0) invert(1)'}} />
+          <img src="/sansom-logo.jpg" alt="Sansom" style={{height:36, borderRadius:4}} />
           <div style={S.logoSub}>Stock Book</div>
         </div>
         <div style={S.tabs}>
-          {['capture','log'].map(t => (
+          {['capture','log','qr'].map(t => (
             <button key={t} style={S.tab(tab===t)} onClick={() => setTab(t)}>
-              {t === 'capture' ? '⬤ Capture' : '☰ Log'}
+              {t === 'capture' ? '⬤ Capture' : t === 'log' ? '☰ Log' : '⊞ QR'}
             </button>
           ))}
         </div>
@@ -669,6 +669,85 @@ export default function App() {
             )}
           </div>
         )}
+        {tab === 'qr' && (
+          <div style={{maxWidth:480, margin:'0 auto', width:'100%'}}>
+            {/* Print button - hidden when printing */}
+            <div style={{textAlign:'right', marginBottom:16}} className="no-print">
+              <button style={{...S.exportBtn, cursor:'pointer'}} onClick={() => window.print()}>
+                🖨 Print This Page
+              </button>
+            </div>
+
+            {/* Printable card */}
+            <div id="qr-card" style={{
+              background:'#fff',
+              borderRadius:12,
+              padding:36,
+              textAlign:'center',
+              border:'1px solid var(--border)',
+              color:'#111',
+            }}>
+              <img src="/sansom-logo.jpg" alt="Sansom" style={{height:52, marginBottom:20}} />
+
+              <div style={{
+                fontFamily:'var(--font-head)',
+                fontSize:22,
+                fontWeight:800,
+                letterSpacing:2,
+                textTransform:'uppercase',
+                color:'#111',
+                marginBottom:8,
+              }}>
+                Stock Book Entry
+              </div>
+
+              <div style={{
+                fontSize:14,
+                color:'#444',
+                lineHeight:1.7,
+                marginBottom:28,
+                maxWidth:340,
+                margin:'0 auto 28px',
+              }}>
+                Scan this QR code when you take stock.<br/>
+                Press the microphone button and say the <strong>product name</strong>, <strong>how many units</strong>, <strong>job name and number</strong>, and <strong>your name</strong>.
+              </div>
+
+              {/* QR code via Google Charts API */}
+              <div style={{
+                background:'#fff',
+                padding:12,
+                display:'inline-block',
+                borderRadius:8,
+                border:'1px solid #ddd',
+                marginBottom:20,
+              }}>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(window.location.origin)}`}
+                  alt="QR Code"
+                  style={{display:'block', width:220, height:220}}
+                />
+              </div>
+
+              <div style={{fontSize:12, color:'#888', marginBottom:4}}>
+                Scan to open the Stock Book app
+              </div>
+              <div style={{fontSize:11, color:'#bbb', wordBreak:'break-all'}}>
+                {window.location.origin}
+              </div>
+            </div>
+
+            <style>{`
+              @media print {
+                .no-print { display: none !important; }
+                body { background: white !important; }
+                header { display: none !important; }
+                #qr-card { border: none !important; box-shadow: none !important; }
+              }
+            `}</style>
+          </div>
+        )}
+
       </main>
 
       <div style={S.toast(toastShow)}>{toast}</div>
