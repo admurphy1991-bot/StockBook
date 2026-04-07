@@ -357,6 +357,8 @@ export default function App() {
   const [form, setForm] = useState({ job: '', quantity: '', comments: '' })
   const [entries, setEntries] = useState([])
   const [toast, setToast] = useState('')
+  const [inputMode, setInputMode] = useState('voice')  // 'voice' or 'text'
+  const [textInput, setTextInput] = useState('')
   const [toastShow, setToastShow] = useState(false)
   const recognitionRef = useRef(null)
   const transcriptRef = useRef('')
@@ -507,35 +509,88 @@ export default function App() {
         {tab === 'capture' && (
           <>
             <div style={S.voiceCard}>
-              <div style={S.voiceTitle}>Voice Entry</div>
-              <div style={S.voiceHint}>
-                Tap the mic and say the product name, job number, quantity and your name.<br/>
-                <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job 2847, 3 cans, taken by Dave"</em>
+              <div style={S.voiceTitle}>New Entry</div>
+
+              {/* Mode toggle */}
+              <div style={{display:'flex', gap:0, marginBottom:24, borderRadius:8, overflow:'hidden', border:'1px solid var(--border)', width:'fit-content', margin:'0 auto 24px'}}>
+                {['voice','text'].map(mode => (
+                  <button key={mode} onClick={() => { setInputMode(mode); setTranscript(''); setTextInput(''); setMatchResult(null); setSelectedProduct(null); }}
+                    style={{
+                      padding:'9px 24px',
+                      background: inputMode===mode ? 'var(--accent)' : 'transparent',
+                      color: inputMode===mode ? '#fff' : 'var(--muted)',
+                      fontFamily:'var(--font-head)',
+                      fontWeight:700,
+                      fontSize:14,
+                      letterSpacing:1,
+                      textTransform:'uppercase',
+                      border:'none',
+                      transition:'all .15s',
+                    }}>
+                    {mode === 'voice' ? '🎤 Voice' : '⌨️ Type'}
+                  </button>
+                ))}
               </div>
 
-              <button style={S.micBtn(listening)} onClick={toggleListening}>
-                {listening ? '⏹' : '🎤'}
-              </button>
-
-              <div style={{fontSize:13, color:listening?'var(--danger)':'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1}}>
-                {listening ? 'LISTENING — TAP TO STOP' : 'TAP TO SPEAK'}
-              </div>
-
-              {transcript && (
-                <div style={S.transcript}>
-                  <span style={{color:'var(--muted)',fontSize:12,fontFamily:'var(--font-head)',letterSpacing:1}}>HEARD: </span>
-                  {transcript}
-                </div>
-              )}
-              {transcript && !listening && (
-                <div style={{display:'flex', gap:10, marginTop:14, justifyContent:'center'}}>
-                  <button style={{...S.btnSecondary, padding:'10px 20px'}} onClick={() => setTranscript('')}>
-                    Clear
+              {inputMode === 'voice' ? (
+                <>
+                  <div style={S.voiceHint}>
+                    Tap the mic and say the product name, job number, quantity and your name.<br/>
+                    <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job 2847, 3 cans, taken by Dave"</em>
+                  </div>
+                  <button style={S.micBtn(listening)} onClick={toggleListening}>
+                    {listening ? '⏹' : '🎤'}
                   </button>
-                  <button style={{...S.btnPrimary, padding:'10px 28px', flex:'none'}} onClick={() => handleTranscript(transcript)}>
-                    Submit ✓
-                  </button>
-                </div>
+                  <div style={{fontSize:13, color:listening?'var(--danger)':'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1}}>
+                    {listening ? 'LISTENING — TAP TO STOP' : 'TAP TO SPEAK'}
+                  </div>
+                  {transcript && (
+                    <div style={S.transcript}>
+                      <span style={{color:'var(--muted)',fontSize:12,fontFamily:'var(--font-head)',letterSpacing:1}}>HEARD: </span>
+                      {transcript}
+                    </div>
+                  )}
+                  {transcript && !listening && (
+                    <div style={{display:'flex', gap:10, marginTop:14, justifyContent:'center'}}>
+                      <button style={{...S.btnSecondary, padding:'10px 20px'}} onClick={() => setTranscript('')}>Clear</button>
+                      <button style={{...S.btnPrimary, padding:'10px 28px', flex:'none'}} onClick={() => handleTranscript(transcript)}>Submit ✓</button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div style={S.voiceHint}>
+                    Type the product name, job number, quantity and your name.<br/>
+                    <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job 2847, 3 cans, taken by Dave"</em>
+                  </div>
+                  <textarea
+                    value={textInput}
+                    onChange={e => setTextInput(e.target.value)}
+                    placeholder='e.g. "Sika Boom, job 2847, 3 cans, taken by Dave"'
+                    style={{
+                      width:'100%',
+                      background:'var(--surface2)',
+                      border:'1px solid var(--border)',
+                      borderRadius:8,
+                      padding:'12px 16px',
+                      color:'var(--text)',
+                      fontSize:15,
+                      lineHeight:1.6,
+                      minHeight:90,
+                      resize:'vertical',
+                      fontFamily:'var(--font-body)',
+                      marginBottom:14,
+                    }}
+                  />
+                  <div style={{display:'flex', gap:10, justifyContent:'center'}}>
+                    <button style={{...S.btnSecondary, padding:'10px 20px'}} onClick={() => setTextInput('')}>Clear</button>
+                    <button
+                      style={{...S.btnPrimary, padding:'10px 28px', flex:'none', opacity: textInput.trim() ? 1 : .4}}
+                      onClick={() => { if(textInput.trim()) handleTranscript(textInput) }}
+                      disabled={!textInput.trim()}
+                    >Submit ✓</button>
+                  </div>
+                </>
               )}
             </div>
 
