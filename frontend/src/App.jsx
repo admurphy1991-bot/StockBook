@@ -323,7 +323,7 @@ export default function App() {
 
       {/* Browser notice */}
       <div style={S.browserBanner}>
-        🌐 For best results use <strong>Safari on iPhone</strong> or <strong>Chrome on Android / desktop</strong>
+        🌐 This app works best on <strong>Chrome</strong> (Android, desktop). Safari on iPhone is not fully supported.
       </div>
 
       {/* Header */}
