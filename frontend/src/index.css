@@ -25,7 +25,7 @@ html, body, #root {
 }
 
 button { cursor: pointer; border: none; outline: none; font-family: var(--font-body); }
-input  { outline: none; font-family: var(--font-body); }
+input, textarea, select { outline: none; font-family: var(--font-body); }
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--surface); }
