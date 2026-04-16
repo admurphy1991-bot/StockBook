@@ -44,7 +44,7 @@ const S = {
     borderRadius: 4,
     transition: 'all .15s',
   }),
-  main: { flex: 1, maxWidth: 700, width: '100%', margin: '0 auto', padding: '32px 20px' },
+  main: { flex: 1, maxWidth: 800, width: '100%', margin: '0 auto', padding: '32px 20px' },
   card: {
     background: 'var(--surface)',
     border: '1px solid var(--border)',
@@ -141,14 +141,27 @@ const S = {
   productCode: { fontFamily: 'var(--font-head)', fontSize: 20, fontWeight: 700, color: 'var(--accent)', minWidth: 100 },
   productDesc: { fontSize: 14, color: 'var(--text)', lineHeight: 1.4 },
   productSupplier: { fontSize: 12, color: 'var(--muted)', marginTop: 2 },
+
+  // ── Log table ────────────────────────────────────────────────────────────
   logCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' },
-  logHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--border)' },
+  logHeader: { padding: '16px 20px', borderBottom: '1px solid var(--border)' },
+  logTitleRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   logTitle: { fontFamily: 'var(--font-head)', fontSize: 16, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--muted)' },
-  exportBtn: { padding: '7px 16px', background: 'var(--accent)', color: '#fff', fontFamily: 'var(--font-head)', fontSize: 13, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', borderRadius: 4 },
-  logRow: { display: 'grid', gridTemplateColumns: '100px 85px 1fr 60px 50px', gap: 10, padding: '12px 20px', borderBottom: '1px solid var(--border)', alignItems: 'center', fontSize: 13 },
+  exportControls: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
+  dateInput: {
+    background: 'var(--surface2)', border: '1px solid var(--border)',
+    borderRadius: 4, padding: '6px 10px', color: 'var(--text)', fontSize: 13,
+    fontFamily: 'var(--font-body)',
+  },
+  dateLabel: { fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-head)', letterSpacing: 1, textTransform: 'uppercase' },
+  exportBtn: { padding: '7px 16px', background: 'var(--accent)', color: '#fff', fontFamily: 'var(--font-head)', fontSize: 13, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', borderRadius: 4, border: 'none', cursor: 'pointer' },
+
+  // Updated log row: item_code | description | date | job | qty | worker | del
+  logRow: { display: 'grid', gridTemplateColumns: '90px 1fr 80px 160px 55px 90px 36px', gap: 8, padding: '12px 20px', borderBottom: '1px solid var(--border)', alignItems: 'center', fontSize: 13 },
   logHead: { fontFamily: 'var(--font-head)', fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--muted)' },
-  deleteBtn: { padding: '4px 8px', background: 'transparent', color: 'var(--danger)', fontSize: 16, borderRadius: 4, border: '1px solid transparent' },
+  deleteBtn: { padding: '4px 8px', background: 'transparent', color: 'var(--danger)', fontSize: 16, borderRadius: 4, border: '1px solid transparent', cursor: 'pointer' },
   empty: { padding: '40px 20px', textAlign: 'center', color: 'var(--muted)', fontFamily: 'var(--font-head)', fontSize: 16, letterSpacing: 1, textTransform: 'uppercase' },
+
   toast: (show) => ({
     position: 'fixed', bottom: 32, left: '50%',
     transform: `translateX(-50%) translateY(${show ? 0 : 80}px)`,
@@ -174,6 +187,33 @@ const S = {
     border: '1px solid rgba(224,82,82,.3)', borderRadius: 6,
     marginBottom: 16, fontSize: 13, color: '#f08080',
   },
+
+  // ── Webhook / Settings tab ────────────────────────────────────────────────
+  settingSection: { marginBottom: 28 },
+  settingTitle: { fontFamily: 'var(--font-head)', fontSize: 14, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--accent)', marginBottom: 12 },
+  settingDesc: { fontSize: 13, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 14 },
+  codeBlock: {
+    background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 6,
+    padding: '12px 16px', fontSize: 12, color: 'var(--accent)', fontFamily: 'monospace',
+    overflowX: 'auto', whiteSpace: 'pre', marginBottom: 12,
+  },
+  statusBadge: (ok) => ({
+    display: 'inline-block', padding: '3px 10px', borderRadius: 20,
+    background: ok ? 'rgba(76,175,125,.15)' : 'rgba(224,82,82,.15)',
+    color: ok ? 'var(--success)' : 'var(--danger)',
+    fontFamily: 'var(--font-head)', fontSize: 12, fontWeight: 700, letterSpacing: 1,
+  }),
+  syncBtn: {
+    padding: '10px 20px', background: 'var(--accent)', color: '#fff',
+    fontFamily: 'var(--font-head)', fontSize: 13, fontWeight: 700,
+    letterSpacing: 1, textTransform: 'uppercase', borderRadius: 6, border: 'none', cursor: 'pointer',
+    marginTop: 12,
+  },
+  syncInput: {
+    width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)',
+    borderRadius: 6, padding: '10px 14px', color: 'var(--text)', fontSize: 13,
+    marginBottom: 10, fontFamily: 'var(--font-body)',
+  },
 }
 
 export default function App() {
@@ -183,13 +223,24 @@ export default function App() {
   const [processing, setProcessing] = useState(false)
   const [matchResult, setMatchResult] = useState(null)
   const [selectedProduct, setSelectedProduct] = useState(null)
-  const [form, setForm] = useState({ job: '', quantity: '', comments: '' })
+  const [form, setForm] = useState({ job: '', quantity: '', worker_name: '' })
   const [entries, setEntries] = useState([])
   const [toast, setToast] = useState('')
   const [toastShow, setToastShow] = useState(false)
   const [inputMode, setInputMode] = useState('voice')
   const [textInput, setTextInput] = useState('')
   const [jobs, setJobs] = useState([])
+
+  // Export date range state
+  const [exportFrom, setExportFrom] = useState('')
+  const [exportTo, setExportTo] = useState('')
+
+  // Webhook / settings state
+  const [webhookStatus, setWebhookStatus] = useState(null)
+  const [syncProductsUrl, setSyncProductsUrl] = useState('')
+  const [syncJobsUrl, setSyncJobsUrl] = useState('')
+  const [syncing, setSyncing] = useState(false)
+
   const recognitionRef = useRef(null)
   const transcriptRef = useRef('')
 
@@ -198,10 +249,21 @@ export default function App() {
     fetch('/api/jobs').then(r => r.json()).then(setJobs).catch(() => {})
   }, [])
 
+  useEffect(() => {
+    if (tab === 'settings') loadWebhookStatus()
+  }, [tab])
+
   async function loadEntries() {
     try {
       const r = await fetch('/api/entries')
       setEntries(await r.json())
+    } catch {}
+  }
+
+  async function loadWebhookStatus() {
+    try {
+      const r = await fetch('/api/webhook/status')
+      setWebhookStatus(await r.json())
     } catch {}
   }
 
@@ -252,7 +314,7 @@ export default function App() {
       setForm({
         job: data.job || '',
         quantity: data.quantity != null ? String(data.quantity) : '',
-        comments: data.comments || '',
+        worker_name: data.worker_name || '',
       })
       if (!data.ambiguous && data.matches?.length === 1) setSelectedProduct(data.matches[0])
     } catch (e) {
@@ -275,7 +337,7 @@ export default function App() {
           cost_quantity: parseFloat(form.quantity),
           unit: selectedProduct.unit,
           gl_code: selectedProduct.gl || '',
-          comments: form.comments,
+          worker_name: form.worker_name,
         }),
       })
       showToast('Entry saved ✓')
@@ -286,7 +348,7 @@ export default function App() {
 
   function resetCapture() {
     setTranscript(''); setTextInput(''); setMatchResult(null)
-    setSelectedProduct(null); setForm({ job: '', quantity: '', comments: '' })
+    setSelectedProduct(null); setForm({ job: '', quantity: '', worker_name: '' })
   }
 
   async function deleteEntry(id) {
@@ -303,10 +365,47 @@ export default function App() {
     setInputMode(mode); resetCapture()
   }
 
+  function buildExportUrl() {
+    const params = new URLSearchParams()
+    if (exportFrom) params.set('date_from', exportFrom)
+    if (exportTo) params.set('date_to', exportTo)
+    const qs = params.toString()
+    return `/api/export${qs ? '?' + qs : ''}`
+  }
+
+  async function triggerSync() {
+    if (!syncProductsUrl && !syncJobsUrl) {
+      showToast('Enter at least one URL to sync')
+      return
+    }
+    setSyncing(true)
+    try {
+      const body = {}
+      if (syncProductsUrl) body.products_csv_url = syncProductsUrl
+      if (syncJobsUrl) body.jobs_csv_url = syncJobsUrl
+      const r = await fetch('/api/webhook/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await r.json()
+      if (data.ok) {
+        showToast('Sync successful ✓')
+        loadWebhookStatus()
+        // Refresh jobs dropdown too
+        fetch('/api/jobs').then(r => r.json()).then(setJobs).catch(() => {})
+      } else {
+        showToast('Sync failed: ' + (data.message || 'unknown error'))
+      }
+    } catch (e) {
+      showToast('Sync error: ' + (e?.message || 'network error'))
+    }
+    setSyncing(false)
+  }
+
   const hasMatches = matchResult?.matches?.length > 0
   const isAmbiguous = matchResult?.ambiguous && matchResult?.matches?.length > 1
-  // All fields mandatory
-  const canSubmit = selectedProduct && form.job.trim() && form.quantity && form.comments.trim()
+  const canSubmit = selectedProduct && form.job.trim() && form.quantity && form.worker_name.trim()
 
   return (
     <div style={S.app}>
@@ -319,21 +418,20 @@ export default function App() {
         button:hover { opacity: .88; }
         input:focus, textarea:focus, select:focus { border-color: var(--accent) !important; }
         select option { background: #182030; color: #e8ecf2; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
       `}</style>
 
-      {/* Browser notice */}
       <div style={S.browserBanner}>
-        🌐 This app works best on <strong>Chrome</strong> (Android, desktop). Safari on iPhone is not fully supported.
+        🌐 Best on <strong>Chrome</strong> (Android, desktop). Safari on iPhone has limited mic support.
       </div>
 
-      {/* Header */}
       <header style={S.header}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img src="/sansom-logo.jpg" alt="Sansom" style={{ height: 36, borderRadius: 4 }} />
           <span style={S.logoSub}>Stock Book</span>
         </div>
         <div style={S.tabs}>
-          {[['capture','⬤ Capture'],['log','☰ Log'],['qr','⊞ QR']].map(([t,label]) => (
+          {[['capture','⬤ Capture'],['log','☰ Log'],['qr','⊞ QR'],['settings','⚙ Settings']].map(([t,label]) => (
             <button key={t} style={S.tab(tab===t)} onClick={() => setTab(t)}>{label}</button>
           ))}
         </div>
@@ -346,8 +444,6 @@ export default function App() {
           <>
             <div style={S.card}>
               <div style={S.title}>New Entry</div>
-
-              {/* Mode toggle */}
               <div style={S.modeToggle}>
                 {[['voice','🎤 Voice'],['text','⌨️ Type']].map(([mode,label]) => (
                   <button key={mode} style={S.modeBtn(inputMode===mode)} onClick={() => switchMode(mode)}>
@@ -360,7 +456,7 @@ export default function App() {
                 <>
                   <div style={S.hint}>
                     Tap the mic and say the product name, job number, quantity and your name.<br/>
-                    <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job 2847, 3 cans, taken by Dave"</em>
+                    <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job S34482, 3 cans, taken by Dave"</em>
                   </div>
                   <button style={S.micBtn(listening)} onClick={toggleListening}>
                     {listening ? '⏹' : '🎤'}
@@ -385,7 +481,7 @@ export default function App() {
                 <>
                   <div style={S.hint}>
                     Type the product name, job number, quantity and your name.<br/>
-                    <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job 2847, 3 cans, taken by Dave"</em>
+                    <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job S34482, 3 cans, taken by Dave"</em>
                   </div>
                   <textarea
                     value={textInput}
@@ -405,12 +501,10 @@ export default function App() {
               )}
             </div>
 
-            {/* Processing */}
             {processing && (
               <div style={S.processing}><div style={S.spinner} />Matching product…</div>
             )}
 
-            {/* Disambiguation */}
             {!processing && isAmbiguous && (
               <div style={S.card}>
                 <div style={{...S.titleAccent, color:'var(--text)', fontSize:15}}>
@@ -428,12 +522,10 @@ export default function App() {
               </div>
             )}
 
-            {/* Confirm form */}
             {!processing && hasMatches && (
               <div style={S.cardAccent}>
                 <div style={S.titleAccent}>Confirm Entry</div>
 
-                {/* Product display */}
                 {selectedProduct && (
                   <div style={{...S.field, background:'var(--surface2)', borderRadius:8, padding:'12px 16px', marginBottom:20, border:'1px solid var(--border)'}}>
                     <span style={{...S.fieldLabel, marginBottom:2}}>Product</span>
@@ -443,7 +535,6 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Job dropdown */}
                 <div style={S.field}>
                   <label style={S.fieldLabel}>Job Number <span style={S.requiredStar}>*</span></label>
                   <select
@@ -453,7 +544,7 @@ export default function App() {
                   >
                     <option value="">— Select a job —</option>
                     {jobs.map(j => (
-                      <option key={j} value={j} selected={form.job === j}>{j}</option>
+                      <option key={j} value={j}>{j}</option>
                     ))}
                   </select>
                   {form.job && (
@@ -478,24 +569,22 @@ export default function App() {
                     />
                   </div>
                   <div style={S.field}>
-                    <label style={S.fieldLabel}>Taken by <span style={S.requiredStar}>*</span></label>
+                    <label style={S.fieldLabel}>Worker Name <span style={S.requiredStar}>*</span></label>
                     <input
                       style={S.fieldInput}
-                      value={form.comments}
-                      onChange={e => setForm(f => ({...f, comments: e.target.value}))}
-                      placeholder="e.g. Dave"
+                      value={form.worker_name}
+                      onChange={e => setForm(f => ({...f, worker_name: e.target.value}))}
+                      placeholder="e.g. Dave Smith"
                     />
                   </div>
                 </div>
 
-                {/* Missing fields warning */}
                 {matchResult?.missing?.length > 0 && (
                   <div style={S.missingWarning}>
                     ⚠ Not found in transcript — please fill in: <strong>{matchResult.missing.join(', ')}</strong>
                   </div>
                 )}
 
-                {/* Mandatory fields reminder */}
                 {!canSubmit && (
                   <div style={{...S.missingWarning, background:'rgba(27,158,212,.08)', border:'1px solid rgba(27,158,212,.3)', color:'var(--muted)'}}>
                     All fields marked <span style={{color:'var(--danger)'}}>*</span> are required before saving
@@ -511,7 +600,6 @@ export default function App() {
               </div>
             )}
 
-            {/* No match */}
             {!processing && matchResult && !hasMatches && (
               <div style={{...S.card, border:'1px solid var(--danger)'}}>
                 <div style={{color:'var(--danger)', fontFamily:'var(--font-head)', fontWeight:700, fontSize:16, marginBottom:8}}>No product matched</div>
@@ -528,30 +616,75 @@ export default function App() {
         {tab === 'log' && (
           <div style={S.logCard}>
             <div style={S.logHeader}>
-              <div style={S.logTitle}>Stock Entries ({entries.length})</div>
-              <a href="/api/export" download>
-                <button style={S.exportBtn}>↓ Export CSV</button>
-              </a>
+              <div style={S.logTitleRow}>
+                <div style={S.logTitle}>Stock Entries ({entries.length})</div>
+                <a href={buildExportUrl()} download>
+                  <button style={S.exportBtn}>↓ Export CSV</button>
+                </a>
+              </div>
+
+              {/* Date range filter for export */}
+              <div style={S.exportControls}>
+                <span style={S.dateLabel}>Export range:</span>
+                <div style={{display:'flex', alignItems:'center', gap:6}}>
+                  <span style={{fontSize:12, color:'var(--muted)'}}>From</span>
+                  <input
+                    type="date"
+                    style={S.dateInput}
+                    value={exportFrom}
+                    onChange={e => setExportFrom(e.target.value)}
+                  />
+                </div>
+                <div style={{display:'flex', alignItems:'center', gap:6}}>
+                  <span style={{fontSize:12, color:'var(--muted)'}}>To</span>
+                  <input
+                    type="date"
+                    style={S.dateInput}
+                    value={exportTo}
+                    onChange={e => setExportTo(e.target.value)}
+                  />
+                </div>
+                {(exportFrom || exportTo) && (
+                  <button
+                    style={{...S.exportBtn, background:'transparent', color:'var(--muted)', border:'1px solid var(--border)'}}
+                    onClick={() => { setExportFrom(''); setExportTo('') }}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              {(exportFrom || exportTo) && (
+                <div style={{fontSize:12, color:'var(--accent)', marginTop:8, fontFamily:'var(--font-head)', letterSpacing:.5}}>
+                  ↑ Export CSV above will include only entries
+                  {exportFrom ? ` from ${exportFrom}` : ''}
+                  {exportTo ? ` to ${exportTo}` : ''}
+                </div>
+              )}
             </div>
+
             {entries.length === 0 ? (
               <div style={S.empty}>No entries yet</div>
             ) : (
               <>
+                {/* Table header */}
                 <div style={{...S.logRow, borderBottom:'2px solid var(--border)'}}>
-                  {['Item Code','Date','Job','Qty',''].map((h,i) => (
+                  {['Code','Product','Date','Job','Qty','Worker',''].map((h,i) => (
                     <div key={i} style={S.logHead}>{h}</div>
                   ))}
                 </div>
                 {entries.map(e => (
                   <div key={e.id} style={S.logRow}>
-                    <div style={{fontFamily:'var(--font-head)',fontWeight:700,color:'var(--accent)',fontSize:13}}>{e.item_code}</div>
+                    <div style={{fontFamily:'var(--font-head)',fontWeight:700,color:'var(--accent)',fontSize:12}}>{e.item_code}</div>
+                    <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3}}>{e.description}</div>
                     <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
-                    <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3}}>
+                    <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>
                       {e.job}
-                      {e.comments && <div style={{color:'var(--muted)',fontSize:11}}>{e.comments}</div>}
                     </div>
-                    <div style={{fontFamily:'var(--font-head)',fontWeight:700}}>
+                    <div style={{fontFamily:'var(--font-head)',fontWeight:700,fontSize:13}}>
                       {e.cost_quantity}<span style={{fontSize:10,color:'var(--muted)',marginLeft:2}}>{e.unit}</span>
+                    </div>
+                    <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.worker_name}>
+                      {e.worker_name || '—'}
                     </div>
                     <button style={S.deleteBtn} onClick={() => deleteEntry(e.id)} title="Delete">✕</button>
                   </div>
@@ -595,6 +728,89 @@ export default function App() {
                 header { display: none !important; }
               }
             `}</style>
+          </div>
+        )}
+
+        {/* ── SETTINGS / WEBHOOK TAB ───────────────────────────────── */}
+        {tab === 'settings' && (
+          <div style={S.card}>
+            <div style={S.title}>Settings & Sync</div>
+
+            {/* Status */}
+            <div style={S.settingSection}>
+              <div style={S.settingTitle}>Current Data Status</div>
+              {webhookStatus ? (
+                <div style={{display:'flex', gap:16, flexWrap:'wrap', marginBottom:12}}>
+                  <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)'}}>
+                    <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>PRODUCTS LOADED</div>
+                    <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{webhookStatus.products_count}</div>
+                  </div>
+                  <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)'}}>
+                    <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>JOBS LOADED</div>
+                    <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{webhookStatus.jobs_count}</div>
+                  </div>
+                  <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)', flex:1, minWidth:180}}>
+                    <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>SOURCE</div>
+                    <span style={S.statusBadge(webhookStatus.source?.includes('live'))}>
+                      {webhookStatus.source?.includes('live') ? '● Live Sync' : '● Default (hardcoded)'}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div style={{color:'var(--muted)', fontSize:13}}>Loading status…</div>
+              )}
+            </div>
+
+            {/* Manual sync */}
+            <div style={S.settingSection}>
+              <div style={S.settingTitle}>Sync from Google Sheets</div>
+              <div style={S.settingDesc}>
+                Paste the published CSV URLs from your Google Sheets. The app will pull the latest product list and job list instantly — no redeploy needed.<br/><br/>
+                <strong style={{color:'var(--text)'}}>How to get the URL from Google Sheets:</strong><br/>
+                File → Share → Publish to web → select the sheet → CSV → Copy link
+              </div>
+
+              <div style={S.field}>
+                <label style={S.fieldLabel}>Products Sheet CSV URL</label>
+                <input
+                  style={S.syncInput}
+                  placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv"
+                  value={syncProductsUrl}
+                  onChange={e => setSyncProductsUrl(e.target.value)}
+                />
+              </div>
+              <div style={S.field}>
+                <label style={S.fieldLabel}>Jobs Sheet CSV URL</label>
+                <input
+                  style={S.syncInput}
+                  placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv&gid=..."
+                  value={syncJobsUrl}
+                  onChange={e => setSyncJobsUrl(e.target.value)}
+                />
+              </div>
+              <button style={S.syncBtn} onClick={triggerSync} disabled={syncing}>
+                {syncing ? '⏳ Syncing…' : '↻ Sync Now'}
+              </button>
+            </div>
+
+            {/* API webhook docs */}
+            <div style={S.settingSection}>
+              <div style={S.settingTitle}>Automated Webhook (API)</div>
+              <div style={S.settingDesc}>
+                You can also POST to the sync endpoint directly from any automation tool (Zapier, Make, Google Apps Script, etc.) to keep the app updated automatically whenever your sheet changes.
+              </div>
+              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>ENDPOINT</div>
+              <div style={S.codeBlock}>POST /api/webhook/sync</div>
+              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>EXAMPLE PAYLOAD</div>
+              <div style={S.codeBlock}>{`{
+  "products_csv_url": "https://docs.google.com/...",
+  "jobs_csv_url": "https://docs.google.com/..."
+}`}</div>
+              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>PRODUCTS CSV COLUMNS REQUIRED</div>
+              <div style={S.codeBlock}>code, description, supplier, unit, gl, alias</div>
+              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>JOBS CSV COLUMN REQUIRED</div>
+              <div style={S.codeBlock}>job</div>
+            </div>
           </div>
         )}
 
