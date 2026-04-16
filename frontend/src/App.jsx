@@ -240,6 +240,9 @@ export default function App() {
   const [syncProductsUrl, setSyncProductsUrl] = useState('')
   const [syncJobsUrl, setSyncJobsUrl] = useState('')
   const [syncing, setSyncing] = useState(false)
+  const [settingsUnlocked, setSettingsUnlocked] = useState(false)
+  const [settingsPassword, setSettingsPassword] = useState('')
+  const [settingsPasswordError, setSettingsPasswordError] = useState(false)
 
   const recognitionRef = useRef(null)
   const transcriptRef = useRef('')
@@ -365,10 +368,19 @@ export default function App() {
     setInputMode(mode); resetCapture()
   }
 
+  function toISODate(val) {
+    if (!val) return ''
+    if (val.includes('/')) {
+      const [d, m, y] = val.split('/')
+      return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`
+    }
+    return val
+  }
+
   function buildExportUrl() {
     const params = new URLSearchParams()
-    if (exportFrom) params.set('date_from', exportFrom)
-    if (exportTo) params.set('date_to', exportTo)
+    if (exportFrom) params.set('date_from', toISODate(exportFrom))
+    if (exportTo) params.set('date_to', toISODate(exportTo))
     const qs = params.toString()
     return `/api/export${qs ? '?' + qs : ''}`
   }
@@ -736,6 +748,37 @@ export default function App() {
           <div style={S.card}>
             <div style={S.title}>Settings & Sync</div>
 
+            {!settingsUnlocked ? (
+              <div style={{textAlign:'center', padding:'32px 0'}}>
+                <div style={{color:'var(--muted)', fontSize:14, marginBottom:20, fontFamily:'var(--font-head)', letterSpacing:1, textTransform:'uppercase'}}>
+                  Enter password to access settings
+                </div>
+                <input
+                  type="password"
+                  style={{...S.fieldInput, maxWidth:260, margin:'0 auto 12px', display:'block', textAlign:'center'}}
+                  placeholder="Password"
+                  value={settingsPassword}
+                  onChange={e => { setSettingsPassword(e.target.value); setSettingsPasswordError(false) }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      if (settingsPassword === 'Sansom12345') { setSettingsUnlocked(true); setSettingsPasswordError(false) }
+                      else setSettingsPasswordError(true)
+                    }
+                  }}
+                />
+                {settingsPasswordError && (
+                  <div style={{color:'var(--danger)', fontSize:13, marginBottom:12}}>Incorrect password</div>
+                )}
+                <button
+                  style={{...S.syncBtn, marginTop:0}}
+                  onClick={() => {
+                    if (settingsPassword === 'Sansom12345') { setSettingsUnlocked(true); setSettingsPasswordError(false) }
+                    else setSettingsPasswordError(true)
+                  }}
+                >Unlock</button>
+              </div>
+            ) : (<>
+
             {/* Status */}
             <div style={S.settingSection}>
               <div style={S.settingTitle}>Current Data Status</div>
@@ -811,6 +854,8 @@ export default function App() {
               <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>JOBS CSV COLUMN REQUIRED</div>
               <div style={S.codeBlock}>job</div>
             </div>
+          </>
+          )}
           </div>
         )}
 
