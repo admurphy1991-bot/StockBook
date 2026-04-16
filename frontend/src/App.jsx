@@ -630,9 +630,13 @@ export default function App() {
             <div style={S.logHeader}>
               <div style={S.logTitleRow}>
                 <div style={S.logTitle}>Stock Entries ({entries.length})</div>
-                <a href={buildExportUrl()} download>
-                  <button style={S.exportBtn}>↓ Export CSV</button>
-                </a>
+                <button style={S.exportBtn} onClick={() => {
+                  const url = buildExportUrl()
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = ''
+                  a.click()
+                }}>↓ Export CSV</button>
               </div>
 
               {/* Date range filter for export */}
