@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 const S = {
   app: { minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)' },
