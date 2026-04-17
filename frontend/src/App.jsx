@@ -157,7 +157,7 @@ const S = {
   exportBtn: { padding: '7px 16px', background: 'var(--accent)', color: '#fff', fontFamily: 'var(--font-head)', fontSize: 13, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', borderRadius: 4, border: 'none', cursor: 'pointer' },
 
   // Updated log row: item_code | description | date | job | qty | worker | del
-  logRow: { display: 'grid', gridTemplateColumns: '90px 1fr 80px 160px 55px 90px 36px', gap: 8, padding: '12px 20px', borderBottom: '1px solid var(--border)', alignItems: 'center', fontSize: 13 },
+  logRow: { display: 'grid', gridTemplateColumns: '90px 1fr 80px 160px 55px 90px 36px 36px', gap: 8, padding: '12px 20px', borderBottom: '1px solid var(--border)', alignItems: 'center', fontSize: 13 },
   logHead: { fontFamily: 'var(--font-head)', fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--muted)' },
   deleteBtn: { padding: '4px 8px', background: 'transparent', color: 'var(--danger)', fontSize: 16, borderRadius: 4, border: '1px solid transparent', cursor: 'pointer' },
   empty: { padding: '40px 20px', textAlign: 'center', color: 'var(--muted)', fontFamily: 'var(--font-head)', fontSize: 16, letterSpacing: 1, textTransform: 'uppercase' },
@@ -230,6 +230,10 @@ export default function App() {
   const [inputMode, setInputMode] = useState('voice')
   const [textInput, setTextInput] = useState('')
   const [jobs, setJobs] = useState([])
+
+  // Edit state
+  const [editingEntry, setEditingEntry] = useState(null) // { id, job, cost_quantity, worker_name }
+  const [editForm, setEditForm] = useState({})
 
   // Export date range state
   const [exportFrom, setExportFrom] = useState('')
@@ -357,6 +361,23 @@ export default function App() {
   async function deleteEntry(id) {
     await fetch(`/api/entries/${id}`, { method: 'DELETE' })
     loadEntries()
+  }
+
+  async function saveEditEntry() {
+    try {
+      await fetch(`/api/entries/${editingEntry.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job: editForm.job,
+          cost_quantity: parseFloat(editForm.cost_quantity),
+          worker_name: editForm.worker_name,
+        }),
+      })
+      showToast('Entry updated ✓')
+      setEditingEntry(null)
+      loadEntries()
+    } catch { showToast('Update failed — try again') }
   }
 
   function showToast(msg) {
@@ -688,26 +709,72 @@ export default function App() {
               <>
                 {/* Table header */}
                 <div style={{...S.logRow, borderBottom:'2px solid var(--border)'}}>
-                  {['Code','Product','Date','Job','Qty','Worker',''].map((h,i) => (
+                  {['Code','Product','Date','Job','Qty','Worker','',''].map((h,i) => (
                     <div key={i} style={S.logHead}>{h}</div>
                   ))}
                 </div>
                 {entries.map(e => (
-                  <div key={e.id} style={S.logRow}>
-                    <div style={{fontFamily:'var(--font-head)',fontWeight:700,color:'var(--accent)',fontSize:12}}>{e.item_code}</div>
-                    <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3}}>{e.description}</div>
-                    <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
-                    <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>
-                      {e.job}
+                  <React.Fragment key={e.id}>
+                    <div style={S.logRow}>
+                      <div style={{fontFamily:'var(--font-head)',fontWeight:700,color:'var(--accent)',fontSize:12}}>{e.item_code}</div>
+                      <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3}}>{e.description}</div>
+                      <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
+                      <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>
+                        {e.job}
+                      </div>
+                      <div style={{fontFamily:'var(--font-head)',fontWeight:700,fontSize:13}}>
+                        {e.cost_quantity}<span style={{fontSize:10,color:'var(--muted)',marginLeft:2}}>{e.unit}</span>
+                      </div>
+                      <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.worker_name}>
+                        {e.worker_name || '—'}
+                      </div>
+                      <button
+                        style={{padding:'4px 8px', background:'transparent', color:'var(--accent)', fontSize:14, borderRadius:4, border:'1px solid transparent', cursor:'pointer'}}
+                        onClick={() => { setEditingEntry(e); setEditForm({ job: e.job, cost_quantity: e.cost_quantity, worker_name: e.worker_name || '' }) }}
+                        title="Edit"
+                      >✎</button>
+                      <button style={S.deleteBtn} onClick={() => deleteEntry(e.id)} title="Delete">✕</button>
                     </div>
-                    <div style={{fontFamily:'var(--font-head)',fontWeight:700,fontSize:13}}>
-                      {e.cost_quantity}<span style={{fontSize:10,color:'var(--muted)',marginLeft:2}}>{e.unit}</span>
-                    </div>
-                    <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.worker_name}>
-                      {e.worker_name || '—'}
-                    </div>
-                    <button style={S.deleteBtn} onClick={() => deleteEntry(e.id)} title="Delete">✕</button>
-                  </div>
+                    {editingEntry?.id === e.id && (
+                      <div style={{gridColumn:'1/-1', background:'var(--surface2)', border:'1px solid var(--accent)', borderRadius:8, padding:'16px 20px', margin:'0 0 4px 0'}}>
+                        <div style={{fontFamily:'var(--font-head)', fontSize:13, fontWeight:700, color:'var(--accent)', letterSpacing:1, marginBottom:12}}>EDITING: {e.item_code} — {e.description}</div>
+                        <div style={{display:'grid', gridTemplateColumns:'1fr 100px 1fr', gap:12, marginBottom:12}}>
+                          <div>
+                            <label style={S.fieldLabel}>Job <span style={S.requiredStar}>*</span></label>
+                            <select
+                              style={{...S.fieldSelect, fontSize:13}}
+                              value={editForm.job}
+                              onChange={ev => setEditForm(f => ({...f, job: ev.target.value}))}
+                            >
+                              <option value="">— Select job —</option>
+                              {jobs.map(j => <option key={j} value={j}>{j}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label style={S.fieldLabel}>Qty <span style={S.requiredStar}>*</span></label>
+                            <input
+                              type="number"
+                              style={{...S.fieldInput, fontSize:13}}
+                              value={editForm.cost_quantity}
+                              onChange={ev => setEditForm(f => ({...f, cost_quantity: ev.target.value}))}
+                            />
+                          </div>
+                          <div>
+                            <label style={S.fieldLabel}>Worker <span style={S.requiredStar}>*</span></label>
+                            <input
+                              style={{...S.fieldInput, fontSize:13}}
+                              value={editForm.worker_name}
+                              onChange={ev => setEditForm(f => ({...f, worker_name: ev.target.value}))}
+                            />
+                          </div>
+                        </div>
+                        <div style={{display:'flex', gap:8}}>
+                          <button style={{...S.btnPrimary(true), flex:'none', padding:'8px 20px', fontSize:13}} onClick={saveEditEntry}>Save</button>
+                          <button style={{...S.btnSecondary, padding:'8px 16px', fontSize:13}} onClick={() => setEditingEntry(null)}>Cancel</button>
+                        </div>
+                      </div>
+                    )}
+                  </React.Fragment>
                 ))}
               </>
             )}
