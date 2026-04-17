@@ -286,6 +286,34 @@ async def export_csv(
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
+class EntryUpdate(BaseModel):
+    job: Optional[str] = None
+    cost_quantity: Optional[float] = None
+    worker_name: Optional[str] = None
+
+@app.patch("/api/entries/{entry_id}")
+async def update_entry(entry_id: int, update: EntryUpdate):
+    conn = await get_db()
+    try:
+        fields = []
+        params = []
+        if update.job is not None:
+            params.append(update.job); fields.append(f"job=${len(params)}")
+        if update.cost_quantity is not None:
+            params.append(update.cost_quantity); fields.append(f"cost_quantity=${len(params)}")
+        if update.worker_name is not None:
+            params.append(update.worker_name); fields.append(f"worker_name=${len(params)}")
+        if not fields:
+            return {"ok": False, "message": "Nothing to update"}
+        params.append(entry_id)
+        await conn.execute(
+            f"UPDATE stock_entries SET {', '.join(fields)} WHERE id=${len(params)}",
+            *params
+        )
+        return {"ok": True}
+    finally:
+        await conn.close()
+
 @app.delete("/api/entries/{entry_id}")
 async def delete_entry(entry_id: int):
     conn = await get_db()
