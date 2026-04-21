@@ -933,7 +933,7 @@ export default function App() {
             <div style={S.settingSection}>
               <div style={S.settingTitle}>Email Notifications</div>
               <div style={S.settingDesc}>
-                The app sends an email to <strong style={{color:'var(--text)'}}>accounts@sansom.co.nz</strong> automatically when each stock entry is saved.<br/><br/>
+                The app sends an email to <strong style={{color:'var(--text)'}}>accountsreceivable@sansom.co.nz</strong> automatically when each stock entry is saved.<br/><br/>
                 A daily digest of all checked-out items can also be triggered via a scheduled POST request (e.g. from a cron job or Zapier scheduled trigger).<br/><br/>
                 <strong style={{color:'var(--text)'}}>Required server environment variables:</strong><br/>
                 <code style={{color:'var(--accent)'}}>SMTP_HOST</code>, <code style={{color:'var(--accent)'}}>SMTP_PORT</code> (default 587), <code style={{color:'var(--accent)'}}>SMTP_USER</code>, <code style={{color:'var(--accent)'}}>SMTP_PASS</code>
