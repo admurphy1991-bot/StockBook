@@ -4,10 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
-import asyncpg, os, json, csv, io, smtplib
+import asyncpg, os, json, csv, io
 from datetime import date, datetime
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from zoneinfo import ZoneInfo
 from openai import OpenAI
 
@@ -397,61 +395,17 @@ Put null and add to missing[] for anything not in transcript.
     )
     return json.loads(response.choices[0].message.content.strip())
 
-NOTIFY_EMAIL = "accountsreceivable@sansom.co.nz"
+MAKE_WEBHOOK_URL = "https://hook.us2.make.com/n8alwm1aswcpa1gui5ft99orkdawn2xq"
 
-def send_email(subject: str, html_body: str):
-    """Send an email via SMTP. Requires SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS env vars."""
-    smtp_host = os.environ.get("SMTP_HOST")
-    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
-    smtp_user = os.environ.get("SMTP_USER")
-    smtp_pass = os.environ.get("SMTP_PASS")
-    if not all([smtp_host, smtp_user, smtp_pass]):
-        print("⚠ Email not sent: SMTP_HOST, SMTP_USER, SMTP_PASS env vars required")
-        return False
+async def notify_make(payload: dict):
+    """POST entry data to Make webhook — Make handles the Outlook email."""
+    import httpx
     try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = smtp_user
-        msg["To"] = NOTIFY_EMAIL
-        msg.attach(MIMEText(html_body, "html"))
-        with smtplib.SMTP(smtp_host, smtp_port) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(smtp_user, smtp_pass)
-            server.sendmail(smtp_user, NOTIFY_EMAIL, msg.as_string())
-        print(f"✉ Email sent to {NOTIFY_EMAIL}: {subject}")
-        return True
+        async with httpx.AsyncClient() as client:
+            r = await client.post(MAKE_WEBHOOK_URL, json=payload, timeout=10)
+        print(f"✉ Make webhook called: {r.status_code}")
     except Exception as e:
-        print(f"✉ Email send failed: {e}")
-        return False
-
-def format_entry_email(entry: dict) -> str:
-    return f"""
-    <html><body style="font-family:Arial,sans-serif;color:#222;max-width:600px;margin:0 auto;">
-      <h2 style="color:#1b9ed4;border-bottom:2px solid #1b9ed4;padding-bottom:8px;">
-        📦 New Stock Book Entry
-      </h2>
-      <table style="border-collapse:collapse;width:100%;">
-        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;width:140px;">Item Code</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('item_code','')}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Description</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('description','')}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Supplier</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('supplier','')}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Job</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('job','')}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Qty / Unit</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('cost_quantity','')} {entry.get('unit','')}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">GL Code</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('gl_code','')}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Worker</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('worker_name','—')}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Date</td>
-            <td style="padding:8px 12px;">{entry.get('entry_date','')}</td></tr>
-      </table>
-      <p style="color:#888;font-size:12px;margin-top:24px;">Sansom Stock Book — automated notification</p>
-    </body></html>
-    """
+        print(f"✉ Make webhook failed: {e}")
 
 @app.post("/api/entries")
 async def create_entry(entry: EntryCreate):
@@ -465,13 +419,22 @@ async def create_entry(entry: EntryCreate):
         """, entry.item_code, nz_today, entry.job, entry.supplier,
             entry.description, entry.cost_quantity, entry.unit, entry.gl_code, entry.worker_name)
         result = dict(row)
-        # Send immediate email notification (non-blocking, best-effort)
+        # Notify Make webhook (non-blocking, best-effort)
         try:
-            subject = f"Stock Out: {entry.item_code} — {entry.description} ({entry.cost_quantity} {entry.unit})"
-            html = format_entry_email({**result, "entry_date": str(nz_today)})
-            send_email(subject, html)
+            await notify_make({
+                "type": "new_entry",
+                "item_code": entry.item_code,
+                "description": entry.description,
+                "supplier": entry.supplier,
+                "job": entry.job,
+                "quantity": float(entry.cost_quantity),
+                "unit": entry.unit,
+                "gl_code": entry.gl_code or "",
+                "worker_name": entry.worker_name or "",
+                "date": str(nz_today),
+            })
         except Exception as e:
-            print(f"Email notification error: {e}")
+            print(f"Webhook notification error: {e}")
         return result
     finally:
         await conn.close()
@@ -506,39 +469,22 @@ async def send_daily_digest():
     if not entries:
         return {"ok": True, "message": "No entries today — digest not sent"}
 
-    rows_html = "".join(f"""
-        <tr>
-          <td style="padding:7px 10px;border-bottom:1px solid #eee;">{e['item_code']}</td>
-          <td style="padding:7px 10px;border-bottom:1px solid #eee;">{e['description']}</td>
-          <td style="padding:7px 10px;border-bottom:1px solid #eee;">{e['job']}</td>
-          <td style="padding:7px 10px;border-bottom:1px solid #eee;text-align:right;">{e['cost_quantity']} {e['unit']}</td>
-          <td style="padding:7px 10px;border-bottom:1px solid #eee;">{e.get('worker_name') or '—'}</td>
-        </tr>""" for e in entries)
-
-    html = f"""
-    <html><body style="font-family:Arial,sans-serif;color:#222;max-width:700px;margin:0 auto;">
-      <h2 style="color:#1b9ed4;border-bottom:2px solid #1b9ed4;padding-bottom:8px;">
-        📦 Daily Stock Book Digest — {nz_today}
-      </h2>
-      <p style="color:#555;">{len(entries)} item(s) checked out today.</p>
-      <table style="border-collapse:collapse;width:100%;font-size:13px;">
-        <thead>
-          <tr style="background:#1b9ed4;color:#fff;">
-            <th style="padding:9px 10px;text-align:left;">Code</th>
-            <th style="padding:9px 10px;text-align:left;">Description</th>
-            <th style="padding:9px 10px;text-align:left;">Job</th>
-            <th style="padding:9px 10px;text-align:right;">Qty</th>
-            <th style="padding:9px 10px;text-align:left;">Worker</th>
-          </tr>
-        </thead>
-        <tbody>{rows_html}</tbody>
-      </table>
-      <p style="color:#888;font-size:12px;margin-top:24px;">Sansom Stock Book — daily automated digest</p>
-    </body></html>
-    """
-    subject = f"Stock Book Daily Digest — {nz_today} ({len(entries)} entries)"
-    success = send_email(subject, html)
-    return {"ok": success, "entries_count": len(entries), "date": str(nz_today)}
+    await notify_make({
+        "type": "daily_digest",
+        "date": str(nz_today),
+        "entries_count": len(entries),
+        "entries": [
+            {
+                "item_code": e["item_code"],
+                "description": e["description"],
+                "job": e["job"],
+                "quantity": float(e["cost_quantity"]),
+                "unit": e["unit"],
+                "worker_name": e.get("worker_name") or "—",
+            } for e in entries
+        ]
+    })
+    return {"ok": True, "entries_count": len(entries), "date": str(nz_today)}
 
 @app.get("/api/export")
 async def export_csv(
