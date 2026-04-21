@@ -4,8 +4,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
-import asyncpg, os, json, csv, io
+import asyncpg, os, json, csv, io, smtplib
 from datetime import date, datetime
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from zoneinfo import ZoneInfo
 from openai import OpenAI
 
@@ -244,14 +246,12 @@ DEFAULT_JOBS = [
 # In-memory store — overwritten by webhook sync
 _products = list(DEFAULT_PRODUCTS)
 _jobs = list(DEFAULT_JOBS)
-_vos: dict = {}  # { "JOB_NUMBER": ["VO001", "VO002", ...] }
 
 # ── Webhook: sync products & jobs from Google Sheets (published CSV) ─────────
 
 class WebhookSync(BaseModel):
     products_csv_url: Optional[str] = None
     jobs_csv_url: Optional[str] = None
-    vos_csv_url: Optional[str] = None
     # OR post inline data directly
     products: Optional[list] = None
     jobs: Optional[list] = None
@@ -263,16 +263,15 @@ async def webhook_sync(payload: WebhookSync):
 
     Two modes:
     A) Google Sheets published-as-CSV URLs:
-       { "products_csv_url": "https://docs.google.com/...", "jobs_csv_url": "...", "vos_csv_url": "..." }
+       { "products_csv_url": "https://docs.google.com/...", "jobs_csv_url": "..." }
 
     B) Inline JSON arrays (useful for manual pushes or other integrations):
        { "products": [...], "jobs": [...] }
 
     Products CSV must have columns: code, description, supplier, unit, gl, alias
     Jobs CSV must have a single column: job
-    VOs CSV must have columns: Job Number, Variation Order Number
     """
-    global _products, _jobs, _vos
+    global _products, _jobs
     import httpx
 
     updated = []
@@ -319,36 +318,17 @@ async def webhook_sync(payload: WebhookSync):
         _jobs = [str(j).strip() for j in payload.jobs if str(j).strip()]
         updated.append(f"jobs: {len(_jobs)} loaded inline")
 
-    # ── VOs ──
-    if payload.vos_csv_url:
-        async with httpx.AsyncClient() as client:
-            r = await client.get(payload.vos_csv_url, timeout=15)
-            r.raise_for_status()
-        reader = csv.DictReader(io.StringIO(r.text))
-        new_vos: dict = {}
-        for row in reader:
-            job_num = (row.get("Job Number") or row.get("job_number") or row.get("job") or "").strip()
-            vo_num = (row.get("Variation Order Number") or row.get("vo_number") or row.get("vo") or "").strip()
-            if job_num and vo_num:
-                new_vos.setdefault(job_num, []).append(vo_num)
-        if new_vos:
-            _vos = new_vos
-            total_vos = sum(len(v) for v in _vos.values())
-            updated.append(f"vos: {total_vos} loaded from CSV across {len(_vos)} jobs")
-
     if not updated:
-        return {"ok": False, "message": "Nothing to update — supply products_csv_url, jobs_csv_url, vos_csv_url, products, or jobs"}
+        return {"ok": False, "message": "Nothing to update — supply products_csv_url, jobs_csv_url, products, or jobs"}
 
     return {"ok": True, "updated": updated}
 
 @app.get("/api/webhook/status")
 async def webhook_status():
     """Returns how many products and jobs are currently loaded."""
-    total_vos = sum(len(v) for v in _vos.values())
     return {
         "products_count": len(_products),
         "jobs_count": len(_jobs),
-        "vos_count": total_vos,
         "source": "live (last synced via webhook)" if _products is not DEFAULT_PRODUCTS else "default (hardcoded)"
     }
 
@@ -374,19 +354,6 @@ async def get_products():
 @app.get("/api/jobs")
 async def get_jobs():
     return _jobs
-
-@app.get("/api/vos")
-async def get_vos(job: Optional[str] = Query(None)):
-    """Return VO list. If ?job=X is provided, return only VOs for that job number."""
-    if job:
-        # Try exact match first, then try matching just the job number prefix
-        vos = _vos.get(job, [])
-        if not vos:
-            # Try stripping to just the number part (e.g. "21148 - CRL..." -> "21148")
-            job_num = job.split(" ")[0].strip()
-            vos = _vos.get(job_num, [])
-        return sorted(vos)
-    return _vos
 
 @app.post("/api/match")
 async def match_product(req: MatchRequest):
@@ -430,6 +397,62 @@ Put null and add to missing[] for anything not in transcript.
     )
     return json.loads(response.choices[0].message.content.strip())
 
+NOTIFY_EMAIL = "accounts@sansom.co.nz"
+
+def send_email(subject: str, html_body: str):
+    """Send an email via SMTP. Requires SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS env vars."""
+    smtp_host = os.environ.get("SMTP_HOST")
+    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    smtp_user = os.environ.get("SMTP_USER")
+    smtp_pass = os.environ.get("SMTP_PASS")
+    if not all([smtp_host, smtp_user, smtp_pass]):
+        print("⚠ Email not sent: SMTP_HOST, SMTP_USER, SMTP_PASS env vars required")
+        return False
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = smtp_user
+        msg["To"] = NOTIFY_EMAIL
+        msg.attach(MIMEText(html_body, "html"))
+        with smtplib.SMTP(smtp_host, smtp_port) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(smtp_user, smtp_pass)
+            server.sendmail(smtp_user, NOTIFY_EMAIL, msg.as_string())
+        print(f"✉ Email sent to {NOTIFY_EMAIL}: {subject}")
+        return True
+    except Exception as e:
+        print(f"✉ Email send failed: {e}")
+        return False
+
+def format_entry_email(entry: dict) -> str:
+    return f"""
+    <html><body style="font-family:Arial,sans-serif;color:#222;max-width:600px;margin:0 auto;">
+      <h2 style="color:#1b9ed4;border-bottom:2px solid #1b9ed4;padding-bottom:8px;">
+        📦 New Stock Book Entry
+      </h2>
+      <table style="border-collapse:collapse;width:100%;">
+        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;width:140px;">Item Code</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('item_code','')}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Description</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('description','')}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Supplier</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('supplier','')}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Job</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('job','')}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Qty / Unit</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('cost_quantity','')} {entry.get('unit','')}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">GL Code</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('gl_code','')}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Worker</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{entry.get('worker_name','—')}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f5f5f5;font-weight:bold;">Date</td>
+            <td style="padding:8px 12px;">{entry.get('entry_date','')}</td></tr>
+      </table>
+      <p style="color:#888;font-size:12px;margin-top:24px;">Sansom Stock Book — automated notification</p>
+    </body></html>
+    """
+
 @app.post("/api/entries")
 async def create_entry(entry: EntryCreate):
     import datetime
@@ -441,7 +464,15 @@ async def create_entry(entry: EntryCreate):
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *
         """, entry.item_code, nz_today, entry.job, entry.supplier,
             entry.description, entry.cost_quantity, entry.unit, entry.gl_code, entry.worker_name)
-        return dict(row)
+        result = dict(row)
+        # Send immediate email notification (non-blocking, best-effort)
+        try:
+            subject = f"Stock Out: {entry.item_code} — {entry.description} ({entry.cost_quantity} {entry.unit})"
+            html = format_entry_email({**result, "entry_date": str(nz_today)})
+            send_email(subject, html)
+        except Exception as e:
+            print(f"Email notification error: {e}")
+        return result
     finally:
         await conn.close()
 
@@ -453,6 +484,61 @@ async def list_entries():
         return [dict(r) for r in rows]
     finally:
         await conn.close()
+
+@app.post("/api/email/daily-digest")
+async def send_daily_digest():
+    """
+    Send a daily digest email of all entries logged today (NZ time).
+    Call this from a cron job / scheduler at your desired time each day.
+    e.g. POST /api/email/daily-digest with no body required.
+    """
+    conn = await get_db()
+    try:
+        nz_today = datetime.datetime.now(NZ_TZ).date()
+        rows = await conn.fetch(
+            "SELECT * FROM stock_entries WHERE entry_date = $1 ORDER BY created_at ASC",
+            nz_today
+        )
+        entries = [dict(r) for r in rows]
+    finally:
+        await conn.close()
+
+    if not entries:
+        return {"ok": True, "message": "No entries today — digest not sent"}
+
+    rows_html = "".join(f"""
+        <tr>
+          <td style="padding:7px 10px;border-bottom:1px solid #eee;">{e['item_code']}</td>
+          <td style="padding:7px 10px;border-bottom:1px solid #eee;">{e['description']}</td>
+          <td style="padding:7px 10px;border-bottom:1px solid #eee;">{e['job']}</td>
+          <td style="padding:7px 10px;border-bottom:1px solid #eee;text-align:right;">{e['cost_quantity']} {e['unit']}</td>
+          <td style="padding:7px 10px;border-bottom:1px solid #eee;">{e.get('worker_name') or '—'}</td>
+        </tr>""" for e in entries)
+
+    html = f"""
+    <html><body style="font-family:Arial,sans-serif;color:#222;max-width:700px;margin:0 auto;">
+      <h2 style="color:#1b9ed4;border-bottom:2px solid #1b9ed4;padding-bottom:8px;">
+        📦 Daily Stock Book Digest — {nz_today}
+      </h2>
+      <p style="color:#555;">{len(entries)} item(s) checked out today.</p>
+      <table style="border-collapse:collapse;width:100%;font-size:13px;">
+        <thead>
+          <tr style="background:#1b9ed4;color:#fff;">
+            <th style="padding:9px 10px;text-align:left;">Code</th>
+            <th style="padding:9px 10px;text-align:left;">Description</th>
+            <th style="padding:9px 10px;text-align:left;">Job</th>
+            <th style="padding:9px 10px;text-align:right;">Qty</th>
+            <th style="padding:9px 10px;text-align:left;">Worker</th>
+          </tr>
+        </thead>
+        <tbody>{rows_html}</tbody>
+      </table>
+      <p style="color:#888;font-size:12px;margin-top:24px;">Sansom Stock Book — daily automated digest</p>
+    </body></html>
+    """
+    subject = f"Stock Book Daily Digest — {nz_today} ({len(entries)} entries)"
+    success = send_email(subject, html)
+    return {"ok": success, "entries_count": len(entries), "date": str(nz_today)}
 
 @app.get("/api/export")
 async def export_csv(
