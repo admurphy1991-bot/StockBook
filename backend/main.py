@@ -397,7 +397,7 @@ Put null and add to missing[] for anything not in transcript.
     )
     return json.loads(response.choices[0].message.content.strip())
 
-NOTIFY_EMAIL = "accounts@sansom.co.nz"
+NOTIFY_EMAIL = "accountsreceivable@sansom.co.nz"
 
 def send_email(subject: str, html_body: str):
     """Send an email via SMTP. Requires SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS env vars."""
