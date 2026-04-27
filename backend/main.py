@@ -605,10 +605,16 @@ async def export_csv(
         conditions = []
         params = []
         if date_from:
-            params.append(date_from)
+            try:
+                params.append(datetime.strptime(date_from, "%Y-%m-%d").date())
+            except ValueError:
+                params.append(date_from)
             conditions.append(f"entry_date >= ${len(params)}")
         if date_to:
-            params.append(date_to)
+            try:
+                params.append(datetime.strptime(date_to, "%Y-%m-%d").date())
+            except ValueError:
+                params.append(date_to)
             conditions.append(f"entry_date <= ${len(params)}")
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         rows = await conn.fetch(
