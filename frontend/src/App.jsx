@@ -230,6 +230,7 @@ export default function App() {
   const [showReportModal, setShowReportModal] = useState(false)
   const [reportText, setReportText] = useState('')
   const [reportSending, setReportSending] = useState(false)
+  const [reporterName, setReporterName] = useState(() => localStorage.getItem('reporterName') || '')
   const [inputMode, setInputMode] = useState('voice')
   const [textInput, setTextInput] = useState('')
   const [jobs, setJobs] = useState([])
@@ -396,11 +397,13 @@ export default function App() {
   async function submitReport() {
     if (!reportText.trim()) return
     setReportSending(true)
+    if (reporterName.trim()) localStorage.setItem('reporterName', reporterName.trim())
     try {
       await fetch('https://hook.us2.make.com/k1vpgwnxstveou5913b9776b09gw3fnk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: reporterName.trim() || 'Unknown',
           issue: reportText.trim(),
           url: window.location.href,
           reported_at: new Date().toISOString(),
@@ -536,6 +539,27 @@ export default function App() {
             </div>
             <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 18 }}>
               Describe what went wrong and we'll look into it.
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 11, fontFamily: 'var(--font-head)', letterSpacing: 1,
+                color: 'var(--muted)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                Your Name
+              </label>
+              <input
+                placeholder="e.g. John Smith"
+                value={reporterName}
+                onChange={e => setReporterName(e.target.value)}
+                style={{
+                  width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)',
+                  borderRadius: 8, padding: '10px 12px', color: 'var(--fg)',
+                  fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box',
+                }}
+              />
+              {reporterName.trim() && (
+                <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 4, fontFamily: 'var(--font-head)' }}>
+                  ✓ Remembered on this device
+                </div>
+              )}
             </div>
             <textarea
               autoFocus
