@@ -13,11 +13,11 @@ const S = {
   header: {
     background: 'var(--surface)',
     borderBottom: '2px solid var(--accent)',
-    padding: '0 24px',
+    padding: '0 16px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 64,
+    height: 56,
     position: 'sticky',
     top: 0,
     zIndex: 100,
@@ -44,7 +44,7 @@ const S = {
     borderRadius: 4,
     transition: 'all .15s',
   }),
-  main: { flex: 1, maxWidth: 800, width: '100%', margin: '0 auto', padding: '32px 20px' },
+  main: { flex: 1, maxWidth: 800, width: '100%', margin: '0 auto', padding: '24px 16px 100px' },
   card: {
     background: 'var(--surface)',
     border: '1px solid var(--border)',
@@ -501,12 +501,24 @@ export default function App() {
         🌐 Best on <strong>Chrome</strong> (Android, desktop). Safari on iPhone has limited mic support.
       </div>
 
+      {/* ── GLOBAL RESPONSIVE STYLES ─────────────────────────────── */}
+      <style>{`
+        .logo-text { display: inline; }
+        .desktop-tabs { display: flex; }
+        .mobile-bottom-nav { display: none; }
+        @media (max-width: 600px) {
+          .logo-text { display: none; }
+          .desktop-tabs { display: none !important; }
+          .mobile-bottom-nav { display: flex !important; }
+        }
+      `}</style>
+
       <header style={S.header}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="/sansom-logo.jpg" alt="Sansom" style={{ height: 36, borderRadius: 4 }} />
-          <span style={S.logoSub}>Stock Book</span>
+        <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <img src="/sansom-logo.jpg" alt="Sansom" style={{ height: 32, borderRadius: 4 }} />
+          <span className="logo-text" style={S.logoSub}>Stock Book</span>
         </div>
-        <div style={S.tabs}>
+        <div className="desktop-tabs" style={S.tabs}>
           {[['capture','⬤ Capture'],['log','☰ Log'],['qr','⊞ QR'],['settings','⚙ Settings']].map(([t,label]) => (
             <button key={t} style={S.tab(tab===t)} onClick={() => setTab(t)}>{label}</button>
           ))}
@@ -515,12 +527,39 @@ export default function App() {
           onClick={() => { setShowReportModal(true); setReportText('') }}
           style={{
             background: 'transparent', border: '1px solid #e55', color: '#e55',
-            borderRadius: 6, padding: '6px 12px', fontFamily: 'var(--font-head)',
+            borderRadius: 6, padding: '6px 10px', fontFamily: 'var(--font-head)',
             fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase',
             cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
           }}
-        >⚠ Report Issue</button>
+        >⚠ <span className="logo-text">Report Issue</span></button>
       </header>
+
+      {/* ── MOBILE BOTTOM NAV ────────────────────────────────────────── */}
+      <nav className="mobile-bottom-nav" style={{
+        display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0,
+        background: 'var(--surface)', borderTop: '2px solid var(--accent)',
+        zIndex: 200, padding: '8px 0 max(8px, env(safe-area-inset-bottom))',
+      }}>
+        {[
+          ['capture', '⬤', 'Capture'],
+          ['log', '☰', 'Log'],
+          ['qr', '⊞', 'QR'],
+          ['settings', '⚙', 'Settings'],
+        ].map(([t, icon, label]) => (
+          <button key={t} onClick={() => setTab(t)} style={{
+            flex: 1, background: 'none', border: 'none', cursor: 'pointer',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+            padding: '4px 0',
+            color: tab === t ? 'var(--accent)' : 'var(--muted)',
+          }}>
+            <span style={{ fontSize: 18, lineHeight: 1 }}>{icon}</span>
+            <span style={{
+              fontFamily: 'var(--font-head)', fontSize: 10, fontWeight: 700,
+              letterSpacing: 1, textTransform: 'uppercase',
+            }}>{label}</span>
+          </button>
+        ))}
+      </nav>
 
       {/* ── REPORT ISSUE MODAL ───────────────────────────────────────── */}
       {showReportModal && (
