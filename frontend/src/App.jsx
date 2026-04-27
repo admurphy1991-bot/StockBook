@@ -869,14 +869,7 @@ export default function App() {
                 <div style={S.logTitle}>Stock Entries ({entries.length})</div>
                 <button style={S.exportBtn} onClick={() => {
                   const url = buildExportUrl()
-                  console.log('Export URL:', url)
-                  console.log('exportFrom:', exportFrom, 'exportTo:', exportTo)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = ''
-                  document.body.appendChild(a)
-                  a.click()
-                  document.body.removeChild(a)
+                  window.open(url, '_blank')
                 }}>↓ Export CSV</button>
               </div>
 
