@@ -385,14 +385,12 @@ DEFAULT_JOBS = [
 # In-memory store — overwritten by webhook sync
 _products = list(DEFAULT_PRODUCTS)
 _jobs = list(DEFAULT_JOBS)
-_vos: dict = {}  # { "JOB_NUMBER": ["VO001", "VO002", ...] }
 
 # ── Webhook: sync products & jobs from Google Sheets (published CSV) ─────────
 
 class WebhookSync(BaseModel):
     products_csv_url: Optional[str] = None
     jobs_csv_url: Optional[str] = None
-    vos_csv_url: Optional[str] = None
     # OR post inline data directly
     products: Optional[list] = None
     jobs: Optional[list] = None
@@ -404,7 +402,7 @@ async def webhook_sync(payload: WebhookSync):
 
     Two modes:
     A) Google Sheets published-as-CSV URLs:
-       { "products_csv_url": "https://docs.google.com/...", "jobs_csv_url": "...", "vos_csv_url": "..." }
+       { "products_csv_url": "https://docs.google.com/...", "jobs_csv_url": "..." }
 
     B) Inline JSON arrays (useful for manual pushes or other integrations):
        { "products": [...], "jobs": [...] }
@@ -413,7 +411,7 @@ async def webhook_sync(payload: WebhookSync):
     Jobs CSV must have a single column: job
     VOs CSV must have columns: Job Number, Variation Order Number
     """
-    global _products, _jobs, _vos
+    global _products, _jobs
     import httpx
 
     updated = []
@@ -460,36 +458,18 @@ async def webhook_sync(payload: WebhookSync):
         _jobs = [str(j).strip() for j in payload.jobs if str(j).strip()]
         updated.append(f"jobs: {len(_jobs)} loaded inline")
 
-    # ── VOs ──
-    if payload.vos_csv_url:
-        async with httpx.AsyncClient() as client:
-            r = await client.get(payload.vos_csv_url, timeout=15)
-            r.raise_for_status()
-        reader = csv.DictReader(io.StringIO(r.text))
-        new_vos: dict = {}
-        for row in reader:
-            job_num = (row.get("Job Number") or row.get("job_number") or row.get("job") or "").strip()
-            vo_num = (row.get("Variation Order Number") or row.get("vo_number") or row.get("vo") or "").strip()
-            if job_num and vo_num:
-                new_vos.setdefault(job_num, []).append(vo_num)
-        if new_vos:
-            _vos = new_vos
-            total_vos = sum(len(v) for v in _vos.values())
-            updated.append(f"vos: {total_vos} loaded from CSV across {len(_vos)} jobs")
 
     if not updated:
-        return {"ok": False, "message": "Nothing to update — supply products_csv_url, jobs_csv_url, vos_csv_url, products, or jobs"}
+        return {"ok": False, "message": "Nothing to update — supply products_csv_url, jobs_csv_url, products, or jobs"}
 
     return {"ok": True, "updated": updated}
 
 @app.get("/api/webhook/status")
 async def webhook_status():
     """Returns how many products and jobs are currently loaded."""
-    total_vos = sum(len(v) for v in _vos.values())
     return {
         "products_count": len(_products),
         "jobs_count": len(_jobs),
-        "vos_count": total_vos,
         "source": "live (last synced via webhook)" if _products is not DEFAULT_PRODUCTS else "default (hardcoded)"
     }
 
@@ -516,18 +496,6 @@ async def get_products():
 async def get_jobs():
     return _jobs
 
-@app.get("/api/vos")
-async def get_vos(job: Optional[str] = Query(None)):
-    """Return VO list. If ?job=X is provided, return only VOs for that job number."""
-    if job:
-        # Try exact match first, then try matching just the job number prefix
-        vos = _vos.get(job, [])
-        if not vos:
-            # Try stripping to just the number part (e.g. "21148 - CRL..." -> "21148")
-            job_num = job.split(" ")[0].strip()
-            vos = _vos.get(job_num, [])
-        return sorted(vos)
-    return _vos
 
 @app.post("/api/match")
 async def match_product(req: MatchRequest):
