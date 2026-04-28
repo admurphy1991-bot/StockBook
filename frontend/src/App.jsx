@@ -223,7 +223,7 @@ export default function App() {
   const [processing, setProcessing] = useState(false)
   const [matchResult, setMatchResult] = useState(null)
   const [selectedProduct, setSelectedProduct] = useState(null)
-  const [form, setForm] = useState({ job: '', quantity: '', worker_name: '', vo: '', has_vo: null })
+  const [form, setForm] = useState({ job: '', quantity: '', worker_name: '' })
   const [entries, setEntries] = useState([])
   const [toast, setToast] = useState('')
   const [toastShow, setToastShow] = useState(false)
@@ -234,8 +234,6 @@ export default function App() {
   const [inputMode, setInputMode] = useState('voice')
   const [textInput, setTextInput] = useState('')
   const [jobs, setJobs] = useState([])
-  const [voOptions, setVoOptions] = useState([])   // VOs for selected job
-  const [voLoading, setVoLoading] = useState(false)
 
   // Edit state
   const [editingEntry, setEditingEntry] = useState(null) // { id, job, cost_quantity, worker_name }
@@ -249,7 +247,6 @@ export default function App() {
   const [webhookStatus, setWebhookStatus] = useState(null)
   const [syncProductsUrl, setSyncProductsUrl] = useState('')
   const [syncJobsUrl, setSyncJobsUrl] = useState('')
-  const [syncVosUrl, setSyncVosUrl] = useState('')
   const [syncing, setSyncing] = useState(false)
   const [settingsUnlocked, setSettingsUnlocked] = useState(false)
   const [settingsPassword, setSettingsPassword] = useState('')
@@ -339,14 +336,13 @@ export default function App() {
 
   async function submitEntry() {
     if (!canSubmit) return
-    const jobValue = (form.has_vo === true && form.vo) ? `${form.job} / ${form.vo}` : form.job
     try {
       await fetch('/api/entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           item_code: selectedProduct.code,
-          job: jobValue,
+          job: form.job,
           supplier: selectedProduct.supplier,
           description: selectedProduct.description,
           cost_quantity: parseFloat(form.quantity),
@@ -363,7 +359,7 @@ export default function App() {
 
   function resetCapture() {
     setTranscript(''); setTextInput(''); setMatchResult(null)
-    setSelectedProduct(null); setForm({ job: '', quantity: '', worker_name: '', vo: '', has_vo: null })
+    setSelectedProduct(null); setForm({ job: '', quantity: '', worker_name: '' })
     setVoOptions([])
   }
 
@@ -440,7 +436,7 @@ export default function App() {
   }
 
   async function triggerSync() {
-    if (!syncProductsUrl && !syncJobsUrl && !syncVosUrl) {
+    if (!syncProductsUrl && !syncJobsUrl) {
       showToast('Enter at least one URL to sync')
       return
     }
@@ -449,7 +445,6 @@ export default function App() {
       const body = {}
       if (syncProductsUrl) body.products_csv_url = syncProductsUrl
       if (syncJobsUrl) body.jobs_csv_url = syncJobsUrl
-      if (syncVosUrl) body.vos_csv_url = syncVosUrl
       const r = await fetch('/api/webhook/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -469,19 +464,10 @@ export default function App() {
     setSyncing(false)
   }
 
-  // Fetch VOs when job selection changes
-  useEffect(() => {
-    if (!form.job) { setVoOptions([]); return }
-    setVoLoading(true)
-    fetch(`/api/vos?job=${encodeURIComponent(form.job)}`)
-      .then(r => r.json())
-      .then(data => { setVoOptions(Array.isArray(data) ? data : []); setVoLoading(false) })
-      .catch(() => { setVoOptions([]); setVoLoading(false) })
-  }, [form.job])
   const hasMatches = matchResult?.matches?.length > 0
   const isAmbiguous = matchResult?.ambiguous && matchResult?.matches?.length > 1
   const canSubmit = selectedProduct && form.job.trim() && form.quantity && form.worker_name.trim()
-    && (form.has_vo === false || form.has_vo === null || (form.has_vo === true && (!voOptions.length || form.vo)))
+
 
   return (
     <div style={S.app}>
@@ -742,7 +728,7 @@ export default function App() {
                   <select
                     style={S.fieldSelect}
                     value={form.job}
-                    onChange={e => setForm(f => ({...f, job: e.target.value, has_vo: null, vo: ''}))}
+                    onChange={e => setForm(f => ({...f, job: e.target.value}))}
                   >
                     <option value="">— Select a job —</option>
                     {jobs.map(j => (
@@ -755,53 +741,6 @@ export default function App() {
                     </div>
                   )}
                 </div>
-
-                {/* ── VO Step ── */}
-                {form.job && (
-                  <div style={{...S.field, background:'var(--surface2)', borderRadius:8, padding:'14px 16px', border:'1px solid var(--border)'}}>
-                    <label style={S.fieldLabel}>Does this relate to a Variation Order (VO)?</label>
-                    <div style={{display:'flex', gap:10, marginBottom: form.has_vo === true ? 12 : 0}}>
-                      {[['yes', true], ['no', false]].map(([label, val]) => (
-                        <button
-                          key={label}
-                          style={{
-                            padding:'8px 22px',
-                            borderRadius:6,
-                            fontFamily:'var(--font-head)', fontWeight:700, fontSize:13, letterSpacing:1, textTransform:'uppercase',
-                            background: form.has_vo === val ? 'var(--accent)' : 'transparent',
-                            color: form.has_vo === val ? '#fff' : 'var(--muted)',
-                            border: form.has_vo === val ? 'none' : '1px solid var(--border)',
-                            transition:'all .15s',
-                          }}
-                          onClick={() => setForm(f => ({...f, has_vo: val, vo: ''}))}
-                        >{label}</button>
-                      ))}
-                    </div>
-                    {form.has_vo === true && (
-                      voLoading ? (
-                        <div style={{color:'var(--muted)', fontSize:13, fontFamily:'var(--font-head)', letterSpacing:1}}>Loading VOs…</div>
-                      ) : voOptions.length > 0 ? (
-                        <div>
-                          <label style={{...S.fieldLabel, marginTop:4}}>Select VO <span style={S.requiredStar}>*</span></label>
-                          <select
-                            style={S.fieldSelect}
-                            value={form.vo}
-                            onChange={e => setForm(f => ({...f, vo: e.target.value}))}
-                          >
-                            <option value="">— Select a VO —</option>
-                            {voOptions.map(vo => (
-                              <option key={vo} value={vo}>{vo}</option>
-                            ))}
-                          </select>
-                        </div>
-                      ) : (
-                        <div style={{fontSize:13, color:'var(--muted)', marginTop:8}}>
-                          No VOs found for this job. Sync the VO sheet in Settings if expected.
-                        </div>
-                      )
-                    )}
-                  </div>
-                )}
 
                 <div style={S.row}>
                   <div style={S.field}>
@@ -998,89 +937,6 @@ export default function App() {
                 🖨 Print This Page
               </button>
             </div>
-            <div style={{background:'#fff', borderRadius:12, padding:36, textAlign:'center', border:'1px solid var(--border)', color:'#111'}}>
-              <img src="/sansom-logo.jpg" alt="Sansom" style={{height:52, marginBottom:20}} />
-              <div style={{fontFamily:'var(--font-head)', fontSize:22, fontWeight:800, letterSpacing:2, textTransform:'uppercase', color:'#111', marginBottom:12}}>
-                Stock Book Entry
-              </div>
-              <div style={{fontSize:14, color:'#444', lineHeight:1.8, marginBottom:28, maxWidth:340, margin:'0 auto 28px'}}>
-                Scan this QR code when you take stock.<br/>
-                Press the microphone button and say the <strong>product name</strong>, <strong>how many units</strong>, <strong>job name and number</strong>, and <strong>your name</strong>.
-              </div>
-              <div style={{background:'#fff', padding:12, display:'inline-block', borderRadius:8, border:'1px solid #ddd', marginBottom:20}}>
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(window.location.origin)}`}
-                  alt="QR Code"
-                  style={{display:'block', width:220, height:220}}
-                />
-              </div>
-              <div style={{fontSize:12, color:'#888', marginBottom:4}}>Scan to open the Stock Book app</div>
-              <div style={{fontSize:11, color:'#bbb', wordBreak:'break-all', marginBottom:12}}>{window.location.origin}</div>
-              <div style={{fontSize:13, color:'#333', fontWeight:700}}>Works best on Google Chrome</div>
-            </div>
-            <style>{`
-              @media print {
-                .no-print { display: none !important; }
-                body { background: white !important; }
-                header { display: none !important; }
-              }
-            `}</style>
-          </div>
-        )}
-
-        {/* ── SETTINGS / WEBHOOK TAB ───────────────────────────────── */}
-        {tab === 'settings' && (
-          <div style={S.card}>
-            <div style={S.title}>Settings & Sync</div>
-
-            {!settingsUnlocked ? (
-              <div style={{textAlign:'center', padding:'32px 0'}}>
-                <div style={{color:'var(--muted)', fontSize:14, marginBottom:20, fontFamily:'var(--font-head)', letterSpacing:1, textTransform:'uppercase'}}>
-                  Enter password to access settings
-                </div>
-                <input
-                  type="password"
-                  style={{...S.fieldInput, maxWidth:260, margin:'0 auto 12px', display:'block', textAlign:'center'}}
-                  placeholder="Password"
-                  value={settingsPassword}
-                  onChange={e => { setSettingsPassword(e.target.value); setSettingsPasswordError(false) }}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') {
-                      if (settingsPassword === 'Sansom12345') { setSettingsUnlocked(true); setSettingsPasswordError(false) }
-                      else setSettingsPasswordError(true)
-                    }
-                  }}
-                />
-                {settingsPasswordError && (
-                  <div style={{color:'var(--danger)', fontSize:13, marginBottom:12}}>Incorrect password</div>
-                )}
-                <button
-                  style={{...S.syncBtn, marginTop:0}}
-                  onClick={() => {
-                    if (settingsPassword === 'Sansom12345') { setSettingsUnlocked(true); setSettingsPasswordError(false) }
-                    else setSettingsPasswordError(true)
-                  }}
-                >Unlock</button>
-              </div>
-            ) : (<>
-
-            {/* Status */}
-            <div style={S.settingSection}>
-              <div style={S.settingTitle}>Current Data Status</div>
-              {webhookStatus ? (
-                <div style={{display:'flex', gap:16, flexWrap:'wrap', marginBottom:12}}>
-                  <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)'}}>
-                    <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>PRODUCTS LOADED</div>
-                    <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{webhookStatus.products_count}</div>
-                  </div>
-                  <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)'}}>
-                    <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>JOBS LOADED</div>
-                    <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{webhookStatus.jobs_count}</div>
-                  </div>
-                  <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)'}}>
-                    <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>VOS LOADED</div>
-                    <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{webhookStatus.vos_count ?? 0}</div>
-                  </div>
                   <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)', flex:1, minWidth:180}}>
                     <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>SOURCE</div>
                     <span style={S.statusBadge(webhookStatus.source?.includes('live'))}>
@@ -1120,41 +976,6 @@ export default function App() {
                   onChange={e => setSyncJobsUrl(e.target.value)}
                 />
               </div>
-              <div style={S.field}>
-                <label style={S.fieldLabel}>Variation Orders (VO) Sheet CSV URL</label>
-                <input
-                  style={S.syncInput}
-                  placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv&gid=..."
-                  value={syncVosUrl}
-                  onChange={e => setSyncVosUrl(e.target.value)}
-                />
-              </div>
-              <button style={S.syncBtn} onClick={triggerSync} disabled={syncing}>
-                {syncing ? '⏳ Syncing…' : '↻ Sync Now'}
-              </button>
-            </div>
-
-            {/* API webhook docs */}
-            <div style={S.settingSection}>
-              <div style={S.settingTitle}>Automated Webhook (API)</div>
-              <div style={S.settingDesc}>
-                You can also POST to the sync endpoint directly from any automation tool (Zapier, Make, Google Apps Script, etc.) to keep the app updated automatically whenever your sheet changes.
-              </div>
-              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>ENDPOINT</div>
-              <div style={S.codeBlock}>POST /api/webhook/sync</div>
-              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>EXAMPLE PAYLOAD</div>
-              <div style={S.codeBlock}>{`{
-  "products_csv_url": "https://docs.google.com/...",
-  "jobs_csv_url": "https://docs.google.com/...",
-  "vos_csv_url": "https://docs.google.com/..."
-}`}</div>
-              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>PRODUCTS CSV COLUMNS REQUIRED</div>
-              <div style={S.codeBlock}>code, description, supplier, unit, gl, alias</div>
-              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>JOBS CSV COLUMN REQUIRED</div>
-              <div style={S.codeBlock}>job</div>
-              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>VOS CSV COLUMNS REQUIRED</div>
-              <div style={S.codeBlock}>Job Number, Variation Order Number</div>
-            </div>
           </>
           )}
           </div>
