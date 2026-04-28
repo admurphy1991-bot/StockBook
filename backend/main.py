@@ -628,10 +628,12 @@ async def export_csv(
     writer = csv.writer(output)
     writer.writerow(["Item Code", "Date", "Job Number", "Subcategory", "Cost Quantity", "GL Code", "Comments"])
     for r in rows:
+        job_full = r["job"] or ""
+        job_number = job_full.split(" - ")[0].strip() if " - " in job_full else job_full
         writer.writerow([
             r["item_code"],
             str(r["entry_date"]),
-            r["job"],
+            job_number,
             "",  # Subcategory — reserved column, left blank
             r["cost_quantity"],
             r["gl_code"] or "",
