@@ -632,7 +632,7 @@ async def export_csv(
         job_number = job_full.split(" - ")[0].strip() if " - " in job_full else job_full
         writer.writerow([
             r["item_code"],
-            str(r["entry_date"]),
+            str(r["entry_date"].strftime("%d-%m-%Y")),
             job_number,
             "",  # Subcategory — reserved column, left blank
             r["cost_quantity"],
