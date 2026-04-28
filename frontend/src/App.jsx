@@ -937,6 +937,58 @@ export default function App() {
                 🖨 Print This Page
               </button>
             </div>
+          </div>
+        )}
+
+        {/* ── SETTINGS TAB ─────────────────────────────────────────── */}
+        {tab === 'settings' && (
+          <div style={S.card}>
+            <div style={S.title}>Settings & Sync</div>
+
+            {!settingsUnlocked ? (
+              <div style={{textAlign:'center', padding:'32px 0'}}>
+                <div style={{color:'var(--muted)', fontSize:14, marginBottom:20, fontFamily:'var(--font-head)', letterSpacing:1, textTransform:'uppercase'}}>
+                  Enter password to access settings
+                </div>
+                <input
+                  type="password"
+                  style={{...S.fieldInput, maxWidth:260, margin:'0 auto 12px', display:'block', textAlign:'center'}}
+                  placeholder="Password"
+                  value={settingsPassword}
+                  onChange={e => { setSettingsPassword(e.target.value); setSettingsPasswordError(false) }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      if (settingsPassword === 'Sansom12345') { setSettingsUnlocked(true); setSettingsPasswordError(false) }
+                      else setSettingsPasswordError(true)
+                    }
+                  }}
+                />
+                {settingsPasswordError && (
+                  <div style={{color:'var(--danger)', fontSize:13, marginBottom:12}}>Incorrect password</div>
+                )}
+                <button
+                  style={{...S.syncBtn, marginTop:0}}
+                  onClick={() => {
+                    if (settingsPassword === 'Sansom12345') { setSettingsUnlocked(true); setSettingsPasswordError(false) }
+                    else setSettingsPasswordError(true)
+                  }}
+                >Unlock</button>
+              </div>
+            ) : (<>
+
+            {/* Status */}
+            <div style={S.settingSection}>
+              <div style={S.settingTitle}>Current Data Status</div>
+              {webhookStatus ? (
+                <div style={{display:'flex', gap:16, flexWrap:'wrap', marginBottom:12}}>
+                  <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)'}}>
+                    <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>PRODUCTS LOADED</div>
+                    <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{webhookStatus.products_count}</div>
+                  </div>
+                  <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)'}}>
+                    <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>JOBS LOADED</div>
+                    <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{webhookStatus.jobs_count}</div>
+                  </div>
                   <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)', flex:1, minWidth:180}}>
                     <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>SOURCE</div>
                     <span style={S.statusBadge(webhookStatus.source?.includes('live'))}>
@@ -957,7 +1009,6 @@ export default function App() {
                 <strong style={{color:'var(--text)'}}>How to get the URL from Google Sheets:</strong><br/>
                 File → Share → Publish to web → select the sheet → CSV → Copy link
               </div>
-
               <div style={S.field}>
                 <label style={S.fieldLabel}>Products Sheet CSV URL</label>
                 <input
@@ -976,8 +1027,30 @@ export default function App() {
                   onChange={e => setSyncJobsUrl(e.target.value)}
                 />
               </div>
-          </>
-          )}
+              <button style={S.syncBtn} onClick={triggerSync} disabled={syncing}>
+                {syncing ? '⏳ Syncing…' : '↻ Sync Now'}
+              </button>
+            </div>
+
+            {/* API webhook docs */}
+            <div style={S.settingSection}>
+              <div style={S.settingTitle}>Automated Webhook (API)</div>
+              <div style={S.settingDesc}>
+                You can also POST to the sync endpoint directly from any automation tool (Zapier, Make, Google Apps Script, etc.) to keep the app updated automatically whenever your sheet changes.
+              </div>
+              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>ENDPOINT</div>
+              <div style={S.codeBlock}>POST /api/webhook/sync</div>
+              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>EXAMPLE PAYLOAD</div>
+              <div style={S.codeBlock}>{`{
+  "products_csv_url": "https://docs.google.com/...",
+  "jobs_csv_url": "https://docs.google.com/..."
+}`}</div>
+              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>PRODUCTS CSV COLUMNS REQUIRED</div>
+              <div style={S.codeBlock}>code, description, supplier, unit, gl, alias</div>
+              <div style={{fontSize:12, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:6}}>JOBS CSV COLUMN REQUIRED</div>
+              <div style={S.codeBlock}>job</div>
+            </div>
+            </>)}
           </div>
         )}
 
