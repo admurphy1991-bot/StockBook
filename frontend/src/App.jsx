@@ -360,7 +360,6 @@ export default function App() {
   function resetCapture() {
     setTranscript(''); setTextInput(''); setMatchResult(null)
     setSelectedProduct(null); setForm({ job: '', quantity: '', worker_name: '' })
-    setVoOptions([])
   }
 
   async function deleteEntry(id) {
