@@ -110,6 +110,26 @@ const S = {
     borderRadius: 6, padding: '10px 14px', color: 'var(--text)', fontSize: 15,
     transition: 'border-color .15s', appearance: 'none',
   },
+  jobComboWrap: { position: 'relative' },
+  jobComboInput: {
+    width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)',
+    borderRadius: 6, padding: '10px 14px', color: 'var(--text)', fontSize: 15,
+    transition: 'border-color .15s', boxSizing: 'border-box',
+  },
+  jobDropdown: {
+    position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 500,
+    background: 'var(--surface)', border: '1px solid var(--accent)',
+    borderTop: 'none', borderRadius: '0 0 8px 8px',
+    maxHeight: 240, overflowY: 'auto',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+  },
+  jobDropItem: (highlighted) => ({
+    padding: '10px 14px', cursor: 'pointer', fontSize: 14,
+    color: highlighted ? '#fff' : 'var(--text)',
+    background: highlighted ? 'var(--accent)' : 'transparent',
+    borderBottom: '1px solid var(--border)',
+    lineHeight: 1.35,
+  }),
   unitHint: {
     display: 'inline-block', marginLeft: 10, fontSize: 12,
     color: 'var(--accent)', fontFamily: 'var(--font-head)', fontWeight: 600, letterSpacing: .5,
@@ -239,6 +259,14 @@ export default function App() {
   const [editingEntry, setEditingEntry] = useState(null) // { id, job, cost_quantity, worker_name }
   const [editForm, setEditForm] = useState({})
 
+  // Job search combobox state
+  const [jobSearch, setJobSearch] = useState('')
+  const [jobDropOpen, setJobDropOpen] = useState(false)
+  const [editJobSearch, setEditJobSearch] = useState('')
+  const [editJobDropOpen, setEditJobDropOpen] = useState(false)
+  const jobSearchRef = useRef(null)
+  const editJobSearchRef = useRef(null)
+
   // Export date range state
   const [exportFrom, setExportFrom] = useState('')
   const [exportTo, setExportTo] = useState('')
@@ -254,6 +282,22 @@ export default function App() {
 
   const recognitionRef = useRef(null)
   const transcriptRef = useRef('')
+
+  // Close job dropdowns on outside click
+  useEffect(() => {
+    function handleClick(e) {
+      if (jobSearchRef.current && !jobSearchRef.current.contains(e.target)) setJobDropOpen(false)
+      if (editJobSearchRef.current && !editJobSearchRef.current.contains(e.target)) setEditJobDropOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  // Sync jobSearch display text when AI fills in form.job
+  useEffect(() => {
+    if (form.job) setJobSearch(form.job)
+    else setJobSearch('')
+  }, [form.job])
 
   useEffect(() => {
     loadEntries()
@@ -360,6 +404,7 @@ export default function App() {
   function resetCapture() {
     setTranscript(''); setTextInput(''); setMatchResult(null)
     setSelectedProduct(null); setForm({ job: '', quantity: '', worker_name: '' })
+    setJobSearch(''); setJobDropOpen(false)
   }
 
   async function deleteEntry(id) {
@@ -724,16 +769,52 @@ export default function App() {
 
                 <div style={S.field}>
                   <label style={S.fieldLabel}>Job Number <span style={S.requiredStar}>*</span></label>
-                  <select
-                    style={S.fieldSelect}
-                    value={form.job}
-                    onChange={e => setForm(f => ({...f, job: e.target.value}))}
-                  >
-                    <option value="">— Select a job —</option>
-                    {jobs.map(j => (
-                      <option key={j} value={j}>{j}</option>
-                    ))}
-                  </select>
+                  <div ref={jobSearchRef} style={S.jobComboWrap}>
+                    <input
+                      style={{
+                        ...S.jobComboInput,
+                        borderColor: jobDropOpen ? 'var(--accent)' : (form.job ? 'var(--accent)' : 'var(--border)'),
+                        borderRadius: jobDropOpen ? '6px 6px 0 0' : 6,
+                      }}
+                      placeholder="Type job # or name to search…"
+                      value={jobSearch}
+                      onChange={e => {
+                        setJobSearch(e.target.value)
+                        setForm(f => ({...f, job: ''}))
+                        setJobDropOpen(true)
+                      }}
+                      onFocus={() => setJobDropOpen(true)}
+                      autoComplete="off"
+                    />
+                    {jobDropOpen && (() => {
+                      const q = jobSearch.toLowerCase()
+                      const filtered = jobs.filter(j => j.toLowerCase().includes(q))
+                      return filtered.length > 0 ? (
+                        <div style={S.jobDropdown}>
+                          {filtered.map(j => (
+                            <div
+                              key={j}
+                              style={S.jobDropItem(false)}
+                              onMouseEnter={e => e.currentTarget.style.background = 'var(--accent)' && (e.currentTarget.style.color = '#fff')}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text)' }}
+                              onMouseDown={e => {
+                                e.preventDefault()
+                                setForm(f => ({...f, job: j}))
+                                setJobSearch(j)
+                                setJobDropOpen(false)
+                              }}
+                            >
+                              {j}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={S.jobDropdown}>
+                          <div style={{padding:'12px 14px', color:'var(--muted)', fontSize:13, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div>
+                        </div>
+                      )
+                    })()}
+                  </div>
                   {form.job && (
                     <div style={{fontSize:12, color:'var(--accent)', marginTop:4, fontFamily:'var(--font-head)'}}>
                       ✓ {form.job}
@@ -877,7 +958,7 @@ export default function App() {
                       </div>
                       <button
                         style={{padding:'4px 8px', background:'transparent', color:'var(--accent)', fontSize:14, borderRadius:4, border:'1px solid transparent', cursor:'pointer'}}
-                        onClick={() => { setEditingEntry(e); setEditForm({ job: e.job, cost_quantity: e.cost_quantity, worker_name: e.worker_name || '' }) }}
+                        onClick={() => { setEditingEntry(e); setEditForm({ job: e.job, cost_quantity: e.cost_quantity, worker_name: e.worker_name || '' }); setEditJobSearch(e.job || ''); setEditJobDropOpen(false) }}
                         title="Edit"
                       >✎</button>
                       <button style={S.deleteBtn} onClick={() => deleteEntry(e.id)} title="Delete">✕</button>
@@ -888,14 +969,56 @@ export default function App() {
                         <div style={{display:'grid', gridTemplateColumns:'1fr 100px 1fr', gap:12, marginBottom:12}}>
                           <div>
                             <label style={S.fieldLabel}>Job <span style={S.requiredStar}>*</span></label>
-                            <select
-                              style={{...S.fieldSelect, fontSize:13}}
-                              value={editForm.job}
-                              onChange={ev => setEditForm(f => ({...f, job: ev.target.value}))}
-                            >
-                              <option value="">— Select job —</option>
-                              {jobs.map(j => <option key={j} value={j}>{j}</option>)}
-                            </select>
+                            <div ref={editJobSearchRef} style={S.jobComboWrap}>
+                              <input
+                                style={{
+                                  ...S.jobComboInput,
+                                  fontSize: 13,
+                                  borderColor: editJobDropOpen ? 'var(--accent)' : (editForm.job ? 'var(--accent)' : 'var(--border)'),
+                                  borderRadius: editJobDropOpen ? '6px 6px 0 0' : 6,
+                                }}
+                                placeholder="Type to search…"
+                                value={editJobSearch || editForm.job || ''}
+                                onChange={ev => {
+                                  setEditJobSearch(ev.target.value)
+                                  setEditForm(f => ({...f, job: ''}))
+                                  setEditJobDropOpen(true)
+                                }}
+                                onFocus={() => {
+                                  setEditJobSearch(editForm.job || '')
+                                  setEditJobDropOpen(true)
+                                }}
+                                autoComplete="off"
+                              />
+                              {editJobDropOpen && (() => {
+                                const q = (editJobSearch || '').toLowerCase()
+                                const filtered = jobs.filter(j => j.toLowerCase().includes(q))
+                                return filtered.length > 0 ? (
+                                  <div style={S.jobDropdown}>
+                                    {filtered.map(j => (
+                                      <div
+                                        key={j}
+                                        style={S.jobDropItem(false)}
+                                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff' }}
+                                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text)' }}
+                                        onMouseDown={ev => {
+                                          ev.preventDefault()
+                                          setEditForm(f => ({...f, job: j}))
+                                          setEditJobSearch(j)
+                                          setEditJobDropOpen(false)
+                                        }}
+                                      >
+                                        {j}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div style={S.jobDropdown}>
+                                    <div style={{padding:'10px 14px', color:'var(--muted)', fontSize:12, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div>
+                                  </div>
+                                )
+                              })()}
+                            </div>
                           </div>
                           <div>
                             <label style={S.fieldLabel}>Qty <span style={S.requiredStar}>*</span></label>
@@ -917,7 +1040,7 @@ export default function App() {
                         </div>
                         <div style={{display:'flex', gap:8}}>
                           <button style={{...S.btnPrimary(true), flex:'none', padding:'8px 20px', fontSize:13}} onClick={saveEditEntry}>Save</button>
-                          <button style={{...S.btnSecondary, padding:'8px 16px', fontSize:13}} onClick={() => setEditingEntry(null)}>Cancel</button>
+                          <button style={{...S.btnSecondary, padding:'8px 16px', fontSize:13}} onClick={() => { setEditingEntry(null); setEditJobSearch(''); setEditJobDropOpen(false) }}>Cancel</button>
                         </div>
                       </div>
                     )}
