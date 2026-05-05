@@ -261,9 +261,16 @@ export default function App() {
   const [editForm, setEditForm] = useState({})
 
   // Multi-entry basket
-  const [basket, setBasket] = useState([]) // [{product, quantity}]
+  const [basket, setBasket] = useState([]) // [{type:'stock'|'tool', product?, toolName?, quantity?}]
   const [basketJob, setBasketJob] = useState('')
   const [basketWorker, setBasketWorker] = useState('')
+
+  // Log sub-tab
+  const [logTab, setLogTab] = useState('stock') // 'stock' | 'tools'
+  const [toolEntries, setToolEntries] = useState([])
+
+  // Pending tools from AI match (before adding to basket)
+  const [pendingTools, setPendingTools] = useState([]) // string[]
 
 
   // Job search combobox state
@@ -312,6 +319,7 @@ export default function App() {
 
   useEffect(() => {
     loadEntries()
+    loadToolEntries()
     fetch('/api/jobs').then(r => r.json()).then(setJobs).catch(() => {})
   }, [])
 
@@ -323,6 +331,13 @@ export default function App() {
     try {
       const r = await fetch('/api/entries')
       setEntries(await r.json())
+    } catch {}
+  }
+
+  async function loadToolEntries() {
+    try {
+      const r = await fetch('/api/tool-entries')
+      setToolEntries(await r.json())
     } catch {}
   }
 
@@ -368,6 +383,7 @@ export default function App() {
     setProcessing(true)
     setMatchResult(null)
     setSelectedProduct(null)
+    setPendingTools([])
     try {
       const r = await fetch('/api/match', {
         method: 'POST',
@@ -377,9 +393,12 @@ export default function App() {
       if (!r.ok) throw new Error(`Server error ${r.status}: ${(await r.text()).slice(0, 200)}`)
       const data = await r.json()
       setMatchResult(data)
+      // Populate pending tools from AI response
+      if (data.tools?.length > 0) setPendingTools(data.tools)
+      // For stock: each match now carries its own quantity from AI
       setForm({
         job: data.job || '',
-        quantity: data.quantity != null ? String(data.quantity) : '',
+        quantity: data.matches?.length === 1 ? (data.matches[0].quantity != null ? String(data.matches[0].quantity) : '') : '',
         worker_name: data.worker_name || '',
       })
       if (!data.ambiguous && data.matches?.length === 1) setSelectedProduct(data.matches[0])
@@ -392,6 +411,7 @@ export default function App() {
   async function submitEntry() {
     if (!canSubmit) return
     try {
+      // Save stock entry
       await fetch('/api/entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -406,15 +426,34 @@ export default function App() {
           worker_name: form.worker_name,
         }),
       })
-      // Add to basket instead of resetting
-      setBasket(b => [...b, { product: selectedProduct, quantity: parseFloat(form.quantity) }])
+
+      // Save any pending tools
+      const savedTools = []
+      for (const toolName of pendingTools) {
+        await fetch('/api/tool-entries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tool_name: toolName, job: form.job, worker_name: form.worker_name }),
+        })
+        savedTools.push(toolName)
+      }
+
+      // Update basket
+      const newBasketItems = [
+        { type: 'stock', product: selectedProduct, quantity: parseFloat(form.quantity) },
+        ...savedTools.map(t => ({ type: 'tool', toolName: t })),
+      ]
+      setBasket(b => [...b, ...newBasketItems])
       if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
       if (!basketWorker && form.worker_name) setBasketWorker(form.worker_name)
-      showToast('Added to basket ✓')
+
+      const toolMsg = savedTools.length > 0 ? ` + ${savedTools.length} tool${savedTools.length > 1 ? 's' : ''}` : ''
+      showToast(`Added to basket ✓${toolMsg}`)
       loadEntries()
-      // Reset just the product/qty/transcript part, keep job+worker
+      loadToolEntries()
+      // Reset transcript/product/tools, keep job+worker
       setTranscript(''); setTextInput(''); setMatchResult(null)
-      setSelectedProduct(null)
+      setSelectedProduct(null); setPendingTools([])
       setForm(f => ({ ...f, quantity: '' }))
       setJobDropOpen(false)
     } catch { showToast('Save failed — try again') }
@@ -433,13 +472,18 @@ export default function App() {
   function resetCapture() {
     setTranscript(''); setTextInput(''); setMatchResult(null)
     setSelectedProduct(null); setForm({ job: '', quantity: '', worker_name: '' })
-    setJobSearch(''); setJobDropOpen(false)
+    setJobSearch(''); setJobDropOpen(false); setPendingTools([])
     setBasket([]); setBasketJob(''); setBasketJobSearch(''); setBasketWorker('')
   }
 
   async function deleteEntry(id) {
     await fetch(`/api/entries/${id}`, { method: 'DELETE' })
     loadEntries()
+  }
+
+  async function deleteToolEntry(id) {
+    await fetch(`/api/tool-entries/${id}`, { method: 'DELETE' })
+    loadToolEntries()
   }
 
   async function saveEditEntry() {
@@ -507,6 +551,14 @@ export default function App() {
     if (exportTo) params.set('date_to', toISODate(exportTo))
     const qs = params.toString()
     return `/api/export${qs ? '?' + qs : ''}`
+  }
+
+  function buildToolExportUrl() {
+    const params = new URLSearchParams()
+    if (exportFrom) params.set('date_from', toISODate(exportFrom))
+    if (exportTo) params.set('date_to', toISODate(exportTo))
+    const qs = params.toString()
+    return `/api/tool-entries/export${qs ? '?' + qs : ''}`
   }
 
   async function triggerSync() {
@@ -717,8 +769,8 @@ export default function App() {
               {inputMode === 'voice' ? (
                 <>
                   <div style={S.hint}>
-                    Tap the mic and say the product name, job number, quantity and your name.<br/>
-                    <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job S34482, 3 cans, taken by Dave"</em>
+                    Tap the mic and say the product name, job number, quantity, your name — and any tools you're taking.<br/>
+                    <em style={{color:'var(--accent)'}}>e.g. "Hey it's Tony, 5 bags of concrete to job S34477, also grabbed a handsaw, hammer and blade"</em>
                   </div>
                   <button style={S.micBtn(listening)} onClick={toggleListening}>
                     {listening ? '⏹' : '🎤'}
@@ -742,8 +794,8 @@ export default function App() {
               ) : (
                 <>
                   <div style={S.hint}>
-                    Type the product name, job number, quantity and your name.<br/>
-                    <em style={{color:'var(--accent)'}}>e.g. "Sika Boom, job S34482, 3 cans, taken by Dave"</em>
+                    Type the product name, job number, quantity, your name — and any tools you're taking.<br/>
+                    <em style={{color:'var(--accent)'}}>e.g. "5 bags of concrete, job S34477, Tony — also handsaw, hammer and blade"</em>
                   </div>
                   <textarea
                     value={textInput}
@@ -764,7 +816,7 @@ export default function App() {
             </div>
 
             {processing && (
-              <div style={S.processing}><div style={S.spinner} />Matching product…</div>
+              <div style={S.processing}><div style={S.spinner} />Matching products &amp; tools…</div>
             )}
 
             {!processing && isAmbiguous && (
@@ -889,6 +941,30 @@ export default function App() {
                   </div>
                 )}
 
+                {/* Tools matched from transcript */}
+                {pendingTools.length > 0 && (
+                  <div style={{background:'rgba(27,158,212,0.06)', border:'1px solid rgba(27,158,212,.3)', borderRadius:8, padding:'12px 16px', marginBottom:16}}>
+                    <div style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1.5, color:'var(--accent)', marginBottom:8}}>
+                      🔧 TOOLS ALSO DETECTED — WILL BE LOGGED
+                    </div>
+                    <div style={{display:'flex', flexWrap:'wrap', gap:6}}>
+                      {pendingTools.map((t, i) => (
+                        <div key={i} style={{
+                          display:'flex', alignItems:'center', gap:6,
+                          background:'var(--surface2)', border:'1px solid var(--accent)',
+                          borderRadius:20, padding:'4px 12px', fontSize:12,
+                        }}>
+                          <span style={{color:'var(--text)'}}>{t}</span>
+                          <button
+                            style={{background:'transparent', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:13, lineHeight:1, padding:0}}
+                            onClick={() => setPendingTools(pt => pt.filter((_,j) => j !== i))}
+                          >✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div style={S.btnRow}>
                   <button style={S.btnSecondary} onClick={resetCapture}>Cancel</button>
                   <button style={S.btnPrimary(canSubmit)} onClick={submitEntry} disabled={!canSubmit}>
@@ -919,18 +995,30 @@ export default function App() {
                     <div key={i} style={{
                       display:'flex', alignItems:'center', justifyContent:'space-between',
                       padding:'10px 14px', background:'var(--surface2)',
-                      borderRadius:8, marginBottom:6, border:'1px solid var(--border)',
+                      borderRadius:8, marginBottom:6,
+                      border: `1px solid ${item.type === 'tool' ? 'rgba(27,158,212,.35)' : 'var(--border)'}`,
                     }}>
-                      <div>
-                        <span style={{fontFamily:'var(--font-head)', fontWeight:700, color:'var(--accent)', fontSize:13, marginRight:10}}>
-                          {item.product.code}
-                        </span>
-                        <span style={{fontSize:13, color:'var(--text)'}}>{item.product.description}</span>
+                      <div style={{display:'flex', alignItems:'center', gap:8}}>
+                        {item.type === 'tool' ? (
+                          <>
+                            <span style={{fontSize:14}}>🔧</span>
+                            <span style={{fontSize:13, color:'var(--text)'}}>{item.toolName}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{fontFamily:'var(--font-head)', fontWeight:700, color:'var(--accent)', fontSize:12, marginRight:4}}>
+                              {item.product.code}
+                            </span>
+                            <span style={{fontSize:13, color:'var(--text)'}}>{item.product.description}</span>
+                          </>
+                        )}
                       </div>
                       <div style={{display:'flex', alignItems:'center', gap:10}}>
-                        <span style={{fontFamily:'var(--font-head)', fontWeight:700, fontSize:14}}>
-                          ×{item.quantity}<span style={{fontSize:10, color:'var(--muted)', marginLeft:2}}>{item.product.unit}</span>
-                        </span>
+                        {item.type === 'stock' && (
+                          <span style={{fontFamily:'var(--font-head)', fontWeight:700, fontSize:13}}>
+                            ×{item.quantity}<span style={{fontSize:10, color:'var(--muted)', marginLeft:2}}>{item.product.unit}</span>
+                          </span>
+                        )}
                         <button
                           style={{background:'transparent', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:16, padding:'0 4px'}}
                           onClick={() => setBasket(b => b.filter((_,j) => j !== i))}
@@ -988,14 +1076,11 @@ export default function App() {
                   </div>
                 </div>
                 <div style={{fontSize:12, color:'var(--muted)', marginBottom:12}}>
-                  Each item above has already been saved individually to the log. Use <strong style={{color:'var(--text)'}}>Done</strong> to clear the basket and start fresh, or keep adding more items.
+                  All items above are already saved to their respective logs. Tap <strong style={{color:'var(--text)'}}>Done</strong> to clear and start fresh.
                 </div>
                 <div style={{display:'flex', gap:10}}>
                   <button style={S.btnSecondary} onClick={resetCapture}>Clear All</button>
-                  <button
-                    style={{...S.btnPrimary(true), flex:1}}
-                    onClick={submitBasketAll}
-                  >✓ Done — Clear Basket</button>
+                  <button style={{...S.btnPrimary(true), flex:1}} onClick={submitBasketAll}>✓ Done — Clear Basket</button>
                 </div>
               </div>
             )}
@@ -1006,169 +1091,165 @@ export default function App() {
         {tab === 'log' && (
           <div style={S.logCard}>
             <div style={S.logHeader}>
+              {/* Stock / Tools sub-tab toggle */}
+              <div style={{display:'flex', gap:0, marginBottom:16, borderRadius:6, overflow:'hidden', border:'1px solid var(--border)', width:'fit-content'}}>
+                {[['stock','📦 Stock'],['tools','🔧 Tools']].map(([t,label]) => (
+                  <button key={t} onClick={() => setLogTab(t)} style={{
+                    padding:'7px 20px', background: logTab===t ? 'var(--accent)' : 'transparent',
+                    color: logTab===t ? '#fff' : 'var(--muted)', border:'none',
+                    fontFamily:'var(--font-head)', fontWeight:700, fontSize:13, letterSpacing:1,
+                    textTransform:'uppercase', cursor:'pointer', transition:'all .15s',
+                  }}>{label}</button>
+                ))}
+              </div>
+
               <div style={S.logTitleRow}>
-                <div style={S.logTitle}>Stock Entries ({entries.length})</div>
+                <div style={S.logTitle}>
+                  {logTab === 'stock' ? `Stock Entries (${entries.length})` : `Tool Entries (${toolEntries.length})`}
+                </div>
                 <button style={S.exportBtn} onClick={() => {
-                  const url = buildExportUrl()
+                  const url = logTab === 'stock' ? buildExportUrl() : buildToolExportUrl()
                   window.open(url, '_blank')
                 }}>↓ Export CSV</button>
               </div>
 
-              {/* Date range filter for export */}
               <div style={S.exportControls}>
                 <span style={S.dateLabel}>Export range:</span>
                 <div style={{display:'flex', alignItems:'center', gap:6}}>
                   <span style={{fontSize:12, color:'var(--muted)'}}>From</span>
-                  <input
-                    type="date"
-                    style={S.dateInput}
-                    value={exportFrom}
-                    onChange={e => setExportFrom(e.target.value)}
-                  />
+                  <input type="date" style={S.dateInput} value={exportFrom} onChange={e => setExportFrom(e.target.value)} />
                 </div>
                 <div style={{display:'flex', alignItems:'center', gap:6}}>
                   <span style={{fontSize:12, color:'var(--muted)'}}>To</span>
-                  <input
-                    type="date"
-                    style={S.dateInput}
-                    value={exportTo}
-                    onChange={e => setExportTo(e.target.value)}
-                  />
+                  <input type="date" style={S.dateInput} value={exportTo} onChange={e => setExportTo(e.target.value)} />
                 </div>
                 {(exportFrom || exportTo) && (
-                  <button
-                    style={{...S.exportBtn, background:'transparent', color:'var(--muted)', border:'1px solid var(--border)'}}
-                    onClick={() => { setExportFrom(''); setExportTo('') }}
-                  >
-                    Clear
-                  </button>
+                  <button style={{...S.exportBtn, background:'transparent', color:'var(--muted)', border:'1px solid var(--border)'}}
+                    onClick={() => { setExportFrom(''); setExportTo('') }}>Clear</button>
                 )}
               </div>
               {(exportFrom || exportTo) && (
                 <div style={{fontSize:12, color:'var(--accent)', marginTop:8, fontFamily:'var(--font-head)', letterSpacing:.5}}>
-                  ↑ Export CSV above will include only entries
-                  {exportFrom ? ` from ${exportFrom}` : ''}
-                  {exportTo ? ` to ${exportTo}` : ''}
+                  ↑ Export will include only entries{exportFrom ? ` from ${exportFrom}` : ''}{exportTo ? ` to ${exportTo}` : ''}
                 </div>
               )}
             </div>
 
-            {entries.length === 0 ? (
-              <div style={S.empty}>No entries yet</div>
-            ) : (
-              <>
-                {/* Table header */}
-                <div style={{...S.logRow, borderBottom:'2px solid var(--border)'}}>
-                  {['Code','Product','Date','Job','Qty','Worker','',''].map((h,i) => (
-                    <div key={i} style={S.logHead}>{h}</div>
-                  ))}
-                </div>
-                {entries.map(e => (
-                  <React.Fragment key={e.id}>
-                    <div style={S.logRow}>
-                      <div style={{fontFamily:'var(--font-head)',fontWeight:700,color:'var(--accent)',fontSize:12}}>{e.item_code}</div>
-                      <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3}}>{e.description}</div>
-                      <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
-                      <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>
-                        {e.job}
+            {/* ── STOCK SUB-TAB ── */}
+            {logTab === 'stock' && (
+              entries.length === 0 ? (
+                <div style={S.empty}>No stock entries yet</div>
+              ) : (
+                <>
+                  <div style={{...S.logRow, borderBottom:'2px solid var(--border)'}}>
+                    {['Code','Product','Date','Job','Qty','Worker','',''].map((h,i) => (
+                      <div key={i} style={S.logHead}>{h}</div>
+                    ))}
+                  </div>
+                  {entries.map(e => (
+                    <React.Fragment key={e.id}>
+                      <div style={S.logRow}>
+                        <div style={{fontFamily:'var(--font-head)',fontWeight:700,color:'var(--accent)',fontSize:12}}>{e.item_code}</div>
+                        <div style={{color:'var(--text)',fontSize:12,lineHeight:1.3}}>{e.description}</div>
+                        <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
+                        <div style={{color:'var(--text)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>{e.job}</div>
+                        <div style={{fontFamily:'var(--font-head)',fontWeight:700,fontSize:13}}>
+                          {e.cost_quantity}<span style={{fontSize:10,color:'var(--muted)',marginLeft:2}}>{e.unit}</span>
+                        </div>
+                        <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.worker_name}>{e.worker_name || '—'}</div>
+                        <button
+                          style={{padding:'4px 8px', background:'transparent', color:'var(--accent)', fontSize:14, borderRadius:4, border:'1px solid transparent', cursor:'pointer'}}
+                          onClick={() => { setEditingEntry(e); setEditForm({ job: e.job, cost_quantity: e.cost_quantity, worker_name: e.worker_name || '' }); setEditJobSearch(e.job || ''); setEditJobDropOpen(false) }}
+                          title="Edit"
+                        >✎</button>
+                        <button style={S.deleteBtn} onClick={() => deleteEntry(e.id)} title="Delete">✕</button>
                       </div>
-                      <div style={{fontFamily:'var(--font-head)',fontWeight:700,fontSize:13}}>
-                        {e.cost_quantity}<span style={{fontSize:10,color:'var(--muted)',marginLeft:2}}>{e.unit}</span>
-                      </div>
-                      <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.worker_name}>
-                        {e.worker_name || '—'}
-                      </div>
-                      <button
-                        style={{padding:'4px 8px', background:'transparent', color:'var(--accent)', fontSize:14, borderRadius:4, border:'1px solid transparent', cursor:'pointer'}}
-                        onClick={() => { setEditingEntry(e); setEditForm({ job: e.job, cost_quantity: e.cost_quantity, worker_name: e.worker_name || '' }); setEditJobSearch(e.job || ''); setEditJobDropOpen(false) }}
-                        title="Edit"
-                      >✎</button>
-                      <button style={S.deleteBtn} onClick={() => deleteEntry(e.id)} title="Delete">✕</button>
-                    </div>
-                    {editingEntry?.id === e.id && (
-                      <div style={{gridColumn:'1/-1', background:'var(--surface2)', border:'1px solid var(--accent)', borderRadius:8, padding:'16px 20px', margin:'0 0 4px 0'}}>
-                        <div style={{fontFamily:'var(--font-head)', fontSize:13, fontWeight:700, color:'var(--accent)', letterSpacing:1, marginBottom:12}}>EDITING: {e.item_code} — {e.description}</div>
-                        <div style={{display:'grid', gridTemplateColumns:'1fr 100px 1fr', gap:12, marginBottom:12}}>
-                          <div>
-                            <label style={S.fieldLabel}>Job <span style={S.requiredStar}>*</span></label>
-                            <div ref={editJobSearchRef} style={S.jobComboWrap}>
-                              <input
-                                style={{
-                                  ...S.jobComboInput,
-                                  fontSize: 13,
-                                  borderColor: editJobDropOpen ? 'var(--accent)' : (editForm.job ? 'var(--accent)' : 'var(--border)'),
-                                  borderRadius: editJobDropOpen ? '6px 6px 0 0' : 6,
-                                }}
-                                placeholder="Type to search…"
-                                value={editJobSearch || editForm.job || ''}
-                                onChange={ev => {
-                                  setEditJobSearch(ev.target.value)
-                                  setEditForm(f => ({...f, job: ''}))
-                                  setEditJobDropOpen(true)
-                                }}
-                                onFocus={() => {
-                                  setEditJobSearch(editForm.job || '')
-                                  setEditJobDropOpen(true)
-                                }}
-                                autoComplete="off"
-                              />
-                              {editJobDropOpen && (() => {
-                                const q = (editJobSearch || '').toLowerCase()
-                                const filtered = jobs.filter(j => j.toLowerCase().includes(q))
-                                return filtered.length > 0 ? (
-                                  <div style={S.jobDropdown}>
-                                    {filtered.map(j => (
-                                      <div
-                                        key={j}
-                                        style={S.jobDropItem(false)}
-                                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff' }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text)' }}
-                                        onMouseDown={ev => {
-                                          ev.preventDefault()
-                                          setEditForm(f => ({...f, job: j}))
-                                          setEditJobSearch(j)
-                                          setEditJobDropOpen(false)
-                                        }}
-                                      >
-                                        {j}
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <div style={S.jobDropdown}>
-                                    <div style={{padding:'10px 14px', color:'var(--muted)', fontSize:12, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div>
-                                  </div>
-                                )
-                              })()}
+                      {editingEntry?.id === e.id && (
+                        <div style={{gridColumn:'1/-1', background:'var(--surface2)', border:'1px solid var(--accent)', borderRadius:8, padding:'16px 20px', margin:'0 0 4px 0'}}>
+                          <div style={{fontFamily:'var(--font-head)', fontSize:13, fontWeight:700, color:'var(--accent)', letterSpacing:1, marginBottom:12}}>EDITING: {e.item_code} — {e.description}</div>
+                          <div style={{display:'grid', gridTemplateColumns:'1fr 100px 1fr', gap:12, marginBottom:12}}>
+                            <div>
+                              <label style={S.fieldLabel}>Job <span style={S.requiredStar}>*</span></label>
+                              <div ref={editJobSearchRef} style={S.jobComboWrap}>
+                                <input
+                                  style={{...S.jobComboInput, fontSize:13,
+                                    borderColor: editJobDropOpen ? 'var(--accent)' : (editForm.job ? 'var(--accent)' : 'var(--border)'),
+                                    borderRadius: editJobDropOpen ? '6px 6px 0 0' : 6,
+                                  }}
+                                  placeholder="Type to search…"
+                                  value={editJobSearch || editForm.job || ''}
+                                  onChange={ev => { setEditJobSearch(ev.target.value); setEditForm(f => ({...f, job: ''})); setEditJobDropOpen(true) }}
+                                  onFocus={() => { setEditJobSearch(editForm.job || ''); setEditJobDropOpen(true) }}
+                                  autoComplete="off"
+                                />
+                                {editJobDropOpen && (() => {
+                                  const q = (editJobSearch || '').toLowerCase()
+                                  const filtered = jobs.filter(j => j.toLowerCase().includes(q))
+                                  return filtered.length > 0 ? (
+                                    <div style={S.jobDropdown}>
+                                      {filtered.map(j => (
+                                        <div key={j} style={S.jobDropItem(false)}
+                                          onMouseEnter={e => { e.currentTarget.style.background='var(--accent)'; e.currentTarget.style.color='#fff' }}
+                                          onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='var(--text)' }}
+                                          onMouseDown={ev => { ev.preventDefault(); setEditForm(f => ({...f, job: j})); setEditJobSearch(j); setEditJobDropOpen(false) }}
+                                        >{j}</div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div style={S.jobDropdown}><div style={{padding:'10px 14px', color:'var(--muted)', fontSize:12, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div></div>
+                                  )
+                                })()}
+                              </div>
+                            </div>
+                            <div>
+                              <label style={S.fieldLabel}>Qty <span style={S.requiredStar}>*</span></label>
+                              <input type="number" style={{...S.fieldInput, fontSize:13}} value={editForm.cost_quantity} onChange={ev => setEditForm(f => ({...f, cost_quantity: ev.target.value}))} />
+                            </div>
+                            <div>
+                              <label style={S.fieldLabel}>Worker</label>
+                              <input style={{...S.fieldInput, fontSize:13}} value={editForm.worker_name} onChange={ev => setEditForm(f => ({...f, worker_name: ev.target.value}))} />
                             </div>
                           </div>
-                          <div>
-                            <label style={S.fieldLabel}>Qty <span style={S.requiredStar}>*</span></label>
-                            <input
-                              type="number"
-                              style={{...S.fieldInput, fontSize:13}}
-                              value={editForm.cost_quantity}
-                              onChange={ev => setEditForm(f => ({...f, cost_quantity: ev.target.value}))}
-                            />
-                          </div>
-                          <div>
-                            <label style={S.fieldLabel}>Worker <span style={S.requiredStar}>*</span></label>
-                            <input
-                              style={{...S.fieldInput, fontSize:13}}
-                              value={editForm.worker_name}
-                              onChange={ev => setEditForm(f => ({...f, worker_name: ev.target.value}))}
-                            />
+                          <div style={{display:'flex', gap:8}}>
+                            <button style={{...S.btnPrimary(true), flex:'none', padding:'8px 20px', fontSize:13}} onClick={saveEditEntry}>Save</button>
+                            <button style={{...S.btnSecondary, padding:'8px 16px', fontSize:13}} onClick={() => { setEditingEntry(null); setEditJobSearch(''); setEditJobDropOpen(false) }}>Cancel</button>
                           </div>
                         </div>
-                        <div style={{display:'flex', gap:8}}>
-                          <button style={{...S.btnPrimary(true), flex:'none', padding:'8px 20px', fontSize:13}} onClick={saveEditEntry}>Save</button>
-                          <button style={{...S.btnSecondary, padding:'8px 16px', fontSize:13}} onClick={() => { setEditingEntry(null); setEditJobSearch(''); setEditJobDropOpen(false) }}>Cancel</button>
-                        </div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </>
+              )
+            )}
+
+            {/* ── TOOLS SUB-TAB ── */}
+            {logTab === 'tools' && (
+              toolEntries.length === 0 ? (
+                <div style={S.empty}>No tool entries yet</div>
+              ) : (
+                <>
+                  <div style={{
+                    display:'grid', gridTemplateColumns:'1fr 80px 160px 100px 36px',
+                    gap:8, padding:'10px 20px', borderBottom:'2px solid var(--border)', alignItems:'center',
+                  }}>
+                    {['Tool','Date','Job','Worker',''].map((h,i) => <div key={i} style={S.logHead}>{h}</div>)}
+                  </div>
+                  {toolEntries.map(e => (
+                    <div key={e.id} style={{
+                      display:'grid', gridTemplateColumns:'1fr 80px 160px 100px 36px',
+                      gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13,
+                    }}>
+                      <div style={{color:'var(--text)', display:'flex', alignItems:'center', gap:6}}>
+                        <span>🔧</span>{e.tool_name}
                       </div>
-                    )}
-                  </React.Fragment>
-                ))}
-              </>
+                      <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
+                      <div style={{color:'var(--text)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>{e.job}</div>
+                      <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</div>
+                      <button style={S.deleteBtn} onClick={() => deleteToolEntry(e.id)} title="Delete">✕</button>
+                    </div>
+                  ))}
+                </>
+              )
             )}
           </div>
         )}
