@@ -37,6 +37,16 @@ async def startup():
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS tool_entries (
+                    id SERIAL PRIMARY KEY,
+                    tool_name TEXT NOT NULL,
+                    entry_date DATE NOT NULL,
+                    job TEXT NOT NULL,
+                    worker_name TEXT,
+                    created_at TIMESTAMPTZ DEFAULT NOW()
+                )
+            """)
             # Migrate: rename comments -> worker_name if old schema exists
             try:
                 await conn.execute("""
@@ -52,6 +62,15 @@ async def startup():
         except Exception as e:
             print(f"DB not ready ({attempt+1}/10): {e}")
             time.sleep(3)
+
+HAND_TOOLS = [
+    "Tajima knife","Hammer","Hand saw","Spirit level","Crescent spanner",
+    "Pliers","Chalk line","Hack saw","Tin snips","SINTEX R26:1 MS Cartridge Gun",
+    "Trowel","Crack patch tool","Pinch bar","Crow bar","Pop riveter",
+    "Spatula","Measuring tape","Metal file","Wire brush","Wood chisel",
+    "Allen keys","Linbide scraper","Rubber mallet","Scissors","Window scraper",
+    "Socket set","Hand spade","Hand shovel","Hand mallet","Hand pick","Digging bar",
+]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
 
@@ -502,9 +521,10 @@ async def match_product(req: MatchRequest):
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
     products_json = json.dumps(_products)
     jobs_json = json.dumps(_jobs)
+    tools_json = json.dumps(HAND_TOOLS)
     response = client.chat.completions.create(
         model="gpt-4o",
-        max_tokens=1500,
+        max_tokens=2000,
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": "You are a stock management assistant for a NZ construction company. Always respond with valid JSON only."},
@@ -516,24 +536,30 @@ PRODUCTS (match by description, code, or alias):
 JOBS (match job number or name):
 {jobs_json}
 
-Extract:
-1. Product - use alias field for nicknames/misspellings
-2. Job - match closest from job list by number or name
-3. Quantity - a number
-4. Worker name (who took the stock)
+HAND TOOLS (match by name, allow for misspellings and abbreviations):
+{tools_json}
+
+Extract everything mentioned:
+1. Stock products - match against PRODUCTS list using description, code, or alias. Each product gets its own entry with quantity.
+2. Tools - match any tools mentioned against the HAND TOOLS list. A "blade" could match "Hack saw" or a cutting tool - use best judgement.
+3. Job - match closest from job list by number or name
+4. Worker name (who took the items)
 
 Return JSON:
 {{
-  "matches": [{{"code":"...","description":"...","supplier":"...","unit":"...","gl":"..."}}],
+  "matches": [{{"code":"...","description":"...","supplier":"...","unit":"...","gl":"...","quantity":null}}],
+  "tools": ["exact name from HAND TOOLS list"],
   "job": "exact match from job list or null",
   "job_suggestions": ["up to 3 close matches if ambiguous"],
-  "quantity": null,
   "worker_name": "...",
   "ambiguous": false,
   "missing": []
 }}
 
-Put null and add to missing[] for anything not in transcript.
+- If multiple stock products mentioned, include all in matches array, each with their own quantity
+- If no quantity stated for a product, set quantity to null and add "quantity" to missing
+- Put null and add to missing[] for job or worker_name if not in transcript
+- Only include tools that are a clear match to the HAND TOOLS list
 """}
         ]
     )
@@ -656,5 +682,120 @@ async def delete_entry(entry_id: int):
         return {"ok": True}
     finally:
         await conn.close()
+
+# ── Tool entries ──────────────────────────────────────────────────────────────
+
+class ToolEntryCreate(BaseModel):
+    tool_name: str
+    job: str
+    worker_name: Optional[str] = None
+
+@app.post("/api/tool-entries")
+async def create_tool_entry(entry: ToolEntryCreate):
+    import datetime
+    conn = await get_db()
+    try:
+        nz_today = datetime.datetime.now(NZ_TZ).date()
+        row = await conn.fetchrow("""
+            INSERT INTO tool_entries (tool_name, entry_date, job, worker_name)
+            VALUES ($1,$2,$3,$4) RETURNING *
+        """, entry.tool_name, nz_today, entry.job, entry.worker_name)
+        return dict(row)
+    finally:
+        await conn.close()
+
+@app.get("/api/tool-entries")
+async def list_tool_entries():
+    conn = await get_db()
+    try:
+        rows = await conn.fetch("SELECT * FROM tool_entries ORDER BY created_at DESC")
+        return [dict(r) for r in rows]
+    finally:
+        await conn.close()
+
+@app.delete("/api/tool-entries/{entry_id}")
+async def delete_tool_entry(entry_id: int):
+    conn = await get_db()
+    try:
+        await conn.execute("DELETE FROM tool_entries WHERE id = $1", entry_id)
+        return {"ok": True}
+    finally:
+        await conn.close()
+
+class ToolEntryUpdate(BaseModel):
+    job: Optional[str] = None
+    worker_name: Optional[str] = None
+
+@app.patch("/api/tool-entries/{entry_id}")
+async def update_tool_entry(entry_id: int, update: ToolEntryUpdate):
+    conn = await get_db()
+    try:
+        fields = []
+        params = []
+        if update.job is not None:
+            params.append(update.job); fields.append(f"job=${len(params)}")
+        if update.worker_name is not None:
+            params.append(update.worker_name); fields.append(f"worker_name=${len(params)}")
+        if not fields:
+            return {"ok": False, "message": "Nothing to update"}
+        params.append(entry_id)
+        await conn.execute(
+            f"UPDATE tool_entries SET {', '.join(fields)} WHERE id=${len(params)}",
+            *params
+        )
+        return {"ok": True}
+    finally:
+        await conn.close()
+
+@app.get("/api/tool-entries/export")
+async def export_tool_csv(
+    date_from: Optional[str] = Query(None),
+    date_to: Optional[str] = Query(None),
+):
+    conn = await get_db()
+    try:
+        conditions = []
+        params = []
+        if date_from:
+            try:
+                params.append(datetime.strptime(date_from, "%Y-%m-%d").date())
+            except ValueError:
+                params.append(date_from)
+            conditions.append(f"entry_date >= ${len(params)}")
+        if date_to:
+            try:
+                params.append(datetime.strptime(date_to, "%Y-%m-%d").date())
+            except ValueError:
+                params.append(date_to)
+            conditions.append(f"entry_date <= ${len(params)}")
+        where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+        rows = await conn.fetch(
+            f"SELECT tool_name, entry_date, job, worker_name FROM tool_entries {where} ORDER BY entry_date ASC, created_at ASC",
+            *params
+        )
+    finally:
+        await conn.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Tool", "Date", "Job Number", "Worker"])
+    for r in rows:
+        job_full = r["job"] or ""
+        job_number = job_full.split(" - ")[0].strip() if " - " in job_full else job_full
+        writer.writerow([
+            r["tool_name"],
+            str(r["entry_date"].strftime("%d-%m-%Y")),
+            job_number,
+            r["worker_name"] or "",
+        ])
+    output.seek(0)
+
+    suffix = f"_{date_from or 'start'}_to_{date_to or 'end'}" if (date_from or date_to) else ""
+    filename = f"tools_export{suffix}_{date.today()}.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="static")
