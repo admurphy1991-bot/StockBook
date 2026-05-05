@@ -236,14 +236,6 @@ const S = {
   },
 }
 
-const HAND_TOOLS = [
-  'Tajima knife','Hammer','Hand saw','Spirit level','Crescent spanner',
-  'Pliers','Chalk line','Hack saw','Tin snips','SINTEX R26:1 MS Cartridge Gun',
-  'Trowel','Crack patch tool','Pinch bar','Crow bar','Pop riveter',
-  'Spatula','Measuring tape','Metal file','Wire brush','Wood chisel',
-  'Allen keys','Linbide scraper','Rubber mallet','Scissors','Window scraper',
-  'Socket set','Hand spade','Hand shovel','Hand mallet','Hand pick','Digging bar',
-]
 
 export default function App() {
   const [tab, setTab] = useState('capture')
@@ -273,13 +265,6 @@ export default function App() {
   const [basketJob, setBasketJob] = useState('')
   const [basketWorker, setBasketWorker] = useState('')
 
-  // Tools tab
-  const [toolsJob, setToolsJob] = useState('')
-  const [toolsWorker, setToolsWorker] = useState('')
-  const [selectedTools, setSelectedTools] = useState(new Set())
-  const [toolsJobSearch, setToolsJobSearch] = useState('')
-  const [toolsJobDropOpen, setToolsJobDropOpen] = useState(false)
-  const toolsJobSearchRef = useRef(null)
 
   // Job search combobox state
   const [jobSearch, setJobSearch] = useState('')
@@ -314,7 +299,6 @@ export default function App() {
       if (jobSearchRef.current && !jobSearchRef.current.contains(e.target)) setJobDropOpen(false)
       if (editJobSearchRef.current && !editJobSearchRef.current.contains(e.target)) setEditJobDropOpen(false)
       if (basketJobSearchRef.current && !basketJobSearchRef.current.contains(e.target)) setBasketJobDropOpen(false)
-      if (toolsJobSearchRef.current && !toolsJobSearchRef.current.contains(e.target)) setToolsJobDropOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -445,31 +429,6 @@ export default function App() {
     resetCapture()
   }
 
-  async function submitToolsLog() {
-    if (!selectedTools.size || !toolsJob.trim() || !toolsWorker.trim()) return
-    const toolList = [...selectedTools]
-    try {
-      await Promise.all(toolList.map(tool =>
-        fetch('/api/entries', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            item_code: 'TOOL',
-            job: toolsJob,
-            supplier: 'Hand Tools',
-            description: tool,
-            cost_quantity: 1,
-            unit: 'ea',
-            gl_code: '',
-            worker_name: toolsWorker,
-          }),
-        })
-      ))
-      showToast(`${toolList.length} tool${toolList.length > 1 ? 's' : ''} logged ✓`)
-      loadEntries()
-      setSelectedTools(new Set())
-    } catch { showToast('Failed to log tools — try again') }
-  }
 
   function resetCapture() {
     setTranscript(''); setTextInput(''); setMatchResult(null)
@@ -620,7 +579,7 @@ export default function App() {
           <span className="logo-text" style={S.logoSub}>Stock Book</span>
         </div>
         <div className="desktop-tabs" style={S.tabs}>
-          {[['capture','⬤ Capture'],['log','☰ Log'],['tools','🔧 Tools'],['qr','⊞ QR'],['settings','⚙ Settings']].map(([t,label]) => (
+          {[['capture','⬤ Capture'],['log','☰ Log'],['qr','⊞ QR'],['settings','⚙ Settings']].map(([t,label]) => (
             <button key={t} style={S.tab(tab===t)} onClick={() => setTab(t)}>{label}</button>
           ))}
         </div>
@@ -644,7 +603,6 @@ export default function App() {
         {[
           ['capture', '⬤', 'Capture'],
           ['log', '☰', 'Log'],
-          ['tools', '🔧', 'Tools'],
           ['qr', '⊞', 'QR'],
           ['settings', '⚙', 'Settings'],
         ].map(([t, icon, label]) => (
@@ -1042,149 +1000,6 @@ export default function App() {
               </div>
             )}
           </>
-        )}
-
-        {/* ── TOOLS TAB ────────────────────────────────────────────── */}
-        {tab === 'tools' && (
-          <div style={S.card}>
-            <div style={S.title}>🔧 Hand Tools — Daily Sign-Out</div>
-            <div style={S.hint}>
-              Tick the tools you're taking for the day, select your job and name, then tap <em style={{color:'var(--accent)'}}>Log Tools</em>. Each tool gets its own entry in the log.
-            </div>
-
-            {/* Job + Worker */}
-            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:20}}>
-              <div style={S.field}>
-                <label style={S.fieldLabel}>Job <span style={S.requiredStar}>*</span></label>
-                <div ref={toolsJobSearchRef} style={S.jobComboWrap}>
-                  <input
-                    style={{
-                      ...S.jobComboInput,
-                      borderColor: toolsJobDropOpen ? 'var(--accent)' : (toolsJob ? 'var(--accent)' : 'var(--border)'),
-                      borderRadius: toolsJobDropOpen ? '6px 6px 0 0' : 6,
-                    }}
-                    placeholder="Type job # or name…"
-                    value={toolsJobSearch}
-                    onChange={e => { setToolsJobSearch(e.target.value); setToolsJob(''); setToolsJobDropOpen(true) }}
-                    onFocus={() => setToolsJobDropOpen(true)}
-                    autoComplete="off"
-                  />
-                  {toolsJobDropOpen && (() => {
-                    const q = toolsJobSearch.toLowerCase()
-                    const filtered = jobs.filter(j => j.toLowerCase().includes(q))
-                    return filtered.length > 0 ? (
-                      <div style={S.jobDropdown}>
-                        {filtered.map(j => (
-                          <div key={j} style={S.jobDropItem(false)}
-                            onMouseEnter={e => { e.currentTarget.style.background='var(--accent)'; e.currentTarget.style.color='#fff' }}
-                            onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='var(--text)' }}
-                            onMouseDown={e => { e.preventDefault(); setToolsJob(j); setToolsJobSearch(j); setToolsJobDropOpen(false) }}
-                          >{j}</div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div style={S.jobDropdown}>
-                        <div style={{padding:'10px 14px', color:'var(--muted)', fontSize:12, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div>
-                      </div>
-                    )
-                  })()}
-                </div>
-              </div>
-              <div style={S.field}>
-                <label style={S.fieldLabel}>Your Name <span style={S.requiredStar}>*</span></label>
-                <input
-                  style={S.fieldInput}
-                  placeholder="e.g. Dave Smith"
-                  value={toolsWorker}
-                  onChange={e => setToolsWorker(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Tool grid */}
-            <div style={{marginBottom:16}}>
-              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10}}>
-                <label style={S.fieldLabel}>Select tools <span style={S.requiredStar}>*</span></label>
-                <div style={{display:'flex', gap:8}}>
-                  <button
-                    style={{...S.btnSecondary, padding:'4px 12px', fontSize:11}}
-                    onClick={() => setSelectedTools(new Set(HAND_TOOLS))}
-                  >All</button>
-                  <button
-                    style={{...S.btnSecondary, padding:'4px 12px', fontSize:11}}
-                    onClick={() => setSelectedTools(new Set())}
-                  >None</button>
-                </div>
-              </div>
-              <div style={{
-                display:'grid',
-                gridTemplateColumns:'repeat(auto-fill, minmax(160px, 1fr))',
-                gap:8,
-              }}>
-                {HAND_TOOLS.map(tool => {
-                  const checked = selectedTools.has(tool)
-                  return (
-                    <div
-                      key={tool}
-                      onClick={() => setSelectedTools(s => {
-                        const n = new Set(s)
-                        checked ? n.delete(tool) : n.add(tool)
-                        return n
-                      })}
-                      style={{
-                        display:'flex', alignItems:'center', gap:10,
-                        padding:'10px 12px',
-                        background: checked ? 'rgba(27,158,212,0.1)' : 'var(--surface2)',
-                        border: `1px solid ${checked ? 'var(--accent)' : 'var(--border)'}`,
-                        borderRadius:8, cursor:'pointer', transition:'all .12s',
-                        userSelect:'none',
-                      }}
-                    >
-                      <div style={{
-                        width:18, height:18, borderRadius:4, flexShrink:0,
-                        background: checked ? 'var(--accent)' : 'transparent',
-                        border: `2px solid ${checked ? 'var(--accent)' : 'var(--muted)'}`,
-                        display:'flex', alignItems:'center', justifyContent:'center',
-                        fontSize:12, color:'#fff', fontWeight:700, transition:'all .12s',
-                      }}>
-                        {checked ? '✓' : ''}
-                      </div>
-                      <span style={{fontSize:13, color: checked ? 'var(--text)' : 'var(--muted)', lineHeight:1.3}}>
-                        {tool}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Summary + submit */}
-            {selectedTools.size > 0 && (
-              <div style={{
-                background:'rgba(27,158,212,0.06)', border:'1px solid var(--accent)',
-                borderRadius:8, padding:'12px 16px', marginBottom:16,
-                fontSize:13, color:'var(--muted)',
-              }}>
-                <strong style={{color:'var(--accent)'}}>{selectedTools.size} tool{selectedTools.size > 1 ? 's' : ''}</strong> selected
-                {toolsJob && <> · Job: <strong style={{color:'var(--text)'}}>{toolsJob.split(' - ')[0]}</strong></>}
-                {toolsWorker && <> · Worker: <strong style={{color:'var(--text)'}}>{toolsWorker}</strong></>}
-              </div>
-            )}
-
-            {(!toolsJob || !toolsWorker || selectedTools.size === 0) && (
-              <div style={{...S.missingWarning, background:'rgba(27,158,212,.06)', border:'1px solid rgba(27,158,212,.25)', color:'var(--muted)', marginBottom:16}}>
-                Select at least one tool, a job, and your name to log
-              </div>
-            )}
-
-            <button
-              style={{...S.btnPrimary(selectedTools.size > 0 && !!toolsJob && !!toolsWorker), width:'100%', padding:'14px 0'}}
-              onClick={submitToolsLog}
-              disabled={!selectedTools.size || !toolsJob || !toolsWorker}
-            >
-              🔧 Log {selectedTools.size > 0 ? selectedTools.size : ''} Tool{selectedTools.size !== 1 ? 's' : ''}
-            </button>
-          </div>
         )}
 
         {/* ── LOG TAB ──────────────────────────────────────────────── */}
