@@ -188,7 +188,7 @@ DEFAULT_PRODUCTS = [
     {"code": "RF169", "description": "IKOprotect MS DETAIL 1LT (1.5KG)", "supplier": "NURA", "unit": "LTR", "gl": "2000", "alias": "IKO protect, MS detail liquid, iko one litre"},
     {"code": "RF170", "description": "KO hybrytech MS DETAIL 1LT [BLACK]", "supplier": "NURA", "unit": "LTR", "gl": "2000", "alias": "KO hybrytech black, MS detail black, hybrytech liquid"},
     {"code": "RF751", "description": "MS SEALANT 415gm BLACK FIXALL 220", "supplier": "NURA", "unit": "ea", "gl": "2000", "alias": "MS sealant black, fixall sealant, black MS sealant"},
-    {"code": "SDM06030SS", "description": "SHURE DRIVE SS 6X30MM 01380", "supplier": "RAMSET", "unit": "ea", "gl": "2000", "alias": "shure drive screw, stainless screw six by thirty, SS timber screw"},
+    {"code": "SDM06030SS", "description": "SHURE DRIVE SS 6X30MM 01380", "supplier": "RAMSET", "unit": "ea", "gl": "2000", "alias": "shure drive screw, stainless screw six by thirty, SS timber screw, suredrive, shore drive, shore drive screw, sure drive, shure drive stainless, shore drive stainless"},
     {"code": "SI11FC", "description": "Sika - Sikaflex11 FC purform", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sikaflex eleven FC, sika eleven FC purform, sikaflex joint sealant"},
     {"code": "SI212", "description": "Sika - 212 Grout 25kg", "supplier": "SIKA", "unit": "BAG", "gl": "2000", "alias": "sika two twelve grout, sika grout, two twelve bag"},
     {"code": "SI31", "description": "Sikadur-31 CF Normal kg", "supplier": "SIKA", "unit": "KG", "gl": "2000", "alias": "sikadur thirty one, sika thirty one, epoxy adhesive sikadur"},
