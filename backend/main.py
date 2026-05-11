@@ -217,6 +217,9 @@ DEFAULT_PRODUCTS = [
     {"code": "VSTPOL10.2", "description": "Swelltite Polish 3000 10.2m Roll", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "swelltite polish, polish three thousand, swelltite roll"},
     {"code": "VVS500", "description": "Allsheet 500 micron non hydrostatic DPM PE 4x25m", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "allsheet DPM, five hundred micron DPM, damp proof membrane sheet"},
     {"code": "WLPERMATAC21", "description": "WOODLOK PERMATAC 21KG", "supplier": "GLUE", "unit": "ea", "gl": "2000", "alias": "woodlok permatac, permatac adhesive, woodlok glue"}
+    {"code": "11204", "description": "Pulsa washer containers (box of 1,000)", "supplier": "RAMSET", "unit": "Bag", "gl": "2000", "alias": "pulsa washer, washer containers, ramset washers"},
+    {"code": "P8C630", "description": "30 mm nails (box of 500)", "supplier": "RAMSET", "unit": "Bag", "gl": "2000", "alias": "thirty mil nails, P8C630, ramset thirty nails"},
+    {"code": "P8HC627", "description": "27 mm nails (box of 500)", "supplier": "RAMSET", "unit": "Bag", "gl": "2000", "alias": "twenty seven mil nails, P8HC627, ramset twenty seven nails"},
 ]
 
 DEFAULT_JOBS = [
