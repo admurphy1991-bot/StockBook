@@ -44,6 +44,7 @@ async def startup():
                     entry_date DATE NOT NULL,
                     job TEXT NOT NULL,
                     worker_name TEXT,
+                    quantity INTEGER NOT NULL DEFAULT 1,
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
@@ -56,6 +57,14 @@ async def startup():
                 print("Migrated: renamed comments -> worker_name")
             except Exception:
                 pass  # Column already renamed or doesn't exist
+            # Migrate: add quantity column to tool_entries if missing
+            try:
+                await conn.execute("""
+                    ALTER TABLE tool_entries ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1
+                """)
+                print("Migrated: added quantity to tool_entries")
+            except Exception:
+                pass  # Column already exists
             await conn.close()
             print("Database ready.")
             return
@@ -554,7 +563,7 @@ Extract everything mentioned:
 Return JSON:
 {{
   "matches": [{{"code":"...","description":"...","supplier":"...","unit":"...","gl":"...","quantity":null}}],
-  "tools": ["exact name from HAND TOOLS list"],
+  "tools": [{{"name":"exact name from HAND TOOLS list","quantity":1}}],
   "job": "exact match from job list or null",
   "job_suggestions": ["up to 3 close matches if ambiguous"],
   "worker_name": "...",
@@ -566,6 +575,7 @@ Return JSON:
 - If no quantity stated for a product, set quantity to null and add "quantity" to missing
 - Put null and add to missing[] for job or worker_name if not in transcript
 - Only include tools that are a clear match to the HAND TOOLS list
+- For tools, if a quantity is stated (e.g. "2 hammers") set quantity accordingly, otherwise default to 1
 - If ONLY tools are mentioned (no stock products), return matches: [] and do NOT add "product" or "quantity" to missing[]
 """}
         ]
@@ -696,6 +706,7 @@ class ToolEntryCreate(BaseModel):
     tool_name: str
     job: str
     worker_name: Optional[str] = None
+    quantity: int = 1
 
 @app.post("/api/tool-entries")
 async def create_tool_entry(entry: ToolEntryCreate):
@@ -704,9 +715,9 @@ async def create_tool_entry(entry: ToolEntryCreate):
     try:
         nz_today = datetime.datetime.now(NZ_TZ).date()
         row = await conn.fetchrow("""
-            INSERT INTO tool_entries (tool_name, entry_date, job, worker_name)
-            VALUES ($1,$2,$3,$4) RETURNING *
-        """, entry.tool_name, nz_today, entry.job, entry.worker_name)
+            INSERT INTO tool_entries (tool_name, entry_date, job, worker_name, quantity)
+            VALUES ($1,$2,$3,$4,$5) RETURNING *
+        """, entry.tool_name, nz_today, entry.job, entry.worker_name, entry.quantity)
         return dict(row)
     finally:
         await conn.close()
@@ -732,6 +743,7 @@ async def delete_tool_entry(entry_id: int):
 class ToolEntryUpdate(BaseModel):
     job: Optional[str] = None
     worker_name: Optional[str] = None
+    quantity: Optional[int] = None
 
 @app.patch("/api/tool-entries/{entry_id}")
 async def update_tool_entry(entry_id: int, update: ToolEntryUpdate):
@@ -743,6 +755,8 @@ async def update_tool_entry(entry_id: int, update: ToolEntryUpdate):
             params.append(update.job); fields.append(f"job=${len(params)}")
         if update.worker_name is not None:
             params.append(update.worker_name); fields.append(f"worker_name=${len(params)}")
+        if update.quantity is not None:
+            params.append(update.quantity); fields.append(f"quantity=${len(params)}")
         if not fields:
             return {"ok": False, "message": "Nothing to update"}
         params.append(entry_id)
@@ -777,7 +791,7 @@ async def export_tool_csv(
             conditions.append(f"entry_date <= ${len(params)}")
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         rows = await conn.fetch(
-            f"SELECT tool_name, entry_date, job, worker_name FROM tool_entries {where} ORDER BY entry_date ASC, created_at ASC",
+            f"SELECT tool_name, entry_date, job, worker_name, quantity FROM tool_entries {where} ORDER BY entry_date ASC, created_at ASC",
             *params
         )
     finally:
@@ -785,12 +799,13 @@ async def export_tool_csv(
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Tool", "Date", "Job Number", "Worker"])
+    writer.writerow(["Tool", "Quantity", "Date", "Job Number", "Worker"])
     for r in rows:
         job_full = r["job"] or ""
         job_number = job_full.split(" - ")[0].strip() if " - " in job_full else job_full
         writer.writerow([
             r["tool_name"],
+            r["quantity"] or 1,
             str(r["entry_date"].strftime("%d-%m-%Y")),
             job_number,
             r["worker_name"] or "",
