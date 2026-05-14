@@ -975,13 +975,118 @@ export default function App() {
             )}
 
             {!processing && matchResult && !hasMatches && (
-              <div style={{...S.card, border:'1px solid var(--danger)'}}>
-                <div style={{color:'var(--danger)', fontFamily:'var(--font-head)', fontWeight:700, fontSize:16, marginBottom:8}}>No product matched</div>
-                <div style={{color:'var(--muted)', fontSize:14, marginBottom:16}}>
-                  Try again with a different product name or description.
+              pendingTools.length > 0 ? (
+                // Tools-only result — no stock product needed
+                <div style={S.cardAccent}>
+                  <div style={S.titleAccent}>Confirm Tool Log</div>
+                  <div style={{...S.hint, marginBottom: 16}}>
+                    No stock products detected — only hand tools. Fill in the details below and save.
+                  </div>
+
+                  {/* Tools detected */}
+                  <div style={{background:'rgba(27,158,212,0.06)', border:'1px solid rgba(27,158,212,.3)', borderRadius:8, padding:'12px 16px', marginBottom:16}}>
+                    <div style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1.5, color:'var(--accent)', marginBottom:8}}>
+                      🔧 TOOLS DETECTED
+                    </div>
+                    <div style={{display:'flex', flexWrap:'wrap', gap:6}}>
+                      {pendingTools.map((t, i) => (
+                        <div key={i} style={{
+                          display:'flex', alignItems:'center', gap:6,
+                          background:'var(--surface2)', border:'1px solid var(--accent)',
+                          borderRadius:20, padding:'4px 12px', fontSize:12,
+                        }}>
+                          <span style={{color:'var(--text)'}}>{t}</span>
+                          <button
+                            style={{background:'transparent', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:13, lineHeight:1, padding:0}}
+                            onClick={() => setPendingTools(pt => pt.filter((_,j) => j !== i))}
+                          >✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Job */}
+                  <div style={S.field}>
+                    <label style={S.fieldLabel}>Job Number <span style={S.requiredStar}>*</span></label>
+                    <div ref={jobSearchRef} style={S.jobComboWrap}>
+                      <input
+                        style={{...S.jobComboInput, borderColor: jobDropOpen ? 'var(--accent)' : (form.job ? 'var(--accent)' : 'var(--border)'), borderRadius: jobDropOpen ? '6px 6px 0 0' : 6}}
+                        placeholder="Type job # or name to search…"
+                        value={jobSearch}
+                        onChange={e => { setJobSearch(e.target.value); setForm(f => ({...f, job: ''})); setJobDropOpen(true) }}
+                        onFocus={() => setJobDropOpen(true)}
+                        autoComplete="off"
+                      />
+                      {jobDropOpen && (() => {
+                        const q = jobSearch.toLowerCase()
+                        const filtered = jobs.filter(j => j.toLowerCase().includes(q))
+                        return filtered.length > 0 ? (
+                          <div style={S.jobDropdown}>
+                            {filtered.map(j => (
+                              <div key={j} style={S.jobDropItem(false)}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff' }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text)' }}
+                                onMouseDown={e => { e.preventDefault(); setForm(f => ({...f, job: j})); setJobSearch(j); setJobDropOpen(false) }}
+                              >{j}</div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={S.jobDropdown}>
+                            <div style={{padding:'12px 14px', color:'var(--muted)', fontSize:13, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div>
+                          </div>
+                        )
+                      })()}
+                    </div>
+                    {form.job && <div style={{fontSize:12, color:'var(--accent)', marginTop:4, fontFamily:'var(--font-head)'}}>✓ {form.job}</div>}
+                  </div>
+
+                  {/* Worker name */}
+                  <div style={S.field}>
+                    <label style={S.fieldLabel}>Worker Name <span style={S.requiredStar}>*</span></label>
+                    <input
+                      style={S.fieldInput}
+                      value={form.worker_name}
+                      onChange={e => setForm(f => ({...f, worker_name: e.target.value}))}
+                      placeholder="e.g. Dave Smith"
+                    />
+                  </div>
+
+                  <div style={S.btnRow}>
+                    <button style={S.btnSecondary} onClick={resetCapture}>Cancel</button>
+                    <button
+                      style={S.btnPrimary(!!(form.job.trim() && form.worker_name.trim() && pendingTools.length > 0))}
+                      disabled={!(form.job.trim() && form.worker_name.trim() && pendingTools.length > 0)}
+                      onClick={async () => {
+                        try {
+                          for (const toolName of pendingTools) {
+                            await fetch('/api/tool-entries', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ tool_name: toolName, job: form.job, worker_name: form.worker_name }),
+                            })
+                          }
+                          if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
+                          if (!basketWorker && form.worker_name) setBasketWorker(form.worker_name)
+                          showToast(`${pendingTools.length} tool${pendingTools.length > 1 ? 's' : ''} logged ✓`)
+                          loadToolEntries()
+                          setTranscript(''); setTextInput(''); setMatchResult(null); setPendingTools([])
+                          setForm(f => ({ ...f, quantity: '' }))
+                        } catch { showToast('Save failed — try again') }
+                      }}
+                    >
+                      Log Tools ✓
+                    </button>
+                  </div>
                 </div>
-                <button style={S.btnSecondary} onClick={resetCapture}>Try again</button>
-              </div>
+              ) : (
+                <div style={{...S.card, border:'1px solid var(--danger)'}}>
+                  <div style={{color:'var(--danger)', fontFamily:'var(--font-head)', fontWeight:700, fontSize:16, marginBottom:8}}>No product matched</div>
+                  <div style={{color:'var(--muted)', fontSize:14, marginBottom:16}}>
+                    Try again with a different product name or description.
+                  </div>
+                  <button style={S.btnSecondary} onClick={resetCapture}>Try again</button>
+                </div>
+              )
             )}
 
             {/* ── BASKET PANEL ─────────────────────────────── */}
