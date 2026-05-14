@@ -70,6 +70,7 @@ HAND_TOOLS = [
     "Spatula","Measuring tape","Metal file","Wire brush","Wood chisel",
     "Allen keys","Linbide scraper","Rubber mallet","Scissors","Window scraper",
     "Socket set","Hand spade","Hand shovel","Hand mallet","Hand pick","Digging bar",
+    "Sterling knife","Small torch",
 ]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
