@@ -393,8 +393,10 @@ export default function App() {
       if (!r.ok) throw new Error(`Server error ${r.status}: ${(await r.text()).slice(0, 200)}`)
       const data = await r.json()
       setMatchResult(data)
-      // Populate pending tools from AI response
-      if (data.tools?.length > 0) setPendingTools(data.tools)
+      // Populate pending tools from AI response — normalise to [{name, quantity}]
+      if (data.tools?.length > 0) setPendingTools(data.tools.map(t =>
+        typeof t === 'string' ? { name: t, quantity: 1 } : { name: t.name, quantity: t.quantity ?? 1 }
+      ))
       // For stock: each match now carries its own quantity from AI
       setForm({
         job: data.job || '',
@@ -429,19 +431,19 @@ export default function App() {
 
       // Save any pending tools
       const savedTools = []
-      for (const toolName of pendingTools) {
+      for (const tool of pendingTools) {
         await fetch('/api/tool-entries', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tool_name: toolName, job: form.job, worker_name: form.worker_name }),
+          body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: tool.quantity }),
         })
-        savedTools.push(toolName)
+        savedTools.push(tool)
       }
 
       // Update basket
       const newBasketItems = [
         { type: 'stock', product: selectedProduct, quantity: parseFloat(form.quantity) },
-        ...savedTools.map(t => ({ type: 'tool', toolName: t })),
+        ...savedTools.map(t => ({ type: 'tool', toolName: t.name, quantity: t.quantity })),
       ]
       setBasket(b => [...b, ...newBasketItems])
       if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
@@ -954,7 +956,8 @@ export default function App() {
                           background:'var(--surface2)', border:'1px solid var(--accent)',
                           borderRadius:20, padding:'4px 12px', fontSize:12,
                         }}>
-                          <span style={{color:'var(--text)'}}>{t}</span>
+                          {t.quantity > 1 && <span style={{color:'var(--accent)', fontWeight:700, fontFamily:'var(--font-head)'}}>{t.quantity}×</span>}
+                          <span style={{color:'var(--text)'}}>{t.name}</span>
                           <button
                             style={{background:'transparent', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:13, lineHeight:1, padding:0}}
                             onClick={() => setPendingTools(pt => pt.filter((_,j) => j !== i))}
@@ -995,7 +998,8 @@ export default function App() {
                           background:'var(--surface2)', border:'1px solid var(--accent)',
                           borderRadius:20, padding:'4px 12px', fontSize:12,
                         }}>
-                          <span style={{color:'var(--text)'}}>{t}</span>
+                          {t.quantity > 1 && <span style={{color:'var(--accent)', fontWeight:700, fontFamily:'var(--font-head)'}}>{t.quantity}×</span>}
+                          <span style={{color:'var(--text)'}}>{t.name}</span>
                           <button
                             style={{background:'transparent', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:13, lineHeight:1, padding:0}}
                             onClick={() => setPendingTools(pt => pt.filter((_,j) => j !== i))}
@@ -1058,11 +1062,11 @@ export default function App() {
                       disabled={!(form.job.trim() && form.worker_name.trim() && pendingTools.length > 0)}
                       onClick={async () => {
                         try {
-                          for (const toolName of pendingTools) {
+                          for (const tool of pendingTools) {
                             await fetch('/api/tool-entries', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ tool_name: toolName, job: form.job, worker_name: form.worker_name }),
+                              body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: tool.quantity }),
                             })
                           }
                           if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
@@ -1334,19 +1338,20 @@ export default function App() {
               ) : (
                 <>
                   <div style={{
-                    display:'grid', gridTemplateColumns:'1fr 80px 160px 100px 36px',
+                    display:'grid', gridTemplateColumns:'1fr 50px 80px 160px 100px 36px',
                     gap:8, padding:'10px 20px', borderBottom:'2px solid var(--border)', alignItems:'center',
                   }}>
-                    {['Tool','Date','Job','Worker',''].map((h,i) => <div key={i} style={S.logHead}>{h}</div>)}
+                    {['Tool','Qty','Date','Job','Worker',''].map((h,i) => <div key={i} style={S.logHead}>{h}</div>)}
                   </div>
                   {toolEntries.map(e => (
                     <div key={e.id} style={{
-                      display:'grid', gridTemplateColumns:'1fr 80px 160px 100px 36px',
+                      display:'grid', gridTemplateColumns:'1fr 50px 80px 160px 100px 36px',
                       gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13,
                     }}>
                       <div style={{color:'var(--text)', display:'flex', alignItems:'center', gap:6}}>
                         <span>🔧</span>{e.tool_name}
                       </div>
+                      <div style={{color:'var(--accent)', fontFamily:'var(--font-head)', fontWeight:700}}>{e.quantity ?? 1}</div>
                       <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
                       <div style={{color:'var(--text)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>{e.job}</div>
                       <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</div>
