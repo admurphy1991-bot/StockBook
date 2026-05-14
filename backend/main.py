@@ -565,6 +565,7 @@ Return JSON:
 - If no quantity stated for a product, set quantity to null and add "quantity" to missing
 - Put null and add to missing[] for job or worker_name if not in transcript
 - Only include tools that are a clear match to the HAND TOOLS list
+- If ONLY tools are mentioned (no stock products), return matches: [] and do NOT add "product" or "quantity" to missing[]
 """}
         ]
     )
