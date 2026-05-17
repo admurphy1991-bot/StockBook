@@ -243,8 +243,8 @@ export default function App() {
   const [transcript, setTranscript] = useState('')
   const [processing, setProcessing] = useState(false)
   const [matchResult, setMatchResult] = useState(null)
-  const [selectedProduct, setSelectedProduct] = useState(null)
-  const [form, setForm] = useState({ job: '', quantity: '', worker_name: '' })
+  const [confirmedProducts, setConfirmedProducts] = useState([]) // [{...product, quantity:''}]
+  const [form, setForm] = useState({ job: '', worker_name: '' })
   const [entries, setEntries] = useState([])
   const [toast, setToast] = useState('')
   const [toastShow, setToastShow] = useState(false)
@@ -382,7 +382,7 @@ export default function App() {
   async function handleTranscript(text) {
     setProcessing(true)
     setMatchResult(null)
-    setSelectedProduct(null)
+    setConfirmedProducts([])
     setPendingTools([])
     try {
       const r = await fetch('/api/match', {
@@ -397,13 +397,17 @@ export default function App() {
       if (data.tools?.length > 0) setPendingTools(data.tools.map(t =>
         typeof t === 'string' ? { name: t, quantity: 1 } : { name: t.name, quantity: t.quantity ?? 1 }
       ))
-      // For stock: each match now carries its own quantity from AI
+      // Seed confirmedProducts from all non-ambiguous matches
+      if (data.matches?.length > 0 && !data.ambiguous) {
+        setConfirmedProducts(data.matches.map(m => ({
+          ...m,
+          quantity: m.quantity != null ? String(m.quantity) : '',
+        })))
+      }
       setForm({
         job: data.job || '',
-        quantity: data.matches?.length === 1 ? (data.matches[0].quantity != null ? String(data.matches[0].quantity) : '') : '',
         worker_name: data.worker_name || '',
       })
-      if (!data.ambiguous && data.matches?.length === 1) setSelectedProduct(data.matches[0])
     } catch (e) {
       showToast('Error: ' + (e?.message || 'contacting server'))
     }
@@ -413,21 +417,23 @@ export default function App() {
   async function submitEntry() {
     if (!canSubmit) return
     try {
-      // Save stock entry
-      await fetch('/api/entries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          item_code: selectedProduct.code,
-          job: form.job,
-          supplier: selectedProduct.supplier,
-          description: selectedProduct.description,
-          cost_quantity: parseFloat(form.quantity),
-          unit: selectedProduct.unit,
-          gl_code: selectedProduct.gl || '',
-          worker_name: form.worker_name,
-        }),
-      })
+      // Save all stock entries
+      for (const p of confirmedProducts) {
+        await fetch('/api/entries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            item_code: p.code,
+            job: form.job,
+            supplier: p.supplier,
+            description: p.description,
+            cost_quantity: parseFloat(p.quantity),
+            unit: p.unit,
+            gl_code: p.gl || '',
+            worker_name: form.worker_name,
+          }),
+        })
+      }
 
       // Save any pending tools
       const savedTools = []
@@ -442,21 +448,20 @@ export default function App() {
 
       // Update basket
       const newBasketItems = [
-        { type: 'stock', product: selectedProduct, quantity: parseFloat(form.quantity) },
+        ...confirmedProducts.map(p => ({ type: 'stock', product: p, quantity: parseFloat(p.quantity) })),
         ...savedTools.map(t => ({ type: 'tool', toolName: t.name, quantity: t.quantity })),
       ]
       setBasket(b => [...b, ...newBasketItems])
       if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
       if (!basketWorker && form.worker_name) setBasketWorker(form.worker_name)
 
-      const toolMsg = savedTools.length > 0 ? ` + ${savedTools.length} tool${savedTools.length > 1 ? 's' : ''}` : ''
-      showToast(`Added to basket ✓${toolMsg}`)
+      const productMsg = confirmedProducts.length > 0 ? `${confirmedProducts.length} product${confirmedProducts.length > 1 ? 's' : ''}` : ''
+      const toolMsg = savedTools.length > 0 ? `${productMsg ? ' + ' : ''}${savedTools.length} tool${savedTools.length > 1 ? 's' : ''}` : ''
+      showToast(`${productMsg}${toolMsg} added to basket ✓`)
       loadEntries()
       loadToolEntries()
-      // Reset transcript/product/tools, keep job+worker
       setTranscript(''); setTextInput(''); setMatchResult(null)
-      setSelectedProduct(null); setPendingTools([])
-      setForm(f => ({ ...f, quantity: '' }))
+      setConfirmedProducts([]); setPendingTools([])
       setJobDropOpen(false)
     } catch { showToast('Save failed — try again') }
   }
@@ -473,7 +478,7 @@ export default function App() {
 
   function resetCapture() {
     setTranscript(''); setTextInput(''); setMatchResult(null)
-    setSelectedProduct(null); setForm({ job: '', quantity: '', worker_name: '' })
+    setConfirmedProducts([]); setForm({ job: '', worker_name: '' })
     setJobSearch(''); setJobDropOpen(false); setPendingTools([])
     setBasket([]); setBasketJob(''); setBasketJobSearch(''); setBasketWorker('')
   }
@@ -594,7 +599,10 @@ export default function App() {
 
   const hasMatches = matchResult?.matches?.length > 0
   const isAmbiguous = matchResult?.ambiguous && matchResult?.matches?.length > 1
-  const canSubmit = selectedProduct && form.job.trim() && form.quantity && form.worker_name.trim()
+  const canSubmit = confirmedProducts.length > 0
+    && confirmedProducts.every(p => p.quantity && String(p.quantity).trim() !== '')
+    && form.job.trim()
+    && form.worker_name.trim()
 
 
   return (
@@ -827,7 +835,8 @@ export default function App() {
                   Multiple products found — which one?
                 </div>
                 {matchResult.matches.map(p => (
-                  <div key={p.code} style={S.productOption(selectedProduct?.code === p.code)} onClick={() => setSelectedProduct(p)}>
+                  <div key={p.code} style={S.productOption(confirmedProducts.some(c => c.code === p.code))}
+                    onClick={() => setConfirmedProducts([{ ...p, quantity: p.quantity != null ? String(p.quantity) : '' }])}>
                     <div style={S.productCode}>{p.code}</div>
                     <div>
                       <div style={S.productDesc}>{p.description}</div>
@@ -840,16 +849,47 @@ export default function App() {
 
             {!processing && hasMatches && (
               <div style={S.cardAccent}>
-                <div style={S.titleAccent}>Confirm Entry</div>
+                <div style={S.titleAccent}>
+                  Confirm {confirmedProducts.length > 1 ? `${confirmedProducts.length} Products` : 'Entry'}
+                </div>
 
-                {selectedProduct && (
-                  <div style={{...S.field, background:'var(--surface2)', borderRadius:8, padding:'12px 16px', marginBottom:20, border:'1px solid var(--border)'}}>
-                    <span style={{...S.fieldLabel, marginBottom:2}}>Product</span>
-                    <div style={{fontFamily:'var(--font-head)', fontSize:18, fontWeight:700, color:'var(--accent)'}}>{selectedProduct.code}</div>
-                    <div style={{fontSize:14, color:'var(--text)', marginTop:2}}>{selectedProduct.description}</div>
-                    <div style={{fontSize:12, color:'var(--muted)', marginTop:2}}>{selectedProduct.supplier}</div>
-                  </div>
-                )}
+                {/* One row per product, each with its own qty input */}
+                {confirmedProducts.map((p, i) => {
+                  const missingQty = !p.quantity || String(p.quantity).trim() === ''
+                  return (
+                    <div key={p.code} style={{
+                      background: 'var(--surface2)', borderRadius: 8, padding: '12px 16px',
+                      marginBottom: 10,
+                      border: `1px solid ${missingQty ? 'var(--danger)' : 'var(--border)'}`,
+                    }}>
+                      <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12}}>
+                        <div style={{flex:1, minWidth:0}}>
+                          <div style={{fontFamily:'var(--font-head)', fontSize:16, fontWeight:700, color:'var(--accent)'}}>{p.code}</div>
+                          <div style={{fontSize:13, color:'var(--text)', marginTop:2}}>{p.description}</div>
+                          <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>{p.supplier}</div>
+                        </div>
+                        <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4, flexShrink:0}}>
+                          <label style={{...S.fieldLabel, marginBottom:0}}>
+                            Qty <span style={S.requiredStar}>*</span>
+                            <span style={S.unitHint}>{p.unit}</span>
+                          </label>
+                          <input
+                            style={{...S.fieldInput, width:90, textAlign:'right', borderColor: missingQty ? 'var(--danger)' : 'var(--border)'}}
+                            type="number"
+                            value={p.quantity}
+                            placeholder="—"
+                            onChange={e => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, quantity: e.target.value} : x))}
+                          />
+                        </div>
+                      </div>
+                      {missingQty && (
+                        <div style={{fontSize:11, color:'var(--danger)', marginTop:6, fontFamily:'var(--font-head)', letterSpacing:.5}}>
+                          ⚠ Quantity required
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
 
                 <div style={S.field}>
                   <label style={S.fieldLabel}>Job Number <span style={S.requiredStar}>*</span></label>
@@ -879,7 +919,7 @@ export default function App() {
                             <div
                               key={j}
                               style={S.jobDropItem(false)}
-                              onMouseEnter={e => e.currentTarget.style.background = 'var(--accent)' && (e.currentTarget.style.color = '#fff')}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff' }}
                               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text)' }}
                               onMouseDown={e => {
                                 e.preventDefault()
@@ -906,36 +946,15 @@ export default function App() {
                   )}
                 </div>
 
-                <div style={S.row}>
-                  <div style={S.field}>
-                    <label style={S.fieldLabel}>
-                      Quantity <span style={S.requiredStar}>*</span>
-                      {selectedProduct && <span style={S.unitHint}>unit: {selectedProduct.unit}</span>}
-                    </label>
-                    <input
-                      style={S.fieldInput}
-                      type="number"
-                      value={form.quantity}
-                      onChange={e => setForm(f => ({...f, quantity: e.target.value}))}
-                      placeholder="e.g. 4"
-                    />
-                  </div>
-                  <div style={S.field}>
-                    <label style={S.fieldLabel}>Worker Name <span style={S.requiredStar}>*</span></label>
-                    <input
-                      style={S.fieldInput}
-                      value={form.worker_name}
-                      onChange={e => setForm(f => ({...f, worker_name: e.target.value}))}
-                      placeholder="e.g. Dave Smith"
-                    />
-                  </div>
+                <div style={S.field}>
+                  <label style={S.fieldLabel}>Worker Name <span style={S.requiredStar}>*</span></label>
+                  <input
+                    style={S.fieldInput}
+                    value={form.worker_name}
+                    onChange={e => setForm(f => ({...f, worker_name: e.target.value}))}
+                    placeholder="e.g. Dave Smith"
+                  />
                 </div>
-
-                {matchResult?.missing?.length > 0 && (
-                  <div style={S.missingWarning}>
-                    ⚠ Not found in transcript — please fill in: <strong>{matchResult.missing.join(', ')}</strong>
-                  </div>
-                )}
 
                 {!canSubmit && (
                   <div style={{...S.missingWarning, background:'rgba(27,158,212,.08)', border:'1px solid rgba(27,158,212,.3)', color:'var(--muted)'}}>
