@@ -299,6 +299,7 @@ export default function App() {
 
   const recognitionRef = useRef(null)
   const transcriptRef = useRef('')
+  const lastChunkRef = useRef('')
 
   // Close job dropdowns on outside click
   useEffect(() => {
@@ -350,35 +351,77 @@ export default function App() {
 
   // ── Voice ─────────────────────────────────────────────────────────────────
   function toggleListening() {
-    if (listening) {
-      recognitionRef.current?.stop()
-      setListening(false)
-      return
-    }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) {
-      alert('Speech recognition not supported.\nPlease use Safari on iPhone, or Chrome on Android/desktop.')
-      return
-    }
-    const rec = new SR()
-    rec.continuous = true
-    rec.interimResults = true
-    rec.lang = 'en-NZ'
-    recognitionRef.current = rec
-    transcriptRef.current = ''
-    setTranscript('')
-
-    rec.onstart = () => setListening(true)
-    rec.onresult = (e) => {
-      const t = Array.from(e.results).map(r => r[0].transcript).join('')
-      transcriptRef.current = t
-      setTranscript(t)
-    }
-    rec.onend = () => setListening(false)
-    rec.onerror = () => setListening(false)
-    rec.start()
+  if (listening) {
+    recognitionRef.current?.stop()
+    setListening(false)
+    return
   }
 
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+
+  if (!SR) {
+    alert(
+      'Speech recognition not supported.\nPlease use Safari on iPhone, or Chrome on Android/desktop.'
+    )
+    return
+  }
+
+  const rec = new SR()
+
+  rec.continuous = true
+  rec.interimResults = true
+  rec.lang = 'en-NZ'
+  rec.maxAlternatives = 1
+
+  recognitionRef.current = rec
+  transcriptRef.current = ''
+  lastChunkRef.current = ''
+  setTranscript('')
+
+  rec.onstart = () => setListening(true)
+
+  rec.onresult = (e) => {
+    let updatedTranscript = transcriptRef.current
+
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const result = e.results[i]
+      const chunk = result[0].transcript.trim()
+
+      // Samsung / Android duplicate protection
+      if (
+        result.isFinal &&
+        chunk &&
+        chunk !== lastChunkRef.current
+      ) {
+        updatedTranscript +=
+          (updatedTranscript ? ' ' : '') + chunk
+
+        lastChunkRef.current = chunk
+      }
+    }
+
+    transcriptRef.current = updatedTranscript
+    setTranscript(updatedTranscript)
+
+    // Temporary debugging — remove later if desired
+    console.log('Speech event:', {
+      resultIndex: e.resultIndex,
+      transcript: updatedTranscript,
+      results: e.results.length,
+    })
+  }
+
+  rec.onend = () => {
+    setListening(false)
+  }
+
+  rec.onerror = (err) => {
+    console.error('Speech recognition error:', err)
+    setListening(false)
+  }
+
+  rec.start()
+}
   async function handleTranscript(text) {
     setProcessing(true)
     setMatchResult(null)
