@@ -7,7 +7,7 @@ from typing import Optional
 import asyncpg, os, json, csv, io
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -546,11 +546,11 @@ async def get_jobs():
 
 @app.post("/api/match")
 async def match_product(req: MatchRequest):
-    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
     products_json = json.dumps(_products)
     jobs_json = json.dumps(_jobs)
     tools_json = json.dumps(HAND_TOOLS)
-    response = client.chat.completions.create(
+    response = await client.chat.completions.create(
         model="gpt-4o",
         max_tokens=2000,
         response_format={"type": "json_object"},
