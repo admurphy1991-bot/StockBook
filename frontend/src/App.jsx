@@ -299,7 +299,7 @@ export default function App() {
 
   const recognitionRef = useRef(null)
   const transcriptRef = useRef('')
-  const lastChunkRef = useRef('')
+  const committedIndexesRef = useRef(new Set())
 
   // Close job dropdowns on outside click
   useEffect(() => {
@@ -375,7 +375,7 @@ export default function App() {
 
   recognitionRef.current = rec
   transcriptRef.current = ''
-  lastChunkRef.current = ''
+  committedIndexesRef.current = new Set()
   setTranscript('')
 
   rec.onstart = () => setListening(true)
@@ -387,28 +387,16 @@ export default function App() {
       const result = e.results[i]
       const chunk = result[0].transcript.trim()
 
-      // Samsung / Android duplicate protection
-      if (
-        result.isFinal &&
-        chunk &&
-        chunk !== lastChunkRef.current
-      ) {
-        updatedTranscript +=
-          (updatedTranscript ? ' ' : '') + chunk
-
-        lastChunkRef.current = chunk
+      // Samsung / Android duplicate protection:
+      // track by resultIndex so the same final result firing multiple times is ignored
+      if (result.isFinal && chunk && !committedIndexesRef.current.has(i)) {
+        committedIndexesRef.current.add(i)
+        updatedTranscript += (updatedTranscript ? ' ' : '') + chunk
       }
     }
 
     transcriptRef.current = updatedTranscript
     setTranscript(updatedTranscript)
-
-    // Temporary debugging — remove later if desired
-    console.log('Speech event:', {
-      resultIndex: e.resultIndex,
-      transcript: updatedTranscript,
-      results: e.results.length,
-    })
   }
 
   rec.onend = () => {
