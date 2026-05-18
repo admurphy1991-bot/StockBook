@@ -551,7 +551,7 @@ async def match_product(req: MatchRequest):
     jobs_json = json.dumps(_jobs)
     tools_json = json.dumps(HAND_TOOLS)
     response = await client.chat.completions.create(
-        model="gpt-5-mini",
+        model="gpt-4o-mini",
         max_tokens=800,
         response_format={"type": "json_object"},
         messages=[
