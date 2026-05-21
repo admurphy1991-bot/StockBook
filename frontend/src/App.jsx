@@ -299,7 +299,7 @@ export default function App() {
 
   const recognitionRef = useRef(null)
   const transcriptRef = useRef('')
-  const committedIndexesRef = useRef(new Set())
+  const lastChunkRef = useRef('')
 
   // Close job dropdowns on outside click
   useEffect(() => {
@@ -375,7 +375,7 @@ export default function App() {
 
   recognitionRef.current = rec
   transcriptRef.current = ''
-  committedIndexesRef.current = new Set()
+  lastChunkRef.current = ''
   setTranscript('')
 
   rec.onstart = () => setListening(true)
@@ -387,16 +387,28 @@ export default function App() {
       const result = e.results[i]
       const chunk = result[0].transcript.trim()
 
-      // Samsung / Android duplicate protection:
-      // track by resultIndex so the same final result firing multiple times is ignored
-      if (result.isFinal && chunk && !committedIndexesRef.current.has(i)) {
-        committedIndexesRef.current.add(i)
-        updatedTranscript += (updatedTranscript ? ' ' : '') + chunk
+      // Samsung / Android duplicate protection
+      if (
+        result.isFinal &&
+        chunk &&
+        chunk !== lastChunkRef.current
+      ) {
+        updatedTranscript +=
+          (updatedTranscript ? ' ' : '') + chunk
+
+        lastChunkRef.current = chunk
       }
     }
 
     transcriptRef.current = updatedTranscript
     setTranscript(updatedTranscript)
+
+    // Temporary debugging — remove later if desired
+    console.log('Speech event:', {
+      resultIndex: e.resultIndex,
+      transcript: updatedTranscript,
+      results: e.results.length,
+    })
   }
 
   rec.onend = () => {
@@ -878,7 +890,7 @@ export default function App() {
               </div>
             )}
 
-            {!processing && hasMatches && (
+            {!processing && hasMatches && confirmedProducts.length > 0 && (
               <div style={S.cardAccent}>
                 <div style={S.titleAccent}>
                   Confirm {confirmedProducts.length > 1 ? `${confirmedProducts.length} Products` : 'Entry'}
@@ -904,13 +916,25 @@ export default function App() {
                             Qty <span style={S.requiredStar}>*</span>
                             <span style={S.unitHint}>{p.unit}</span>
                           </label>
-                          <input
-                            style={{...S.fieldInput, width:90, textAlign:'right', borderColor: missingQty ? 'var(--danger)' : 'var(--border)'}}
-                            type="number"
-                            value={p.quantity}
-                            placeholder="—"
-                            onChange={e => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, quantity: e.target.value} : x))}
-                          />
+                          <div style={{display:'flex', alignItems:'center', gap:6}}>
+                            <input
+                              style={{...S.fieldInput, width:90, textAlign:'right', borderColor: missingQty ? 'var(--danger)' : 'var(--border)'}}
+                              type="number"
+                              value={p.quantity}
+                              placeholder="—"
+                              onChange={e => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, quantity: e.target.value} : x))}
+                            />
+                            <button
+                              title="Remove this product"
+                              onClick={() => setConfirmedProducts(cp => cp.filter((_, j) => j !== i))}
+                              style={{
+                                background: 'rgba(220,50,50,0.15)', border: '1px solid rgba(220,50,50,0.4)',
+                                color: '#e55', borderRadius: 6, width: 32, height: 32,
+                                fontSize: 16, cursor: 'pointer', display: 'flex',
+                                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                              }}
+                            >✕</button>
+                          </div>
                         </div>
                       </div>
                       {missingQty && (
