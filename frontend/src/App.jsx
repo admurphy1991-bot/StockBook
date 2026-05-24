@@ -269,6 +269,8 @@ export default function App() {
   const [logTab, setLogTab] = useState('stock') // 'stock' | 'tools'
   const [toolEntries, setToolEntries] = useState([])
 
+  const [handTools, setHandTools] = useState([]) // {name, cost}[]
+
   // Pending tools from AI match (before adding to basket)
   const [pendingTools, setPendingTools] = useState([]) // string[]
 
@@ -322,6 +324,7 @@ export default function App() {
     loadEntries()
     loadToolEntries()
     fetch('/api/jobs').then(r => r.json()).then(setJobs).catch(() => {})
+    fetch('/api/hand-tools').then(r => r.json()).then(setHandTools).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -1409,31 +1412,56 @@ export default function App() {
             {logTab === 'tools' && (
               toolEntries.length === 0 ? (
                 <div style={S.empty}>No tool entries yet</div>
-              ) : (
-                <>
-                  <div style={{
-                    display:'grid', gridTemplateColumns:'1fr 50px 80px 160px 100px 36px',
-                    gap:8, padding:'10px 20px', borderBottom:'2px solid var(--border)', alignItems:'center',
-                  }}>
-                    {['Tool','Qty','Date','Job','Worker',''].map((h,i) => <div key={i} style={S.logHead}>{h}</div>)}
-                  </div>
-                  {toolEntries.map(e => (
-                    <div key={e.id} style={{
-                      display:'grid', gridTemplateColumns:'1fr 50px 80px 160px 100px 36px',
-                      gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13,
+              ) : (() => {
+                const toolCostMap = Object.fromEntries(handTools.map(t => [t.name.toLowerCase(), t.cost]))
+                const getUnitCost = name => toolCostMap[name?.toLowerCase()] ?? null
+                const totalCost = toolEntries.reduce((sum, e) => {
+                  const c = getUnitCost(e.tool_name)
+                  return c != null ? sum + c * (e.quantity ?? 1) : sum
+                }, 0)
+                return (
+                  <>
+                    <div style={{
+                      display:'grid', gridTemplateColumns:'1fr 50px 70px 70px 80px 160px 100px 36px',
+                      gap:8, padding:'10px 20px', borderBottom:'2px solid var(--border)', alignItems:'center',
                     }}>
-                      <div style={{color:'var(--text)', display:'flex', alignItems:'center', gap:6}}>
-                        <span>🔧</span>{e.tool_name}
-                      </div>
-                      <div style={{color:'var(--accent)', fontFamily:'var(--font-head)', fontWeight:700}}>{e.quantity ?? 1}</div>
-                      <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
-                      <div style={{color:'var(--text)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>{e.job}</div>
-                      <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</div>
-                      <button style={S.deleteBtn} onClick={() => deleteToolEntry(e.id)} title="Delete">✕</button>
+                      {['Tool','Qty','Unit $','Total $','Date','Job','Worker',''].map((h,i) => <div key={i} style={S.logHead}>{h}</div>)}
                     </div>
-                  ))}
-                </>
-              )
+                    {toolEntries.map(e => {
+                      const unitCost = getUnitCost(e.tool_name)
+                      const qty = e.quantity ?? 1
+                      const lineTotal = unitCost != null ? unitCost * qty : null
+                      return (
+                        <div key={e.id} style={{
+                          display:'grid', gridTemplateColumns:'1fr 50px 70px 70px 80px 160px 100px 36px',
+                          gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13,
+                        }}>
+                          <div style={{color:'var(--text)', display:'flex', alignItems:'center', gap:6}}>
+                            <span>🔧</span>{e.tool_name}
+                          </div>
+                          <div style={{color:'var(--accent)', fontFamily:'var(--font-head)', fontWeight:700}}>{qty}</div>
+                          <div style={{color:'var(--muted)',fontSize:12}}>{unitCost != null ? `$${unitCost}` : '—'}</div>
+                          <div style={{color:'var(--text)',fontSize:12,fontFamily:'var(--font-head)',fontWeight:600}}>{lineTotal != null ? `$${lineTotal}` : '—'}</div>
+                          <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
+                          <div style={{color:'var(--text)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>{e.job}</div>
+                          <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</div>
+                          <button style={S.deleteBtn} onClick={() => deleteToolEntry(e.id)} title="Delete">✕</button>
+                        </div>
+                      )
+                    })}
+                    {totalCost > 0 && (
+                      <div style={{
+                        display:'flex', justifyContent:'flex-end', alignItems:'center',
+                        padding:'12px 20px', borderTop:'2px solid var(--border)',
+                        gap:12, background:'var(--surface2)',
+                      }}>
+                        <span style={{color:'var(--muted)', fontSize:12, fontFamily:'var(--font-head)', letterSpacing:1, textTransform:'uppercase'}}>Total Tool Value</span>
+                        <span style={{color:'var(--accent)', fontFamily:'var(--font-head)', fontSize:18, fontWeight:800}}>${totalCost.toLocaleString()}</span>
+                      </div>
+                    )}
+                  </>
+                )
+              })()
             )}
           </div>
         )}
