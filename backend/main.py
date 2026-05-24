@@ -110,6 +110,9 @@ HAND_TOOLS = [
     {"name": "Large Membrane roller - 90 mm",       "cost": 132},
     {"name": "Medium Membrane roller - 40 mm",      "cost": 49},
     {"name": "SIEVERT EASYJET PLUS Lighter",        "cost": 131},
+    {"name": "Hand mallet",                         "cost": None},
+    {"name": "Sterling knife",                      "cost": None},
+    {"name": "Small torch",                         "cost": None},
 ]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
