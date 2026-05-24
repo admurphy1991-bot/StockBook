@@ -73,13 +73,43 @@ async def startup():
             time.sleep(3)
 
 HAND_TOOLS = [
-    "Tajima knife","Hammer","Hand saw","Spirit level","Crescent spanner",
-    "Pliers","Chalk line","Hack saw","Tin snips","SINTEX R26:1 MS Cartridge Gun",
-    "Trowel","Crack patch tool","Pinch bar","Crow bar","Pop riveter",
-    "Spatula","Measuring tape","Metal file","Wire brush","Wood chisel",
-    "Allen keys","Linbide scraper","Rubber mallet","Scissors","Window scraper",
-    "Socket set","Hand spade","Hand shovel","Hand mallet","Hand pick","Digging bar",
-    "Sterling knife","Small torch",
+    {"name": "Tajima knife",                        "cost": None},
+    {"name": "Hammer",                              "cost": 26},
+    {"name": "Hand saw",                            "cost": 16},
+    {"name": "Spirit level",                        "cost": 15},
+    {"name": "Crescent spanner",                    "cost": 29},
+    {"name": "Pliers",                              "cost": 12},
+    {"name": "Chalk line",                          "cost": 24},
+    {"name": "Hack saw",                            "cost": 6},
+    {"name": "Aviation tin snips",                  "cost": 29},
+    {"name": "SINTEX R26:1 MS Cartridge Gun",       "cost": 53},
+    {"name": "Trowel",                              "cost": 12},
+    {"name": "Crack patch tool",                    "cost": 19},
+    {"name": "Pinch bar",                           "cost": 29},
+    {"name": "Crow bar",                            "cost": 30},
+    {"name": "Pop riveter",                         "cost": 75},
+    {"name": "Spatula",                             "cost": 10},
+    {"name": "Measuring tape",                      "cost": 20},
+    {"name": "Metal file",                          "cost": 13},
+    {"name": "Bull nose trowel",                    "cost": 8},
+    {"name": "Wire brush",                          "cost": 7},
+    {"name": "Wood chisel",                         "cost": 23},
+    {"name": "Allen keys",                          "cost": 25},
+    {"name": "Linbide scraper",                     "cost": 15},
+    {"name": "Rubber mallet",                       "cost": 13},
+    {"name": "Scissors",                            "cost": 20},
+    {"name": "Window scraper",                      "cost": 9},
+    {"name": "Socket set",                          "cost": 80},
+    {"name": "Hand spade",                          "cost": 37},
+    {"name": "Hand shovel",                         "cost": 70},
+    {"name": "Sledge hammer",                       "cost": 70},
+    {"name": "Hand pick",                           "cost": 50},
+    {"name": "Digging bar",                         "cost": 66},
+    {"name": "Builders set square",                 "cost": 24},
+    {"name": "Penny roller",                        "cost": 51},
+    {"name": "Large Membrane roller - 90 mm",       "cost": 132},
+    {"name": "Medium Membrane roller - 40 mm",      "cost": 49},
+    {"name": "SIEVERT EASYJET PLUS Lighter",        "cost": 131},
 ]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
@@ -273,13 +303,14 @@ DEFAULT_JOBS = [
     "S34266 - Maintenance / Membrane and Admininistration",
     "R680 - IKEA Sealant Works",
     "S34323 - Staff Appreciation",
-    "S34345 - Auckland Art Gallery - East Terrace",
     "S2301 - Pre-Investigation / Quotes",
     "R692 - Hangar 4 - Sikagard 62 to Flame Trap",
+    "S34345 - Auckland Art Gallery - East Terrace",
     "S34354 - Drury / Paerātā Rail Station Main Works – Seismic Joints",
     "S34359 - Pipe Penetration Works",
     "S34360 - Mt Eden Road 101 -Building Maintenance",
     "S34371 - Newton Systems Limited",
+    "R747 - Brighton Road 6  Screeding",
     "S34443 - Fisher & Paykel Headquarters",
     "S34444 - UoA B505, Park Road 85 - Basement Carkpark Leaks",
     "S34466 - Queen Street 256 Student Accommodation",
@@ -305,6 +336,7 @@ DEFAULT_JOBS = [
     "S34593 - Civic Theatre - Basement Remedial Waterproofing",
     "S34611 - Tools & PPE",
     "S19239 - Sansom Concrete Repairs Ltd",
+    "S34618 - Mid Central DHB Substation 1, Palmerston North",
     "S2314 - ILD (NZ) LTD",
     "S34623 - Facade/Jointing - Small Sales",
     "S34624 - Membrane - Small Sales",
@@ -339,6 +371,7 @@ DEFAULT_JOBS = [
     "R1034 - Horizon Apartment Basement Repair Works",
     "R1036 - FNDC Kaitaia Awaroa Road Repairs to Bridges D42 & D47",
     "S34846 - 74 - 76 Grafton Road - Grafton Meditel Hotel",
+    "S34854 - ARWCF Gate House - Roof Gutters Works",
     "R1046 - Carbodur NSM BC12 Rods for St Lukes Gardens",
     "R1048 - Remuera Road, 3/452 - Concrete Repairs",
     "S34868 - ADHB - Waterproofing 91 Pipes",
@@ -346,6 +379,7 @@ DEFAULT_JOBS = [
     "S34872 - Snells Beach Waste Water Treatment Plant Injection",
     "S34874 - Air NZ Hangar 4 (JFC) - Flame Trap 4",
     "S34884 - Remuera Road 454 - Deck Waterproofing",
+    "R1059 - UOA B503.B41C - Autoclaves Replacement, Floor Repalcement",
     "S34889 - 985 Mount Eden Road - Kingsway Connection (A01/A02) Lift",
     "S34897 - Glen Innes, Te Mahia & Takanini Station - Pedestrian Crossings Waterproofing",
     "S34902 - AIAL TH01 – Remedial Works",
@@ -361,6 +395,7 @@ DEFAULT_JOBS = [
     "R1112 - Bridge 43 MSL 96.765km. - Impact Beam Replacement",
     "S34956 - Beresford Square 16-18",
     "R1137 - Kauri Drive, 21, Waiuku - Maintenance",
+    "R1138 - MANGERE WASTEWATER TREATMENT PLANT PREAERATION & SEDIMENTATION TANK 3&4 PR",
     "S34972 - Orams Existing Carpark - Sealant Works",
     "S34975 - Station M - 21 Manapau Street, Meadowbank - Precast Sealant",
     "S34981 - Murray Halberg Retirement Village - Remedial Waterproofinga",
@@ -371,20 +406,22 @@ DEFAULT_JOBS = [
     "S34990 - Tamaki Drive 256 - Tanking Design",
     "R1159 - Middlemore Hospital,Hospital Road 100 , Otahuhu, Auckland–Concrete Repairs",
     "S34996 - Three Kings - Maintenance Annual inspections",
+    "S34999 - 101 Mt Eden Road, Mt Eden - Rear Deck and Lower Roof Membrane Replacement",
     "S35010 - ADHB A01 Entrance Area Coating Works",
     "R1172 - Kirkpatrick Building, Patiki Road - Floor Repairs",
     "S35013 - CDC HV2.2 - Roofing",
     "S35015 - Skycity Membrane Remedial Works",
     "S35021 - PaknSave Albany",
-    "S35023 - Manawaora Road 285",
     "R1184 - Waterview Tunnel Southern Vent Building Topping Slab",
+    "S35023 - Manawaora Road 285",
     "R1186 - Northridge Apartments, Stanwell Street Parnell , 28",
     "R1194 - Stanbeth Building, Commerce Street,6 - Crack Repairs",
     "R1195 - Jarden House Comm Bay B3 Ramp Repair",
     "S35035 - BEKS2025 Limited",
     "S35036 - Bledisloe Cruise Terminal - Tanking",
-    "S35044 - Onyx Apartments, Mt Eden Rd 987 , Three Kings - Maintenance Remedial Work",
+    "S35037 - 6 Brighton Road - Stage 2 Membrane Replacement",
     "R1206 - Fort Street Wilson Car Park 34 Shortland Street",
+    "S35044 - Onyx Apartments, Mt Eden Rd 987 , Three Kings - Maintenance Remedial Work",
     "R1211 - Waka - Post Contract Works",
     "S35047 - 308-310 Great North Road – Seismic Joints",
     "S35048 - Racecourse Parade, 26  -  Sansom Annual Maintenance Inspection",
@@ -407,9 +444,9 @@ DEFAULT_JOBS = [
     "R1247 - Massey Univeristy - Drossbach Infill",
     "S35087 - 6 Pekapeka Place, Raglan - Tanking Remediation Consultant",
     "R1248 - Bledisloe Cruise Terminal",
-    "R1250 - 102 Langley Precast Panel Remediation",
     "S35088 - 19 Ngaiwi St, Orakei - Roof Membrane",
     "S35089 - Walmer Road, 9, Point Chevalier, Auckland -  Roof membrane remedial works",
+    "R1250 - 102 Langley Precast Panel Remediation",
     "S35103 - 107 Carlton Gore Road  - Drainage Improvement",
     "R1270 - Kawakawa Tank Repairs",
     "S35106 - 109 Seaview Road, Remuera",
@@ -423,11 +460,16 @@ DEFAULT_JOBS = [
     "R1279 - Sentinel Road, 60E, Herne Bay - Screeding",
     "S35120 - SkyCity I Group Roof -  Membrane Remedial Works",
     "S35121 - Grand Hotel, Federal Street, L6 - Exterior Canopy Membrane Remedial Works",
+    "S35123 - 34 Rawene Avenue, Westmere - Membrane Replacement",
     "S35124 - H47 Building - Southern Canopy Panel Joint Remedial",
     "S35125 - ADHB A32 Main Entrance - Membrane Works",
     "S35135 - Mt Wellington Estate Warehouse 1  2 Monahan Road, Mt Wellington",
-    "S35138 - Tamaki Drive, 137 -  Flashing and Membrane Investigation",
     "R1290 - Warranty Repair work - Concrete Repairs",
+    "S35138 - Tamaki Drive, 137 -  Flashing and Membrane Investigation",
+    "R1296 - Fisher and Paykel - Nassipour Way, East Tamaki",
+    "S35141 - Vulcan Lane 10",
+    "S35142 - TVNZ - 100 Victoria Street West - Membrane Re-roof Works",
+    "S35150 - MIT Manukau Campus - Interior Plant Room Works",
 ]
 # In-memory store — overwritten by webhook sync
 _products = list(DEFAULT_PRODUCTS)
@@ -520,6 +562,11 @@ async def webhook_status():
         "source": "live (last synced via webhook)" if _products is not DEFAULT_PRODUCTS else "default (hardcoded)"
     }
 
+@app.get("/api/hand-tools")
+async def get_hand_tools():
+    """Returns the hand tools list with names and costs."""
+    return HAND_TOOLS
+
 # ── Standard data endpoints ───────────────────────────────────────────────────
 
 class MatchRequest(BaseModel):
@@ -549,7 +596,7 @@ async def match_product(req: MatchRequest):
     client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
     products_json = json.dumps(_products)
     jobs_json = json.dumps(_jobs)
-    tools_json = json.dumps(HAND_TOOLS)
+    tools_json = json.dumps([t["name"] for t in HAND_TOOLS])
     response = await client.chat.completions.create(
         model="gpt-4o-mini",
         max_tokens=800,
@@ -810,15 +857,23 @@ async def export_tool_csv(
     finally:
         await conn.close()
 
+    # Build cost lookup: tool name (lowercase) -> unit cost
+    tool_cost_lookup = {t["name"].lower(): t["cost"] for t in HAND_TOOLS}
+
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Tool", "Quantity", "Date", "Job Number", "Worker"])
+    writer.writerow(["Tool", "Quantity", "Unit Cost", "Line Total", "Date", "Job Number", "Worker"])
     for r in rows:
         job_full = r["job"] or ""
         job_number = job_full.split(" - ")[0].strip() if " - " in job_full else job_full
+        qty = r["quantity"] or 1
+        unit_cost = tool_cost_lookup.get(r["tool_name"].lower())
+        line_total = (unit_cost * qty) if unit_cost is not None else ""
         writer.writerow([
             r["tool_name"],
-            r["quantity"] or 1,
+            qty,
+            f"${unit_cost}" if unit_cost is not None else "",
+            f"${line_total}" if line_total != "" else "",
             str(r["entry_date"].strftime("%d-%m-%Y")),
             job_number,
             r["worker_name"] or "",
