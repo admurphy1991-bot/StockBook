@@ -165,7 +165,7 @@ DEFAULT_PRODUCTS = [
     {"code": "ALLDE4", "description": "Dermabit Extra - 4mm thick Polypropylene one side", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "dermabit extra, dermabit four mil, polyprop membrane"},
     {"code": "ALLRX101", "description": "RX101T Waterstop 6.1lm per roll", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "RX one oh one waterstop, swelling waterstop, hydrophilic strip"},
     {"code": "ALLRX101DH", "description": "RX101DH waterstop delayed Hydration 5m", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "RX one oh one delayed hydration, delayed hydration waterstop"},
-    {"code": "ALLSWTB", "description": "Allco - Swelltite Termination Bar Lm", "supplier": "ALLCOWATER", "unit": "LM", "gl": "2000", "alias": "swelltite bar, termination bar, swelltite termination"},
+    {"code": "ALLSWTB", "description": "Allco - Swelltite Termination Bar Lm", "supplier": "ALLCOWATER", "unit": "LM", "gl": "2000", "alias": "swelltite, sweltite, swelltite bar, termination bar, swelltite termination, sweltite bar"},
     {"code": "ALLVOCR", "description": "Allco - Voltex CR (5.4sqm roll)", "supplier": "ALLCOWATER", "unit": "M2", "gl": "2000", "alias": "voltex CR, voltex roll, bentonite membrane roll"},
     {"code": "ALLVODS", "description": "Allco - Voltex Super 66.6 DS", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "voltex super, voltex DS, bentonite super sheet"},
     {"code": "ALLVOLT", "description": "Voltex Roll (5.5m¬≤per roll) m¬≤", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "voltex, voltex sheet, bentonite sheet roll, carpet"},
@@ -257,7 +257,7 @@ DEFAULT_PRODUCTS = [
     {"code": "VCTX", "description": "Volclay Coretex (9.29m¬≤) roll", "supplier": "", "unit": "ROLL", "gl": "2000", "alias": "volclay coretex, voltex coretex, coretex roll"},
     {"code": "VRX10210", "description": "Allco - RX102 Waterstop 10.2m", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "RX one oh two waterstop, RX102 strip, allco waterstop ten metre"},
     {"code": "VST50", "description": "DPM Tape Allsheet 48mm x 30 m Red", "supplier": "ALLCOWATER", "unit": "M", "gl": "2000", "alias": "DPM tape red, allsheet tape red, red DPC tape"},
-    {"code": "VSTPOL10.2", "description": "Swelltite Polish 3000 10.2m Roll", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "swelltite polish, polish three thousand, swelltite roll"},
+    {"code": "VSTPOL10.2", "description": "Swelltite Polish 3000 10.2m Roll", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "swelltite, sweltite, swelltite polish, polish three thousand, swelltite roll, sweltite polish, sweltite roll"},
     {"code": "VVS500", "description": "Allsheet 500 micron non hydrostatic DPM PE 4x25m", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "allsheet DPM, five hundred micron DPM, damp proof membrane sheet"},
     {"code": "WLPERMATAC21", "description": "WOODLOK PERMATAC 21KG", "supplier": "GLUE", "unit": "ea", "gl": "2000", "alias": "woodlok permatac, permatac adhesive, woodlok glue"},
     {"code": "11204", "description": "Pulsa washer containers (box of 1,000)", "supplier": "RAMSET", "unit": "Bag", "gl": "2000", "alias": "pulsa washer, washer containers, ramset washers"},
@@ -635,6 +635,7 @@ Return JSON:
 }}
 
 - If multiple stock products mentioned, include all in matches array, each with their own quantity
+- If a word matches the alias of MORE THAN ONE product (e.g. "swelltite" matches both a bar and a roll), set ambiguous: true and include ALL matching products in matches so the user can choose
 - If no quantity stated for a product, set quantity to null and add "quantity" to missing
 - Put null and add to missing[] for job or worker_name if not in transcript
 - Only include tools that are a clear match to the HAND TOOLS list
@@ -647,10 +648,9 @@ Return JSON:
 
 @app.post("/api/entries")
 async def create_entry(entry: EntryCreate):
-    import datetime
     conn = await get_db()
     try:
-        nz_today = datetime.datetime.now(NZ_TZ).date()
+        nz_today = datetime.now(NZ_TZ).date()
         row = await conn.fetchrow("""
             INSERT INTO stock_entries (item_code, entry_date, job, supplier, description, cost_quantity, unit, gl_code, worker_name)
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *
@@ -773,10 +773,9 @@ class ToolEntryCreate(BaseModel):
 
 @app.post("/api/tool-entries")
 async def create_tool_entry(entry: ToolEntryCreate):
-    import datetime
     conn = await get_db()
     try:
-        nz_today = datetime.datetime.now(NZ_TZ).date()
+        nz_today = datetime.now(NZ_TZ).date()
         row = await conn.fetchrow("""
             INSERT INTO tool_entries (tool_name, entry_date, job, worker_name, quantity)
             VALUES ($1,$2,$3,$4,$5) RETURNING *
@@ -791,43 +790,6 @@ async def list_tool_entries():
     try:
         rows = await conn.fetch("SELECT * FROM tool_entries ORDER BY created_at DESC")
         return [dict(r) for r in rows]
-    finally:
-        await conn.close()
-
-@app.delete("/api/tool-entries/{entry_id}")
-async def delete_tool_entry(entry_id: int):
-    conn = await get_db()
-    try:
-        await conn.execute("DELETE FROM tool_entries WHERE id = $1", entry_id)
-        return {"ok": True}
-    finally:
-        await conn.close()
-
-class ToolEntryUpdate(BaseModel):
-    job: Optional[str] = None
-    worker_name: Optional[str] = None
-    quantity: Optional[int] = None
-
-@app.patch("/api/tool-entries/{entry_id}")
-async def update_tool_entry(entry_id: int, update: ToolEntryUpdate):
-    conn = await get_db()
-    try:
-        fields = []
-        params = []
-        if update.job is not None:
-            params.append(update.job); fields.append(f"job=${len(params)}")
-        if update.worker_name is not None:
-            params.append(update.worker_name); fields.append(f"worker_name=${len(params)}")
-        if update.quantity is not None:
-            params.append(update.quantity); fields.append(f"quantity=${len(params)}")
-        if not fields:
-            return {"ok": False, "message": "Nothing to update"}
-        params.append(entry_id)
-        await conn.execute(
-            f"UPDATE tool_entries SET {', '.join(fields)} WHERE id=${len(params)}",
-            *params
-        )
-        return {"ok": True}
     finally:
         await conn.close()
 
@@ -890,5 +852,42 @@ async def export_tool_csv(
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+@app.delete("/api/tool-entries/{entry_id}")
+async def delete_tool_entry(entry_id: int):
+    conn = await get_db()
+    try:
+        await conn.execute("DELETE FROM tool_entries WHERE id = $1", entry_id)
+        return {"ok": True}
+    finally:
+        await conn.close()
+
+class ToolEntryUpdate(BaseModel):
+    job: Optional[str] = None
+    worker_name: Optional[str] = None
+    quantity: Optional[int] = None
+
+@app.patch("/api/tool-entries/{entry_id}")
+async def update_tool_entry(entry_id: int, update: ToolEntryUpdate):
+    conn = await get_db()
+    try:
+        fields = []
+        params = []
+        if update.job is not None:
+            params.append(update.job); fields.append(f"job=${len(params)}")
+        if update.worker_name is not None:
+            params.append(update.worker_name); fields.append(f"worker_name=${len(params)}")
+        if update.quantity is not None:
+            params.append(update.quantity); fields.append(f"quantity=${len(params)}")
+        if not fields:
+            return {"ok": False, "message": "Nothing to update"}
+        params.append(entry_id)
+        await conn.execute(
+            f"UPDATE tool_entries SET {', '.join(fields)} WHERE id=${len(params)}",
+            *params
+        )
+        return {"ok": True}
+    finally:
+        await conn.close()
+
 
 app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="static")
