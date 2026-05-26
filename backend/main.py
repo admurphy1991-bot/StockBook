@@ -42,7 +42,7 @@ async def startup():
                     id SERIAL PRIMARY KEY,
                     tool_name TEXT NOT NULL,
                     entry_date DATE NOT NULL,
-                    job TEXT NOT NULL,
+                     TEXT NOT NULL,
                     worker_name TEXT,
                     quantity INTEGER NOT NULL DEFAULT 1,
                     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -476,6 +476,7 @@ DEFAULT_JOBS = [
     "S35141 - Vulcan Lane 10",
     "S35142 - TVNZ - 100 Victoria Street West - Membrane Re-roof Works",
     "S35150 - MIT Manukau Campus - Interior Plant Room Works",
+    "S35099 - East Coast Bays",
 ]
 # In-memory store — overwritten by webhook sync
 _products = list(DEFAULT_PRODUCTS)
