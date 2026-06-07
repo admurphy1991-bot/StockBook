@@ -442,7 +442,7 @@ DEFAULT_JOBS = [
     "S35080 - The Southern Cross Building - 59- 67 High Street - Maintenance to External Deck",
     "S35086 - College Hill Police Station - Leak Investigation",
     "R1247 - Massey Univeristy - Drossbach Infill",
-    "S35087 - 6 Pekapeka Place, Raglan - Tanking Remediation Consultant",
+    "S35087 - 6 Pekapeka Street, Raglan - Tanking Remediation Consultant",
     "R1248 - Bledisloe Cruise Terminal",
     "S35088 - 19 Ngaiwi St, Orakei - Roof Membrane",
     "S35089 - Walmer Road, 9, Point Chevalier, Auckland -  Roof membrane remedial works",
@@ -476,6 +476,9 @@ DEFAULT_JOBS = [
     "S35154 - Grey Ave 139  Auckland - Annual Maintenance Investigation",
     "S35155 - Greenlane Hospital, Greenlane West  214 - G04 Investigation and Remedial Works",
     "S35156 - Auckland Hospital - A08 Level 6 , Oncology Remedial Works",
+    "R1293 - Esplanade Road,44, Mount Albert - Balcony Edge Repair",
+    "R1303 - Mt  Messenger Pier - Concrete Repair",
+    "S35158 - Epsom Retirement Village - Membrane Works",
 ]
 
 # In-memory store — overwritten by webhook sync
