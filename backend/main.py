@@ -198,6 +198,7 @@ DEFAULT_PRODUCTS = [
     {"code": "CBW426157", "description": "IMPRABOARD¬†¬Æ¬†WHITE¬†680GSM 1200 x 4mm (10 sheets per bag)", "supplier": "MULF", "unit": "SHEET", "gl": "2000", "alias": "impraboard white, protection board white, white foam board"},
     {"code": "COREFL18", "description": "Allguard Coreflute 1800 x 1150 x 4mm", "supplier": "ALLCOWATER", "unit": "SHEET", "gl": "2000", "alias": "coreflute, protection board, allguard coreflute, allco coreflute"},
     {"code": "COREFL18", "description": "Mulfords Coreflute 1800 x 1150 x 4mm", "supplier": "MULFORDS", "unit": "SHEET", "gl": "2000", "alias": "mulfords coreflute, mulford coreflute, coreflute mulfords"},
+    {"code": "COREFL18", "description": "Recycled Coreflute 1800 x 1150 x 4mm", "supplier": "", "unit": "SHEET", "gl": "2000", "alias": "recycled coreflute, recycled protection board, eco coreflute"},
     {"code": "CSW", "description": "BluRez CWS Base 20kg Drum", "supplier": "BLUEYNZ", "unit": "ea", "gl": "2000", "alias": "bluerez base, CWS base drum, blurez drum"},
     {"code": "D1", "description": "Newton Basedrain - 2m Length", "supplier": "NEWSYSLTD", "unit": "M", "gl": "2000", "alias": "newton basedrain, newton drain two metre, newton channel"},
     {"code": "D21", "description": "Newton Basedrain - Sump Connector", "supplier": "NEWSYSLTD", "unit": "ea", "gl": "2000", "alias": "newton sump connector, basedrain sump, newton sump"},
@@ -479,6 +480,17 @@ DEFAULT_JOBS = [
     "R1293 - Esplanade Road,44, Mount Albert - Balcony Edge Repair",
     "R1303 - Mt  Messenger Pier - Concrete Repair",
     "S35158 - Epsom Retirement Village - Membrane Works",
+    "S34269 - Cremorne House - Cremorne Street 16-18",
+    "S34832 - Barfoot & Thompson Remerua - 367 Remuera Road",
+    "R1208 - WSL Mangere WWTP  - Sikagard 63",
+    "S35103 - 107 Carlton Gore Road  - Drainage Improvement",
+    "S35168 - UoA, Waiparuru Hall, B441 and B442 - Membrane Roof Report",
+    "S35169 - 78 View Road - Newtons",
+    "S2309 - Athens Road 1/59, Onehunga",
+    "S2310 - Riddell Rd 283, Glendowie",
+    "S2311 - Speights Rd 8, Kohimararama",
+    "S2312 - Glendowie Road 12a",
+    "S2313 - ILD Australia PTY",
 ]
 
 # In-memory store — overwritten by webhook sync
