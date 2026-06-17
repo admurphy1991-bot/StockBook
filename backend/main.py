@@ -115,6 +115,10 @@ HAND_TOOLS = [
     {"name": "Small torch lighter", "cost": 131},
     {"name": "Wire nipper cutters", "cost": 15},
     {"name": "Hand mallet", "cost": None},
+    {"name": "Striker", "cost": 12},
+    {"name": "Broom", "cost": 40},
+    {"name": "Garden hose", "cost": 50},
+    {"name": "Garden hose fittings", "cost": 4},
 ]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
