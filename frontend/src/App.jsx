@@ -255,6 +255,11 @@ export default function App() {
   const [inputMode, setInputMode] = useState('voice')
   const [textInput, setTextInput] = useState('')
   const [jobs, setJobs] = useState([])
+  const [products, setProducts] = useState([])
+
+  // Reference tab state
+  const [refTab, setRefTab] = useState('tools') // 'tools' | 'products'
+  const [refSearch, setRefSearch] = useState('')
 
   // Edit state
   const [editingEntry, setEditingEntry] = useState(null)
@@ -325,6 +330,7 @@ export default function App() {
     loadToolEntries()
     fetch('/api/jobs').then(r => r.json()).then(setJobs).catch(() => {})
     fetch('/api/hand-tools').then(r => r.json()).then(setHandTools).catch(() => {})
+    fetch('/api/products').then(r => r.json()).then(setProducts).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -687,7 +693,7 @@ export default function App() {
           <span className="logo-text" style={S.logoSub}>Stock Book</span>
         </div>
         <div className="desktop-tabs" style={S.tabs}>
-          {[['capture','⬤ Capture'],['log','☰ Log'],['qr','⊞ QR'],['settings','⚙ Settings']].map(([t,label]) => (
+          {[['capture','⬤ Capture'],['log','☰ Log'],['reference','📋 Reference'],['qr','⊞ QR'],['settings','⚙ Settings']].map(([t,label]) => (
             <button key={t} style={S.tab(tab===t)} onClick={() => setTab(t)}>{label}</button>
           ))}
         </div>
@@ -711,6 +717,7 @@ export default function App() {
         {[
           ['capture', '⬤', 'Capture'],
           ['log', '☰', 'Log'],
+          ['reference', '📋', 'Reference'],
           ['qr', '⊞', 'QR'],
           ['settings', '⚙', 'Settings'],
         ].map(([t, icon, label]) => (
@@ -1463,6 +1470,83 @@ export default function App() {
                 )
               })()
             )}
+          </div>
+        )}
+
+        {/* ── REFERENCE TAB ────────────────────────────────────────── */}
+        {tab === 'reference' && (
+          <div style={S.logCard}>
+            <div style={S.logHeader}>
+              <div style={{display:'flex', gap:0, marginBottom:14, borderRadius:6, overflow:'hidden', border:'1px solid var(--border)', width:'fit-content'}}>
+                {[['tools',`🔧 Tools (${handTools.length})`],['products',`📦 Products (${products.length})`]].map(([t,label]) => (
+                  <button key={t} onClick={() => { setRefTab(t); setRefSearch('') }} style={{
+                    padding:'7px 20px', background: refTab===t ? 'var(--accent)' : 'transparent',
+                    color: refTab===t ? '#fff' : 'var(--muted)', border:'none',
+                    fontFamily:'var(--font-head)', fontWeight:700, fontSize:13, letterSpacing:1,
+                    textTransform:'uppercase', cursor:'pointer', transition:'all .15s',
+                  }}>{label}</button>
+                ))}
+              </div>
+              <input
+                style={S.fieldInput}
+                placeholder={refTab === 'tools' ? 'Search tools…' : 'Search products by name, code, or supplier…'}
+                value={refSearch}
+                onChange={e => setRefSearch(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            {refTab === 'tools' ? (() => {
+              const q = refSearch.trim().toLowerCase()
+              const filtered = handTools.filter(t => t.name.toLowerCase().includes(q))
+              return filtered.length === 0 ? (
+                <div style={S.empty}>No tools match</div>
+              ) : (
+                <>
+                  <div style={{display:'grid', gridTemplateColumns:'1fr 90px', gap:8, padding:'10px 20px', borderBottom:'2px solid var(--border)'}}>
+                    <div style={S.logHead}>Tool</div>
+                    <div style={S.logHead}>Cost</div>
+                  </div>
+                  {filtered.map((t,i) => (
+                    <div key={i} style={{display:'grid', gridTemplateColumns:'1fr 90px', gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13}}>
+                      <div style={{display:'flex', alignItems:'center', gap:6, color:'var(--text)'}}><span>🔧</span>{t.name}</div>
+                      <div style={{color:'var(--muted)'}}>{t.cost != null ? `$${t.cost}` : '—'}</div>
+                    </div>
+                  ))}
+                </>
+              )
+            })() : (() => {
+              const q = refSearch.trim().toLowerCase()
+              const filtered = !q ? products.slice(0, 50) : products.filter(p =>
+                p.description?.toLowerCase().includes(q) ||
+                p.code?.toLowerCase().includes(q) ||
+                p.alias?.toLowerCase().includes(q) ||
+                p.supplier?.toLowerCase().includes(q)
+              )
+              return (
+                <>
+                  {!q && (
+                    <div style={{padding:'10px 20px 0', fontSize:12, color:'var(--muted)'}}>Showing first 50 of {products.length} — search to narrow</div>
+                  )}
+                  {filtered.length === 0 ? <div style={S.empty}>No products match</div> : (
+                    <>
+                      <div style={{display:'grid', gridTemplateColumns:'110px 1fr 100px', gap:8, padding:'10px 20px', borderBottom:'2px solid var(--border)'}}>
+                        <div style={S.logHead}>Code</div>
+                        <div style={S.logHead}>Description</div>
+                        <div style={S.logHead}>Supplier</div>
+                      </div>
+                      {filtered.map(p => (
+                        <div key={p.code} style={{display:'grid', gridTemplateColumns:'110px 1fr 100px', gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13}}>
+                          <div style={{fontFamily:'var(--font-head)', fontWeight:700, color:'var(--accent)', fontSize:12}}>{p.code}</div>
+                          <div style={{color:'var(--text)'}}>{p.description}</div>
+                          <div style={{color:'var(--muted)', fontSize:12}}>{p.supplier}</div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </>
+              )
+            })()}
           </div>
         )}
 
