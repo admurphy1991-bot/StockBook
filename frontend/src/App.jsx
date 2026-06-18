@@ -264,6 +264,8 @@ export default function App() {
   // Edit state
   const [editingEntry, setEditingEntry] = useState(null)
   const [editForm, setEditForm] = useState({})
+  const [editingToolEntry, setEditingToolEntry] = useState(null)
+  const [editToolForm, setEditToolForm] = useState({})
 
   // Multi-entry basket
   const [basket, setBasket] = useState([]) // [{type:'stock'|'tool', product?, toolName?, quantity?}]
@@ -287,9 +289,12 @@ export default function App() {
   const [basketJobDropOpen, setBasketJobDropOpen] = useState(false)
   const [editJobSearch, setEditJobSearch] = useState('')
   const [editJobDropOpen, setEditJobDropOpen] = useState(false)
+  const [editToolJobSearch, setEditToolJobSearch] = useState('')
+  const [editToolJobDropOpen, setEditToolJobDropOpen] = useState(false)
   const jobSearchRef = useRef(null)
   const basketJobSearchRef = useRef(null)
   const editJobSearchRef = useRef(null)
+  const editToolJobSearchRef = useRef(null)
 
   // Export date range state
   const [exportFrom, setExportFrom] = useState('')
@@ -313,6 +318,7 @@ export default function App() {
     function handleClick(e) {
       if (jobSearchRef.current && !jobSearchRef.current.contains(e.target)) setJobDropOpen(false)
       if (editJobSearchRef.current && !editJobSearchRef.current.contains(e.target)) setEditJobDropOpen(false)
+      if (editToolJobSearchRef.current && !editToolJobSearchRef.current.contains(e.target)) setEditToolJobDropOpen(false)
       if (basketJobSearchRef.current && !basketJobSearchRef.current.contains(e.target)) setBasketJobDropOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
@@ -490,12 +496,13 @@ export default function App() {
       // Save any pending tools
       const savedTools = []
       for (const tool of pendingTools) {
+        const qty = parseInt(tool.quantity) || 1
         await fetch('/api/tool-entries', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: tool.quantity }),
+          body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty }),
         })
-        savedTools.push(tool)
+        savedTools.push({ ...tool, quantity: qty })
       }
 
       // Update basket
@@ -559,6 +566,23 @@ export default function App() {
       showToast('Entry updated ✓')
       setEditingEntry(null)
       loadEntries()
+    } catch { showToast('Update failed — try again') }
+  }
+
+  async function saveEditToolEntry() {
+    try {
+      await fetch(`/api/tool-entries/${editingToolEntry.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job: editToolForm.job,
+          quantity: parseFloat(editToolForm.quantity),
+          worker_name: editToolForm.worker_name,
+        }),
+      })
+      showToast('Tool entry updated ✓')
+      setEditingToolEntry(null)
+      loadToolEntries()
     } catch { showToast('Update failed — try again') }
   }
 
@@ -1029,26 +1053,45 @@ export default function App() {
 
                 {/* Tools matched from transcript */}
                 {pendingTools.length > 0 && (
-                  <div style={{background:'rgba(27,158,212,0.06)', border:'1px solid rgba(27,158,212,.3)', borderRadius:8, padding:'12px 16px', marginBottom:16}}>
+                  <div style={{marginBottom:16}}>
                     <div style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1.5, color:'var(--accent)', marginBottom:8}}>
                       🔧 TOOLS ALSO DETECTED — WILL BE LOGGED
                     </div>
-                    <div style={{display:'flex', flexWrap:'wrap', gap:6}}>
-                      {pendingTools.map((t, i) => (
-                        <div key={i} style={{
-                          display:'flex', alignItems:'center', gap:6,
-                          background:'var(--surface2)', border:'1px solid var(--accent)',
-                          borderRadius:20, padding:'4px 12px', fontSize:12,
-                        }}>
-                          {t.quantity > 1 && <span style={{color:'var(--accent)', fontWeight:700, fontFamily:'var(--font-head)'}}>{t.quantity}×</span>}
-                          <span style={{color:'var(--text)'}}>{t.name}</span>
-                          <button
-                            style={{background:'transparent', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:13, lineHeight:1, padding:0}}
-                            onClick={() => setPendingTools(pt => pt.filter((_,j) => j !== i))}
-                          >✕</button>
+                    {pendingTools.map((t, i) => (
+                      <div key={i} style={{
+                        background: 'var(--surface2)', borderRadius: 8, padding: '12px 16px',
+                        marginBottom: 8, border: '1px solid var(--accent)',
+                        display:'flex', justifyContent:'space-between', alignItems:'center', gap:12,
+                      }}>
+                        <div style={{display:'flex', alignItems:'center', gap:8, minWidth:0}}>
+                          <span style={{fontSize:14}}>🔧</span>
+                          <span style={{fontSize:13, color:'var(--text)'}}>{t.name}</span>
                         </div>
-                      ))}
-                    </div>
+                        <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4, flexShrink:0}}>
+                          <label style={{...S.fieldLabel, marginBottom:0}}>Qty</label>
+                          <div style={{display:'flex', alignItems:'center', gap:6}}>
+                            <input
+                              style={{...S.fieldInput, width:70, textAlign:'right'}}
+                              type="number"
+                              min="1"
+                              value={t.quantity}
+                              placeholder="1"
+                              onChange={e => setPendingTools(pt => pt.map((x, j) => j === i ? {...x, quantity: e.target.value} : x))}
+                            />
+                            <button
+                              title="Remove this tool"
+                              onClick={() => setPendingTools(pt => pt.filter((_,j) => j !== i))}
+                              style={{
+                                background: 'rgba(220,50,50,0.15)', border: '1px solid rgba(220,50,50,0.4)',
+                                color: '#e55', borderRadius: 6, width: 32, height: 32,
+                                fontSize: 16, cursor: 'pointer', display: 'flex',
+                                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                              }}
+                            >✕</button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
 
@@ -1071,26 +1114,45 @@ export default function App() {
                   </div>
 
                   {/* Tools detected */}
-                  <div style={{background:'rgba(27,158,212,0.06)', border:'1px solid rgba(27,158,212,.3)', borderRadius:8, padding:'12px 16px', marginBottom:16}}>
+                  <div style={{marginBottom:16}}>
                     <div style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1.5, color:'var(--accent)', marginBottom:8}}>
                       🔧 TOOLS DETECTED
                     </div>
-                    <div style={{display:'flex', flexWrap:'wrap', gap:6}}>
-                      {pendingTools.map((t, i) => (
-                        <div key={i} style={{
-                          display:'flex', alignItems:'center', gap:6,
-                          background:'var(--surface2)', border:'1px solid var(--accent)',
-                          borderRadius:20, padding:'4px 12px', fontSize:12,
-                        }}>
-                          {t.quantity > 1 && <span style={{color:'var(--accent)', fontWeight:700, fontFamily:'var(--font-head)'}}>{t.quantity}×</span>}
-                          <span style={{color:'var(--text)'}}>{t.name}</span>
-                          <button
-                            style={{background:'transparent', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:13, lineHeight:1, padding:0}}
-                            onClick={() => setPendingTools(pt => pt.filter((_,j) => j !== i))}
-                          >✕</button>
+                    {pendingTools.map((t, i) => (
+                      <div key={i} style={{
+                        background: 'var(--surface2)', borderRadius: 8, padding: '12px 16px',
+                        marginBottom: 8, border: '1px solid var(--accent)',
+                        display:'flex', justifyContent:'space-between', alignItems:'center', gap:12,
+                      }}>
+                        <div style={{display:'flex', alignItems:'center', gap:8, minWidth:0}}>
+                          <span style={{fontSize:14}}>🔧</span>
+                          <span style={{fontSize:13, color:'var(--text)'}}>{t.name}</span>
                         </div>
-                      ))}
-                    </div>
+                        <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4, flexShrink:0}}>
+                          <label style={{...S.fieldLabel, marginBottom:0}}>Qty</label>
+                          <div style={{display:'flex', alignItems:'center', gap:6}}>
+                            <input
+                              style={{...S.fieldInput, width:70, textAlign:'right'}}
+                              type="number"
+                              min="1"
+                              value={t.quantity}
+                              placeholder="1"
+                              onChange={e => setPendingTools(pt => pt.map((x, j) => j === i ? {...x, quantity: e.target.value} : x))}
+                            />
+                            <button
+                              title="Remove this tool"
+                              onClick={() => setPendingTools(pt => pt.filter((_,j) => j !== i))}
+                              style={{
+                                background: 'rgba(220,50,50,0.15)', border: '1px solid rgba(220,50,50,0.4)',
+                                color: '#e55', borderRadius: 6, width: 32, height: 32,
+                                fontSize: 16, cursor: 'pointer', display: 'flex',
+                                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                              }}
+                            >✕</button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   {/* Job */}
@@ -1147,10 +1209,11 @@ export default function App() {
                       onClick={async () => {
                         try {
                           for (const tool of pendingTools) {
+                            const qty = parseInt(tool.quantity) || 1
                             await fetch('/api/tool-entries', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: tool.quantity }),
+                              body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty }),
                             })
                           }
                           if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
@@ -1207,9 +1270,13 @@ export default function App() {
                         )}
                       </div>
                       <div style={{display:'flex', alignItems:'center', gap:10}}>
-                        {item.type === 'stock' && (
+                        {item.type === 'stock' ? (
                           <span style={{fontFamily:'var(--font-head)', fontWeight:700, fontSize:13}}>
                             ×{item.quantity}<span style={{fontSize:10, color:'var(--muted)', marginLeft:2}}>{item.product.unit}</span>
+                          </span>
+                        ) : (
+                          <span style={{fontFamily:'var(--font-head)', fontWeight:700, fontSize:13}}>
+                            ×{item.quantity}
                           </span>
                         )}
                         <button
@@ -1429,31 +1496,92 @@ export default function App() {
                 return (
                   <>
                     <div style={{
-                      display:'grid', gridTemplateColumns:'1fr 50px 70px 70px 80px 160px 100px 36px',
+                      display:'grid', gridTemplateColumns:'1fr 50px 70px 70px 80px 160px 100px 36px 36px',
                       gap:8, padding:'10px 20px', borderBottom:'2px solid var(--border)', alignItems:'center',
                     }}>
-                      {['Tool','Qty','Unit $','Total $','Date','Job','Worker',''].map((h,i) => <div key={i} style={S.logHead}>{h}</div>)}
+                      {['Tool','Qty','Unit $','Total $','Date','Job','Worker','',''].map((h,i) => <div key={i} style={S.logHead}>{h}</div>)}
                     </div>
                     {toolEntries.map(e => {
                       const unitCost = getUnitCost(e.tool_name)
                       const qty = e.quantity ?? 1
                       const lineTotal = unitCost != null ? unitCost * qty : null
                       return (
-                        <div key={e.id} style={{
-                          display:'grid', gridTemplateColumns:'1fr 50px 70px 70px 80px 160px 100px 36px',
-                          gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13,
-                        }}>
-                          <div style={{color:'var(--text)', display:'flex', alignItems:'center', gap:6}}>
-                            <span>🔧</span>{e.tool_name}
+                        <React.Fragment key={e.id}>
+                          <div style={{
+                            display:'grid', gridTemplateColumns:'1fr 50px 70px 70px 80px 160px 100px 36px 36px',
+                            gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13,
+                          }}>
+                            <div style={{color:'var(--text)', display:'flex', alignItems:'center', gap:6}}>
+                              <span>🔧</span>{e.tool_name}
+                            </div>
+                            <div style={{color:'var(--accent)', fontFamily:'var(--font-head)', fontWeight:700}}>{qty}</div>
+                            <div style={{color:'var(--muted)',fontSize:12}}>{unitCost != null ? `$${unitCost}` : '—'}</div>
+                            <div style={{color:'var(--text)',fontSize:12,fontFamily:'var(--font-head)',fontWeight:600}}>{lineTotal != null ? `$${lineTotal}` : '—'}</div>
+                            <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
+                            <div style={{color:'var(--text)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>{e.job}</div>
+                            <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</div>
+                            <button
+                              style={{padding:'4px 8px', background:'transparent', color:'var(--accent)', fontSize:14, borderRadius:4, border:'1px solid transparent', cursor:'pointer'}}
+                              onClick={() => { setEditingToolEntry(e); setEditToolForm({ job: e.job, quantity: qty, worker_name: e.worker_name || '' }); setEditToolJobSearch(e.job || ''); setEditToolJobDropOpen(false) }}
+                              title="Edit"
+                            >✎</button>
+                            <button style={S.deleteBtn} onClick={() => deleteToolEntry(e.id)} title="Delete">✕</button>
                           </div>
-                          <div style={{color:'var(--accent)', fontFamily:'var(--font-head)', fontWeight:700}}>{qty}</div>
-                          <div style={{color:'var(--muted)',fontSize:12}}>{unitCost != null ? `$${unitCost}` : '—'}</div>
-                          <div style={{color:'var(--text)',fontSize:12,fontFamily:'var(--font-head)',fontWeight:600}}>{lineTotal != null ? `$${lineTotal}` : '—'}</div>
-                          <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
-                          <div style={{color:'var(--text)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>{e.job}</div>
-                          <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</div>
-                          <button style={S.deleteBtn} onClick={() => deleteToolEntry(e.id)} title="Delete">✕</button>
-                        </div>
+                          {editingToolEntry?.id === e.id && (
+                            <div style={{gridColumn:'1/-1', background:'var(--surface2)', border:'1px solid var(--accent)', borderRadius:8, padding:'16px 20px', margin:'0 0 4px 0'}}>
+                              <div style={{fontFamily:'var(--font-head)', fontSize:13, fontWeight:700, color:'var(--accent)', letterSpacing:1, marginBottom:12}}>
+                                EDITING: 🔧 {e.tool_name}
+                              </div>
+                              <div style={{display:'grid', gridTemplateColumns:'1fr 100px 1fr', gap:12, marginBottom:12}}>
+                                <div>
+                                  <label style={S.fieldLabel}>Job <span style={S.requiredStar}>*</span></label>
+                                  <div ref={editToolJobSearchRef} style={S.jobComboWrap}>
+                                    <input
+                                      style={{...S.jobComboInput, fontSize:13,
+                                        borderColor: editToolJobDropOpen ? 'var(--accent)' : (editToolForm.job ? 'var(--accent)' : 'var(--border)'),
+                                        borderRadius: editToolJobDropOpen ? '6px 6px 0 0' : 6,
+                                      }}
+                                      placeholder="Type to search…"
+                                      value={editToolJobSearch || editToolForm.job || ''}
+                                      onChange={ev => { setEditToolJobSearch(ev.target.value); setEditToolForm(f => ({...f, job: ''})); setEditToolJobDropOpen(true) }}
+                                      onFocus={() => { setEditToolJobSearch(editToolForm.job || ''); setEditToolJobDropOpen(true) }}
+                                      autoComplete="off"
+                                    />
+                                    {editToolJobDropOpen && (() => {
+                                      const q = (editToolJobSearch || '').toLowerCase()
+                                      const filtered = jobs.filter(j => j.toLowerCase().includes(q))
+                                      return filtered.length > 0 ? (
+                                        <div style={S.jobDropdown}>
+                                          {filtered.map(j => (
+                                            <div key={j} style={S.jobDropItem(false)}
+                                              onMouseEnter={ev => { ev.currentTarget.style.background='var(--accent)'; ev.currentTarget.style.color='#fff' }}
+                                              onMouseLeave={ev => { ev.currentTarget.style.background='transparent'; ev.currentTarget.style.color='var(--text)' }}
+                                              onMouseDown={ev => { ev.preventDefault(); setEditToolForm(f => ({...f, job: j})); setEditToolJobSearch(j); setEditToolJobDropOpen(false) }}
+                                            >{j}</div>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <div style={S.jobDropdown}><div style={{padding:'10px 14px', color:'var(--muted)', fontSize:12, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div></div>
+                                      )
+                                    })()}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label style={S.fieldLabel}>Qty <span style={S.requiredStar}>*</span></label>
+                                  <input type="number" min="1" style={{...S.fieldInput, fontSize:13}} value={editToolForm.quantity} onChange={ev => setEditToolForm(f => ({...f, quantity: ev.target.value}))} />
+                                </div>
+                                <div>
+                                  <label style={S.fieldLabel}>Worker</label>
+                                  <input style={{...S.fieldInput, fontSize:13}} value={editToolForm.worker_name} onChange={ev => setEditToolForm(f => ({...f, worker_name: ev.target.value}))} />
+                                </div>
+                              </div>
+                              <div style={{display:'flex', gap:8}}>
+                                <button style={{...S.btnPrimary(true), flex:'none', padding:'8px 20px', fontSize:13}} onClick={saveEditToolEntry}>Save</button>
+                                <button style={{...S.btnSecondary, padding:'8px 16px', fontSize:13}} onClick={() => { setEditingToolEntry(null); setEditToolJobSearch(''); setEditToolJobDropOpen(false) }}>Cancel</button>
+                              </div>
+                            </div>
+                          )}
+                        </React.Fragment>
                       )
                     })}
                     {totalCost > 0 && (
