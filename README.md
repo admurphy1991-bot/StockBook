@@ -5,7 +5,7 @@ AI-powered voice stock entry app for construction sites.
 ## How It Works
 
 1. Worker taps the mic and says e.g. *"Sika Boom, job 2847, 3 cans, taken by Dave"*
-2. Claude AI matches the product, extracts job/qty/name
+2. OpenAI matches the product, extracts job/qty/name
 3. If ambiguous (e.g. "Sikadur UA" could be 4L or 8L) the worker taps the right one
 4. Worker reviews and confirms — entry saves to PostgreSQL
 5. Admin exports to CSV in the stock book import format
@@ -63,7 +63,7 @@ Railway auto-deploys on every push to `main`. Your app will be live at the Railw
 cd backend
 pip install -r requirements.txt
 export DATABASE_URL="postgresql://user:pass@localhost/stockbook"
-export ANTHROPIC_API_KEY="sk-ant-..."
+export OPENAI_API_KEY="sk-..."
 uvicorn main:app --reload
 ```
 
