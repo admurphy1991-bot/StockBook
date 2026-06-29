@@ -275,8 +275,7 @@ DEFAULT_PRODUCTS = [
 ]
 
 DEFAULT_JOBS = [
-    "12345 - Test Job",
-    "2306 - Warranty Work - Sansom Construction Systems Ltd",
+"2306 - Warranty Work - Sansom Construction Systems Ltd",
     "17221 - WTJO Gt Nth Rd 1405 Waterview",
     "19239 - Sansom Concrete Repairs",
     "R9999 - Pre-Investigation / Quote / Admin Time",
