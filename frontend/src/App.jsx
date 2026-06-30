@@ -278,6 +278,20 @@ export default function App() {
 
   const [handTools, setHandTools] = useState([]) // {name, cost}[]
 
+  // ── Room Lock ────────────────────────────────────────────────────
+  const [roomLocked, setRoomLocked] = useState(() => localStorage.getItem('sb_locked') === 'true')
+  const [awaySince, setAwaySince] = useState(() => { const v = localStorage.getItem('sb_since'); return v ? parseInt(v) : null })
+  const [lockAlerts, setLockAlerts] = useState(() => { try { return JSON.parse(localStorage.getItem('sb_alerts') || '[]') } catch(e) { return [] } })
+  const [showLockModal, setShowLockModal] = useState(false)
+  const [showUnlockModal, setShowUnlockModal] = useState(false)
+  const [lockPinEntry, setLockPinEntry] = useState('')
+  const [lockPinError, setLockPinError] = useState(false)
+  const [awaySummary, setAwaySummary] = useState(null)
+  const [lockPin, setLockPin] = useState(() => localStorage.getItem('sb_pin') || '4729')
+  const [lockWebhook, setLockWebhook] = useState(() => localStorage.getItem('sb_lock_webhook') || '')
+  const [lockNote, setLockNote] = useState(() => localStorage.getItem('sb_lock_note') || 'Hemi Walker')
+  const [confirmingAdd, setConfirmingAdd] = useState(false)
+
   // Pending tools from AI match (before adding to basket)
   const [pendingTools, setPendingTools] = useState([]) // string[]
 
@@ -514,6 +528,13 @@ export default function App() {
       if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
       if (!basketWorker && form.worker_name) setBasketWorker(form.worker_name)
 
+      // ── Room lock alert ──────────────────────────────────────────────
+      if (roomLocked) {
+        const alertItems = confirmedProducts.map(p => ({ code: p.code, desc: p.description, qty: parseFloat(p.quantity), unit: p.unit, worker: form.worker_name, job: form.job, time: new Date().toISOString() }))
+        setLockAlerts(prev => [...prev, ...alertItems])
+        sendLockAlert(alertItems)
+      }
+
       const productMsg = confirmedProducts.length > 0 ? `${confirmedProducts.length} product${confirmedProducts.length > 1 ? 's' : ''}` : ''
       const toolMsg = savedTools.length > 0 ? `${productMsg ? ' + ' : ''}${savedTools.length} tool${savedTools.length > 1 ? 's' : ''}` : ''
       showToast(`${productMsg}${toolMsg} added to basket ✓`)
@@ -673,6 +694,65 @@ export default function App() {
     setSyncing(false)
   }
 
+  // ── Lock persistence ──────────────────────────────────────────────
+  useEffect(() => {
+    localStorage.setItem('sb_locked', roomLocked)
+    if (awaySince) localStorage.setItem('sb_since', String(awaySince))
+    else localStorage.removeItem('sb_since')
+    localStorage.setItem('sb_alerts', JSON.stringify(lockAlerts))
+  }, [roomLocked, awaySince, lockAlerts])
+
+  // ── Pack-size helpers ─────────────────────────────────────────────
+  function packInfo(product) {
+    if (!product) return null
+    const text = (product.description || '').toLowerCase()
+    let m = text.match(/box of ([\d,]+)/)
+    if (m) return { pack: parseInt(m[1].replace(/,/g, '')), label: 'box of ' + m[1] }
+    m = text.match(/([\d,]+)\s*per\s*(?:box|bag|carton|ctn)/)
+    if (m) return { pack: parseInt(m[1].replace(/,/g, '')), label: m[1] + ' per pack' }
+    return null
+  }
+  const COUNT_UNITS_LK = ['ROLL','BAG','BOX','PAIL','KIT','EA','SHEET','CTN','CAN','M2']
+  function qtyWarn(product, qty) {
+    const n = parseFloat(qty)
+    if (!(n > 0)) return null
+    const pk = packInfo(product)
+    if (pk && n >= pk.pack && n % pk.pack === 0) return { suggest: n / pk.pack, msg: n + ' sounds like the piece count — that\'s ' + (n / pk.pack) + ' ' + product.unit + ' (each = ' + pk.label + ')' }
+    if (pk && n > pk.pack) { const sg = Math.round(n / pk.pack); return { suggest: sg, msg: 'Counted in ' + product.unit + ' (each = ' + pk.label + '). Did you mean ' + sg + '?' } }
+    if (COUNT_UNITS_LK.includes((product.unit || '').toUpperCase()) && n > 50) return { suggest: null, msg: 'That\'s a lot of ' + product.unit + ' — double-check.' }
+    return null
+  }
+  function fmtLockDur(ms) {
+    const m = Math.round(ms / 60000)
+    if (m < 1) return 'under a minute'
+    if (m < 60) return m + ' min'
+    const h = Math.floor(m / 60); return h + 'h ' + (m % 60) + 'm'
+  }
+  async function sendLockAlert(entries) {
+    if (!lockWebhook) return
+    try {
+      await fetch(lockWebhook, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'stock_taken_while_locked', locked_by: lockNote, entries, at: new Date().toISOString() }) })
+    } catch(e) {}
+  }
+  function doLock() {
+    setRoomLocked(true); setAwaySince(Date.now()); setLockAlerts([]); setShowLockModal(false)
+    showToast('Room locked — you\'ll be alerted to anything taken')
+  }
+  function doUnlock(pin) {
+    if (pin !== lockPin) { setLockPinError(true); setLockPinEntry(''); return }
+    const dur = fmtLockDur(Date.now() - (awaySince || Date.now()))
+    setAwaySummary({ dur, items: lockAlerts.slice() })
+    setRoomLocked(false); setAwaySince(null); setLockAlerts([])
+    setShowUnlockModal(false); setLockPinEntry(''); setLockPinError(false)
+  }
+  function handleLockPin(d) {
+    if (lockPinEntry.length >= 4) return
+    const v = lockPinEntry + d
+    setLockPinEntry(v); setLockPinError(false)
+    if (v.length === 4) setTimeout(() => doUnlock(v), 130)
+  }
+
   const hasMatches = matchResult?.matches?.length > 0
   const isAmbiguous = matchResult?.ambiguous && matchResult?.matches?.length > 1
   const canSubmit = confirmedProducts.length > 0
@@ -721,6 +801,22 @@ export default function App() {
             <button key={t} style={S.tab(tab===t)} onClick={() => setTab(t)}>{label}</button>
           ))}
         </div>
+        {/* Room lock status pill */}
+        {roomLocked ? (
+          <button onClick={() => setShowUnlockModal(true)} style={{ display:'flex', alignItems:'center', gap:9, background:'rgba(232,163,61,.12)', border:'1.5px solid #E8A33D', borderRadius:8, padding:'6px 14px', cursor:'pointer' }}>
+            <span style={{fontSize:17}}>🔒</span>
+            <span style={{display:'flex', flexDirection:'column', alignItems:'flex-start', lineHeight:1.1}}>
+              <span style={{fontFamily:'var(--font-head)', fontWeight:800, fontSize:13, letterSpacing:1, color:'#E8A33D'}}>ROOM LOCKED</span>
+              <span style={{fontSize:10, color:'#c79a55'}}>{lockNote} away · tap to unlock</span>
+            </span>
+          </button>
+        ) : (
+          <button onClick={() => setShowLockModal(true)} style={{ display:'flex', alignItems:'center', gap:9, background:'rgba(76,175,125,.08)', border:'1.5px solid rgba(76,175,125,.5)', borderRadius:8, padding:'6px 14px', cursor:'pointer' }}>
+            <span style={{width:9, height:9, borderRadius:'50%', background:'var(--success)', boxShadow:'0 0 6px var(--success)'}}></span>
+            <span style={{fontFamily:'var(--font-head)', fontWeight:700, fontSize:13, letterSpacing:1, color:'var(--success)'}}>ROOM OPEN</span>
+          </button>
+        )}
+
         <button
           onClick={() => { setShowReportModal(true); setReportText('') }}
           style={{
@@ -731,6 +827,14 @@ export default function App() {
           }}
         >⚠ <span className="logo-text">Report Issue</span></button>
       </header>
+
+      {/* Away locked banner */}
+      {roomLocked && (
+        <div style={{background:'rgba(232,163,61,.13)', borderBottom:'1px solid rgba(232,163,61,.4)', padding:'10px 22px', display:'flex', alignItems:'center', justifyContent:'center', gap:10, textAlign:'center'}}>
+          <span style={{width:8, height:8, borderRadius:'50%', background:'#E8A33D', flexShrink:0}}></span>
+          <span style={{fontSize:13, color:'#e3c389', lineHeight:1.4}}><strong style={{fontFamily:'var(--font-head)', color:'#E8A33D'}}>ROOM LOCKED</strong> — {lockNote} is away. Stock taken now is logged and you'll be alerted automatically.</span>
+        </div>
+      )}
 
       {/* ── MOBILE BOTTOM NAV ────────────────────────────────────────── */}
       <nav className="mobile-bottom-nav" style={{
@@ -834,6 +938,78 @@ export default function App() {
                 }}
               >{reportSending ? 'Sending…' : 'Send Report'}</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── LOCK MODAL ── */}
+      {showLockModal && (
+        <div onClick={() => setShowLockModal(false)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.72)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+          <div onClick={e => e.stopPropagation()} style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:16,padding:28,width:'100%',maxWidth:460}}>
+            <div style={{fontFamily:'var(--font-head)',fontSize:20,fontWeight:800,letterSpacing:1,textTransform:'uppercase',color:'var(--text)',marginBottom:8}}>🔒 Lock the room?</div>
+            <div style={{fontSize:14,color:'var(--muted)',lineHeight:1.6,marginBottom:20}}>You're heading out. While locked, the app stays usable — but <strong style={{color:'var(--text)'}}>anyone who takes stock must log it</strong>, and you'll get an instant alert.</div>
+            <div style={{marginBottom:20}}>
+              <div style={{fontFamily:'var(--font-head)',fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:'uppercase',color:'var(--muted)',marginBottom:8}}>Alert recipient name (for the notification)</div>
+              <input value={lockNote} onChange={e => { setLockNote(e.target.value); localStorage.setItem('sb_lock_note', e.target.value) }} style={{...S.fieldInput}} placeholder="e.g. Hemi Walker" />
+              <div style={{fontFamily:'var(--font-head)',fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:'uppercase',color:'var(--muted)',marginBottom:8,marginTop:12}}>Webhook URL (Make / Zapier — optional)</div>
+              <input value={lockWebhook} onChange={e => { setLockWebhook(e.target.value); localStorage.setItem('sb_lock_webhook', e.target.value) }} style={{...S.fieldInput}} placeholder="https://hook.make.com/..." />
+              <div style={{fontFamily:'var(--font-head)',fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:'uppercase',color:'var(--muted)',marginBottom:8,marginTop:12}}>Unlock PIN</div>
+              <input value={lockPin} onChange={e => { setLockPin(e.target.value); localStorage.setItem('sb_pin', e.target.value) }} style={{...S.fieldInput,maxWidth:140}} placeholder="4729" maxLength={6} />
+            </div>
+            <div style={{display:'flex',gap:10}}>
+              <button style={S.btnSecondary} onClick={() => setShowLockModal(false)}>Cancel</button>
+              <button style={{...S.btnPrimary(true),flex:1,background:'#E8A33D',color:'#1a1206'}} onClick={doLock}>🔒 Lock &amp; Go</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── UNLOCK PIN MODAL ── */}
+      {showUnlockModal && (
+        <div onClick={() => setShowUnlockModal(false)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.78)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+          <div onClick={e => e.stopPropagation()} style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:16,padding:28,width:'100%',maxWidth:360,textAlign:'center'}}>
+            <div style={{fontFamily:'var(--font-head)',fontSize:20,fontWeight:800,letterSpacing:1,textTransform:'uppercase',color:'var(--text)',marginBottom:6}}>Unlock Room</div>
+            <div style={{fontSize:13,color:'var(--muted)',marginBottom:18}}>Enter your 4-digit PIN</div>
+            <div style={{display:'flex',justifyContent:'center',gap:12,marginBottom:8}}>
+              {[0,1,2,3].map(idx => <div key={idx} style={{width:14,height:14,borderRadius:'50%',background:idx<lockPinEntry.length?'var(--accent)`:'transparent',border:'2px solid '+(idx<lockPinEntry.length?'var(--accent)':'var(--border)')}}></div>)}
+            </div>
+            {lockPinError && <div style={{color:'var(--danger)',fontSize:13,marginBottom:8,fontFamily:'var(--font-head)'}}>Wrong PIN — try again</div>}
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,maxWidth:260,margin:'16px auto 0'}}>
+              {['1','2','3','4','5','6','7','8','9'].map(d => <button key={d} onClick={() => handleLockPin(d)} style={{height:64,borderRadius:12,background:'var(--surface2)',border:'1px solid var(--border)',color:'var(--text)',fontFamily:'var(--font-head)',fontWeight:700,fontSize:26,cursor:'pointer'}}>{d}</button>)}
+              <button onClick={() => { setLockPinEntry(''); setLockPinError(false) }} style={{height:64,borderRadius:12,background:'transparent',border:'1px solid var(--border)',color:'var(--muted)',fontFamily:'var(--font-head)',fontWeight:700,fontSize:16,cursor:'pointer'}}>C</button>
+              <button onClick={() => handleLockPin('0')} style={{height:64,borderRadius:12,background:'var(--surface2)',border:'1px solid var(--border)',color:'var(--text)',fontFamily:'var(--font-head)',fontWeight:700,fontSize:26,cursor:'pointer'}}>0</button>
+              <button onClick={() => setLockPinEntry(p => p.slice(0,-1))} style={{height:64,borderRadius:12,background:'transparent',border:'1px solid var(--border)',color:'var(--muted)',fontSize:22,cursor:'pointer'}}>⌫</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── AWAY SUMMARY MODAL ── */}
+      {awaySummary && (
+        <div onClick={() => setAwaySummary(null)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.78)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+          <div onClick={e => e.stopPropagation()} style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:16,padding:28,width:'100%',maxWidth:500,maxHeight:'85vh',overflowY:'auto'}}>
+            <div style={{fontFamily:'var(--font-head)',fontSize:20,fontWeight:800,letterSpacing:1,textTransform:'uppercase',color:'var(--text)',marginBottom:6}}>🔓 Welcome back</div>
+            <div style={{fontSize:14,color:'var(--muted)',marginBottom:18}}>Room was locked for <strong style={{color:'var(--text)'}}>{awaySummary.dur}</strong>.</div>
+            {awaySummary.items.length === 0 ? (
+              <div style={{textAlign:'center',padding:'20px 0 28px'}}>
+                <div style={{fontSize:36,marginBottom:10}}>✅</div>
+                <div style={{fontFamily:'var(--font-head)',fontSize:18,color:'var(--success)'}}>All quiet — nothing was taken</div>
+              </div>
+            ) : (
+              <>
+                <div style={{display:'flex',gap:12,marginBottom:18}}>
+                  <div style={{flex:1,background:'var(--surface2)',borderRadius:10,padding:'12px 16px'}}><div style={{fontFamily:'var(--font-head)',fontSize:28,fontWeight:800,color:'#E8A33D'}}>{awaySummary.items.length}</div><div style={{fontSize:11,color:'var(--muted)',fontFamily:'var(--font-head)',letterSpacing:1}}>ITEMS TAKEN</div></div>
+                  <div style={{flex:1,background:'var(--surface2)',borderRadius:10,padding:'12px 16px'}}><div style={{fontFamily:'var(--font-head)',fontSize:28,fontWeight:800,color:'var(--accent)'}}>{[...new Set(awaySummary.items.map(a => a.worker))].length}</div><div style={{fontSize:11,color:'var(--muted)',fontFamily:'var(--font-head)',letterSpacing:1}}>PEOPLE</div></div>
+                </div>
+                {awaySummary.items.map((a, idx) => (
+                  <div key={idx} style={{padding:'12px 14px',background:'var(--surface2)',border:'1px solid rgba(232,163,61,.3)',borderRadius:10,marginBottom:8}}>
+                    <div style={{display:'flex',justifyContent:'space-between',gap:8}}><span style={{fontFamily:'var(--font-head)',fontWeight:700,color:'var(--accent)'}}>{a.code}</span><span style={{fontFamily:'var(--font-head)',fontWeight:700,color:'var(--text)'}}>×{a.qty} {a.unit}</span></div>
+                    <div style={{fontSize:12,color:'var(--muted)',marginTop:3}}>{a.worker} · {a.job}</div>
+                  </div>
+                ))}
+              </>
+            )}
+            <button style={{...S.btnPrimary(true),width:'100%',marginTop:12}} onClick={() => setAwaySummary(null)}>Got it</button>
           </div>
         </div>
       )}
@@ -1097,8 +1273,16 @@ export default function App() {
 
                 <div style={S.btnRow}>
                   <button style={S.btnSecondary} onClick={resetCapture}>Cancel</button>
-                  <button style={S.btnPrimary(canSubmit)} onClick={submitEntry} disabled={!canSubmit}>
-                    {basket.length > 0 ? `+ Add to Basket (${basket.length})` : 'Add to Basket'}
+                  <button
+                    style={{...S.btnPrimary(canSubmit), background: confirmingAdd ? '#E8A33D' : undefined}}
+                    disabled={!canSubmit}
+                    onClick={() => {
+                      const flagged = confirmedProducts.filter(p => qtyWarn(p, p.quantity)).length
+                      if (flagged > 0 && !confirmingAdd) { setConfirmingAdd(true); showToast('Check the amber quantities — tap again to add anyway'); return }
+                      setConfirmingAdd(false); submitEntry()
+                    }}
+                  >
+                    {confirmingAdd ? '⚠ Yes, add anyway' : basket.length > 0 ? '+ Add to Basket (' + basket.length + ')' : 'Add to Basket'}
                   </button>
                 </div>
               </div>
@@ -1724,6 +1908,18 @@ export default function App() {
                 >Unlock</button>
               </div>
             ) : (<>
+
+            {/* Lock config */}
+            <div style={S.settingSection}>
+              <div style={S.settingTitle}>Room Lock</div>
+              <div style={S.settingDesc}>Let a keyholder lock the room before heading out. While locked, every stock entry fires an alert to a webhook (Make, Zapier, etc.) so they know what was taken.</div>
+              <div style={S.field}><label style={S.fieldLabel}>Unlock PIN</label><input style={{...S.syncInput,maxWidth:160}} value={lockPin} onChange={e => { setLockPin(e.target.value); localStorage.setItem('sb_pin', e.target.value) }} placeholder="e.g. 4729" maxLength={6} /></div>
+              <div style={S.field}><label style={S.fieldLabel}>Alert recipient (shown in banner &amp; notifications)</label><input style={S.syncInput} value={lockNote} onChange={e => { setLockNote(e.target.value); localStorage.setItem('sb_lock_note', e.target.value) }} placeholder="e.g. Hemi Walker" /></div>
+              <div style={S.field}><label style={S.fieldLabel}>Webhook URL (Make / Zapier)</label><input style={S.syncInput} value={lockWebhook} onChange={e => { setLockWebhook(e.target.value); localStorage.setItem('sb_lock_webhook', e.target.value) }} placeholder="https://hook.make.com/..." /></div>
+              <div style={S.field}><label style={S.fieldLabel}>Test</label>
+                <button style={S.syncBtn} onClick={() => setShowLockModal(true)}>Try locking the room</button>
+              </div>
+            </div>
 
             {/* Status */}
             <div style={S.settingSection}>
