@@ -34,6 +34,7 @@ async def startup():
                     unit TEXT,
                     gl_code TEXT,
                     worker_name TEXT,
+                    source TEXT,
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
@@ -42,9 +43,10 @@ async def startup():
                     id SERIAL PRIMARY KEY,
                     tool_name TEXT NOT NULL,
                     entry_date DATE NOT NULL,
-                     TEXT NOT NULL,
+                    job TEXT NOT NULL,
                     worker_name TEXT,
                     quantity INTEGER NOT NULL DEFAULT 1,
+                    source TEXT,
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
@@ -63,6 +65,17 @@ async def startup():
                     ALTER TABLE tool_entries ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1
                 """)
                 print("Migrated: added quantity to tool_entries")
+            except Exception:
+                pass  # Column already exists
+            # Migrate: add source column (voice/text) to both tables if missing
+            try:
+                await conn.execute("ALTER TABLE stock_entries ADD COLUMN source TEXT")
+                print("Migrated: added source to stock_entries")
+            except Exception:
+                pass  # Column already exists
+            try:
+                await conn.execute("ALTER TABLE tool_entries ADD COLUMN source TEXT")
+                print("Migrated: added source to tool_entries")
             except Exception:
                 pass  # Column already exists
             await conn.close()
@@ -585,6 +598,7 @@ class EntryCreate(BaseModel):
     unit: str
     gl_code: Optional[str] = None
     worker_name: Optional[str] = None
+    source: Optional[str] = None  # 'voice' or 'text'
 
 @app.get("/api/products")
 async def get_products():
@@ -653,10 +667,10 @@ async def create_entry(entry: EntryCreate):
     try:
         nz_today = datetime.now(NZ_TZ).date()
         row = await conn.fetchrow("""
-            INSERT INTO stock_entries (item_code, entry_date, job, supplier, description, cost_quantity, unit, gl_code, worker_name)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *
+            INSERT INTO stock_entries (item_code, entry_date, job, supplier, description, cost_quantity, unit, gl_code, worker_name, source)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *
         """, entry.item_code, nz_today, entry.job, entry.supplier,
-            entry.description, entry.cost_quantity, entry.unit, entry.gl_code, entry.worker_name)
+            entry.description, entry.cost_quantity, entry.unit, entry.gl_code, entry.worker_name, entry.source)
         return dict(row)
     finally:
         await conn.close()
@@ -771,6 +785,7 @@ class ToolEntryCreate(BaseModel):
     job: str
     worker_name: Optional[str] = None
     quantity: int = 1
+    source: Optional[str] = None  # 'voice' or 'text'
 
 @app.post("/api/tool-entries")
 async def create_tool_entry(entry: ToolEntryCreate):
@@ -778,9 +793,9 @@ async def create_tool_entry(entry: ToolEntryCreate):
     try:
         nz_today = datetime.now(NZ_TZ).date()
         row = await conn.fetchrow("""
-            INSERT INTO tool_entries (tool_name, entry_date, job, worker_name, quantity)
-            VALUES ($1,$2,$3,$4,$5) RETURNING *
-        """, entry.tool_name, nz_today, entry.job, entry.worker_name, entry.quantity)
+            INSERT INTO tool_entries (tool_name, entry_date, job, worker_name, quantity, source)
+            VALUES ($1,$2,$3,$4,$5,$6) RETURNING *
+        """, entry.tool_name, nz_today, entry.job, entry.worker_name, entry.quantity, entry.source)
         return dict(row)
     finally:
         await conn.close()
