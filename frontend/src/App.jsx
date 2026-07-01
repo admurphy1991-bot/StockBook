@@ -502,6 +502,7 @@ export default function App() {
             unit: p.unit,
             gl_code: p.gl || '',
             worker_name: form.worker_name,
+            source: inputMode,
           }),
         })
       }
@@ -513,7 +514,7 @@ export default function App() {
         await fetch('/api/tool-entries', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty }),
+          body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty, source: inputMode }),
         })
         savedTools.push({ ...tool, quantity: qty })
       }
@@ -1032,8 +1033,8 @@ export default function App() {
               {inputMode === 'voice' ? (
                 <>
                   <div style={S.hint}>
-                    Tap the mic and say the product name, job number, quantity, your name — and any tools you're taking.<br/>
-                    <em style={{color:'var(--accent)'}}>e.g. "Hey it's Tony, 5 bags of concrete to job S34477, also grabbed a handsaw, hammer and blade"</em>
+                    Say it all in one go — multiple products, tools, the job and your name. Tap the mic and the app splits it into lines you can check.<br/>
+                    <em style={{color:'var(--accent)'}}>e.g. "Bag of waterstop and two Bituthene 5000 rolls to building G, plus a handsaw and hammer — it's Tony"</em>
                   </div>
                   <button style={S.micBtn(listening)} onClick={toggleListening}>
                     {listening ? '⏹' : '🎤'}
@@ -1057,8 +1058,8 @@ export default function App() {
               ) : (
                 <>
                   <div style={S.hint}>
-                    Type the product name, job number, quantity, your name — and any tools you're taking.<br/>
-                    <em style={{color:'var(--accent)'}}>e.g. "5 bags of concrete, job S34477, Tony — also handsaw, hammer and blade"</em>
+                    Say it all in one go — multiple products, tools, the job and your name. The app splits it into lines you can check.<br/>
+                    <em style={{color:'var(--accent)'}}>e.g. "Bag of waterstop and two Bituthene 5000 rolls to building G, plus a handsaw and hammer — it's Tony"</em>
                   </div>
                   <textarea
                     value={textInput}
@@ -1457,7 +1458,7 @@ export default function App() {
                             await fetch('/api/tool-entries', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty }),
+                              body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty, source: inputMode }),
                             })
                           }
                           if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
@@ -1660,7 +1661,10 @@ export default function App() {
                         <div style={{fontFamily:'var(--font-head)',fontWeight:700,fontSize:13}}>
                           {e.cost_quantity}<span style={{fontSize:10,color:'var(--muted)',marginLeft:2}}>{e.unit}</span>
                         </div>
-                        <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.worker_name}>{e.worker_name || '—'}</div>
+                        <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',display:'flex',alignItems:'center',gap:5}} title={e.worker_name}>
+                          {e.source && <span title={e.source === 'voice' ? 'Voice entry' : 'Typed entry'} style={{fontSize:11,flexShrink:0}}>{e.source === 'voice' ? '🎤' : '⌨️'}</span>}
+                          <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</span>
+                        </div>
                         <button
                           style={{padding:'4px 8px', background:'transparent', color:'var(--accent)', fontSize:14, borderRadius:4, border:'1px solid transparent', cursor:'pointer'}}
                           onClick={() => { setEditingEntry(e); setEditForm({ job: e.job, cost_quantity: e.cost_quantity, worker_name: e.worker_name || '' }); setEditJobSearch(e.job || ''); setEditJobDropOpen(false) }}
@@ -1763,7 +1767,10 @@ export default function App() {
                             <div style={{color:'var(--text)',fontSize:12,fontFamily:'var(--font-head)',fontWeight:600}}>{lineTotal != null ? `$${lineTotal}` : '—'}</div>
                             <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
                             <div style={{color:'var(--text)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>{e.job}</div>
-                            <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</div>
+                            <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',display:'flex',alignItems:'center',gap:5}}>
+                              {e.source && <span title={e.source === 'voice' ? 'Voice entry' : 'Typed entry'} style={{fontSize:11,flexShrink:0}}>{e.source === 'voice' ? '🎤' : '⌨️'}</span>}
+                              <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</span>
+                            </div>
                             <button
                               style={{padding:'4px 8px', background:'transparent', color:'var(--accent)', fontSize:14, borderRadius:4, border:'1px solid transparent', cursor:'pointer'}}
                               onClick={() => { setEditingToolEntry(e); setEditToolForm({ job: e.job, quantity: qty, worker_name: e.worker_name || '' }); setEditToolJobSearch(e.job || ''); setEditToolJobDropOpen(false) }}
@@ -2005,6 +2012,48 @@ export default function App() {
                 <div style={{color:'var(--muted)', fontSize:13}}>Loading status…</div>
               )}
             </div>
+
+            {/* Entry source tracker (voice vs type) */}
+            <div style={S.settingSection}>
+              <div style={S.settingTitle}>Entry Source</div>
+              <div style={S.settingDesc}>How workers are logging entries — by speaking into the mic or typing manually.</div>
+              {(() => {
+                const all = [...entries, ...toolEntries]
+                const voiceCount = all.filter(e => e.source === 'voice').length
+                const textCount = all.filter(e => e.source === 'text').length
+                const unknownCount = all.length - voiceCount - textCount
+                const total = all.length || 1
+                const pct = n => Math.round((n / total) * 100)
+                return (
+                  <>
+                    <div style={{display:'flex', gap:16, flexWrap:'wrap', marginBottom:14}}>
+                      <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)', flex:1, minWidth:140}}>
+                        <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>🎤 VOICE</div>
+                        <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{voiceCount}</div>
+                        <div style={{fontSize:11, color:'var(--muted)'}}>{pct(voiceCount)}% of entries</div>
+                      </div>
+                      <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)', flex:1, minWidth:140}}>
+                        <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>⌨️ TYPED</div>
+                        <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{textCount}</div>
+                        <div style={{fontSize:11, color:'var(--muted)'}}>{pct(textCount)}% of entries</div>
+                      </div>
+                      {unknownCount > 0 && (
+                        <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)', flex:1, minWidth:140}}>
+                          <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>UNKNOWN</div>
+                          <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--muted)'}}>{unknownCount}</div>
+                          <div style={{fontSize:11, color:'var(--muted)'}}>logged before tracking</div>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{height:8, borderRadius:4, overflow:'hidden', display:'flex', background:'var(--surface2)', border:'1px solid var(--border)'}}>
+                      <div style={{width:`${pct(voiceCount)}%`, background:'var(--accent)'}} />
+                      <div style={{width:`${pct(textCount)}%`, background:'#E8A33D'}} />
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+
 
             {/* Manual sync */}
             <div style={S.settingSection}>
