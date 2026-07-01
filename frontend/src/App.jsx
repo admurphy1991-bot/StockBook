@@ -290,7 +290,6 @@ export default function App() {
   const [lockPin, setLockPin] = useState(() => localStorage.getItem('sb_pin') || '4729')
   const [lockWebhook, setLockWebhook] = useState(() => localStorage.getItem('sb_lock_webhook') || '')
   const [lockNote, setLockNote] = useState(() => localStorage.getItem('sb_lock_note') || 'Hemi Walker')
-  const [confirmingAdd, setConfirmingAdd] = useState(false)
 
   // Pending tools from AI match (before adding to basket)
   const [pendingTools, setPendingTools] = useState([]) // string[]
@@ -757,6 +756,7 @@ export default function App() {
   const isAmbiguous = matchResult?.ambiguous && matchResult?.matches?.length > 1
   const canSubmit = confirmedProducts.length > 0
     && confirmedProducts.every(p => p.quantity && String(p.quantity).trim() !== '')
+    && confirmedProducts.every(p => !qtyWarn(p, p.quantity) || p._qtyAck)
     && form.job.trim()
     && form.worker_name.trim()
 
@@ -1109,11 +1109,13 @@ export default function App() {
                 {/* One row per product, each with its own qty input */}
                 {confirmedProducts.map((p, i) => {
                   const missingQty = !p.quantity || String(p.quantity).trim() === ''
+                  const warn = !missingQty ? qtyWarn(p, p.quantity) : null
+                  const showWarn = warn && !p._qtyAck
                   return (
                     <div key={p.code} style={{
                       background: 'var(--surface2)', borderRadius: 8, padding: '12px 16px',
                       marginBottom: 10,
-                      border: `1px solid ${missingQty ? 'var(--danger)' : 'var(--border)'}`,
+                      border: `1px solid ${missingQty ? 'var(--danger)' : showWarn ? '#E8A33D' : 'var(--border)'}`,
                     }}>
                       <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12}}>
                         <div style={{flex:1, minWidth:0}}>
@@ -1127,13 +1129,48 @@ export default function App() {
                             <span style={S.unitHint}>{p.unit}</span>
                           </label>
                           <div style={{display:'flex', alignItems:'center', gap:6}}>
+                            <button
+                              type="button"
+                              title="Decrease"
+                              onClick={() => setConfirmedProducts(cp => cp.map((x, j) => {
+                                if (j !== i) return x
+                                const next = Math.max(0, (parseFloat(x.quantity) || 0) - 1)
+                                return {...x, quantity: String(next), _qtyAck: false}
+                              }))}
+                              style={{
+                                width:40, height:40, borderRadius:8, background:'var(--surface)',
+                                border:'1px solid var(--border)', color:'var(--text)', fontSize:20,
+                                fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center',
+                                justifyContent:'center', flexShrink:0,
+                              }}
+                            >−</button>
                             <input
-                              style={{...S.fieldInput, width:90, textAlign:'right', borderColor: missingQty ? 'var(--danger)' : 'var(--border)'}}
+                              style={{...S.fieldInput, width:80, textAlign:'center', fontSize:18, fontWeight:700, fontFamily:'var(--font-head)', borderColor: missingQty ? 'var(--danger)' : showWarn ? '#E8A33D' : 'var(--border)'}}
                               type="number"
                               value={p.quantity}
                               placeholder="—"
-                              onChange={e => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, quantity: e.target.value} : x))}
+                              onChange={e => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, quantity: e.target.value, _qtyAck: false} : x))}
                             />
+                            <button
+                              type="button"
+                              title="Increase"
+                              onClick={() => setConfirmedProducts(cp => cp.map((x, j) => {
+                                if (j !== i) return x
+                                const next = (parseFloat(x.quantity) || 0) + 1
+                                return {...x, quantity: String(next), _qtyAck: false}
+                              }))}
+                              style={{
+                                width:40, height:40, borderRadius:8, background:'var(--surface)',
+                                border:'1px solid var(--border)', color:'var(--text)', fontSize:20,
+                                fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center',
+                                justifyContent:'center', flexShrink:0,
+                              }}
+                            >+</button>
+                            <span style={{
+                              fontFamily:'var(--font-head)', fontWeight:700, fontSize:11, letterSpacing:1,
+                              color:'var(--accent)', background:'rgba(27,158,212,.12)',
+                              border:'1px solid rgba(27,158,212,.35)', borderRadius:6, padding:'4px 8px', flexShrink:0,
+                            }}>{p.unit}</span>
                             <button
                               title="Remove this product"
                               onClick={() => setConfirmedProducts(cp => cp.filter((_, j) => j !== i))}
@@ -1150,6 +1187,33 @@ export default function App() {
                       {missingQty && (
                         <div style={{fontSize:11, color:'var(--danger)', marginTop:6, fontFamily:'var(--font-head)', letterSpacing:.5}}>
                           ⚠ Quantity required
+                        </div>
+                      )}
+                      {showWarn && (
+                        <div style={{marginTop:10, padding:'10px 12px', background:'rgba(232,163,61,.1)', border:'1px solid rgba(232,163,61,.35)', borderRadius:8}}>
+                          <div style={{fontSize:12.5, color:'#e3c389', lineHeight:1.5, display:'flex', gap:6}}>
+                            <span>⚠</span><span>{warn.msg}</span>
+                          </div>
+                          <div style={{display:'flex', gap:8, marginTop:8}}>
+                            {warn.suggest != null && (
+                              <button
+                                onClick={() => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, quantity: String(warn.suggest), _qtyAck: true} : x))}
+                                style={{
+                                  background:'#E8A33D', color:'#1a1206', border:'none', borderRadius:6,
+                                  padding:'8px 14px', fontFamily:'var(--font-head)', fontWeight:800,
+                                  fontSize:12.5, letterSpacing:.5, cursor:'pointer',
+                                }}
+                              >USE {warn.suggest} {p.unit}</button>
+                            )}
+                            <button
+                              onClick={() => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, _qtyAck: true} : x))}
+                              style={{
+                                background:'transparent', color:'var(--muted)', border:'1px solid var(--border)',
+                                borderRadius:6, padding:'8px 14px', fontFamily:'var(--font-head)', fontWeight:700,
+                                fontSize:12.5, letterSpacing:.5, cursor:'pointer',
+                              }}
+                            >KEEP AS-IS</button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1274,15 +1338,11 @@ export default function App() {
                 <div style={S.btnRow}>
                   <button style={S.btnSecondary} onClick={resetCapture}>Cancel</button>
                   <button
-                    style={{...S.btnPrimary(canSubmit), background: confirmingAdd ? '#E8A33D' : undefined}}
+                    style={S.btnPrimary(canSubmit)}
                     disabled={!canSubmit}
-                    onClick={() => {
-                      const flagged = confirmedProducts.filter(p => qtyWarn(p, p.quantity)).length
-                      if (flagged > 0 && !confirmingAdd) { setConfirmingAdd(true); showToast('Check the amber quantities — tap again to add anyway'); return }
-                      setConfirmingAdd(false); submitEntry()
-                    }}
+                    onClick={submitEntry}
                   >
-                    {confirmingAdd ? '⚠ Yes, add anyway' : basket.length > 0 ? '+ Add to Basket (' + basket.length + ')' : 'Add to Basket'}
+                    {basket.length > 0 ? '+ Add to Basket (' + basket.length + ')' : 'Add to Basket'}
                   </button>
                 </div>
               </div>
