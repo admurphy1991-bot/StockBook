@@ -310,11 +310,11 @@ function dwTodayISO() {
 }
 
 function dwParseTimeToMinutes(raw) {
-  const m = raw.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i)
+  const m = raw.match(/(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i)
   if (!m) return null
   let h = parseInt(m[1], 10)
   const min = m[2] ? parseInt(m[2], 10) : 0
-  const mer = m[3].toLowerCase()
+  const mer = m[3].toLowerCase().replace(/\./g, '')
   if (mer === 'pm' && h !== 12) h += 12
   if (mer === 'am' && h === 12) h = 0
   return h * 60 + min
@@ -905,11 +905,11 @@ export default function App() {
   }
 
   // ── Day Works handlers ──────────────────────────────────────────────
-  function dwSetTab(id) { setDwActiveTab(id); setDwValidationMsg('') }
+  function dwSetTab(id) { setDwActiveTab(id); setDwValidationMsg(''); setDwLastParsed(null) }
 
   function dwGoPrevTab() {
     const idx = DW_TABS.findIndex(t => t.id === dwActiveTab)
-    if (idx > 0) { setDwActiveTab(DW_TABS[idx - 1].id); setDwValidationMsg('') }
+    if (idx > 0) { setDwActiveTab(DW_TABS[idx - 1].id); setDwValidationMsg(''); setDwLastParsed(null) }
   }
 
   function dwGoNext() {
@@ -919,20 +919,20 @@ export default function App() {
       if (!dwVariation) { setDwValidationMsg('Select whether this is Variation Work.'); return }
       if (dwVariation === 'Yes' && !dwVoNumber) { setDwValidationMsg('Select a Variation Number.'); return }
     }
-    if (idx < DW_TABS.length - 1) { setDwActiveTab(DW_TABS[idx + 1].id); setDwValidationMsg('') }
+    if (idx < DW_TABS.length - 1) { setDwActiveTab(DW_TABS[idx + 1].id); setDwValidationMsg(''); setDwLastParsed(null) }
   }
 
   function dwOnCaptureSubmit(overrideText) {
     const text = (overrideText ?? dwCaptureText).trim()
     if (!text) return
     const lower = text.toLowerCase()
-    const looksLikeLabour = /(am|pm|start|finish|worked|working)/i.test(lower)
+    const looksLikeLabour = /(a\.?m\.?|p\.?m\.?|start|finish|worked|working)/i.test(lower)
     const looksLikeMaterial = /^\s*\d/.test(text) || DW_UNIT_WORDS.some(u => new RegExp(`\\d+\\s*${u}\\b`, 'i').test(lower))
 
     if (looksLikeLabour) {
       const nameMatch = text.match(/^([A-Za-z]+(?:\s[A-Za-z]+)?)\s+(?:was|worked|is)/i)
       const name = nameMatch ? nameMatch[1] : text.split(' ')[0]
-      const times = [...lower.matchAll(/\d{1,2}(?::\d{2})?\s*(?:am|pm)/gi)].map(m => m[0])
+      const times = [...lower.matchAll(/\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)/gi)].map(m => m[0])
       const startRaw = times[0], endRaw = times[1]
       const startMin = startRaw ? dwParseTimeToMinutes(startRaw) : null
       const endMin = endRaw ? dwParseTimeToMinutes(endRaw) : null
@@ -966,7 +966,8 @@ export default function App() {
       const ofMatch = text.match(/of\s+(.+)$/i)
       if (ofMatch) item = ofMatch[1]
       else if (unitMatch) item = text.slice(text.toLowerCase().indexOf(unitMatch[1]) + unitMatch[1].length).replace(/^of\s+/i, '').trim()
-      item = item.trim().replace(/\.$/, '') || text
+      item = item.trim().replace(/\.$/, '')
+      if (!item || /^of$/i.test(item)) item = text
       const row = { id: dwIdSeqRef.current++, item, unit: unit || 'unit', qty: qty || '1' }
       setDwMaterialRows(rows => [...rows, row])
       setDwCaptureText('')
