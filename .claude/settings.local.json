@@ -3,7 +3,23 @@
     "allow": [
       "Bash(git init *)",
       "Bash(git remote *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(cp \"/Users/tonymurphy/Downloads/App.jsx\" \"/Users/tonymurphy/Documents/Stockbook app/StockBook-main/frontend/src/App.jsx\")",
+      "Bash(npm install *)",
+      "Bash(pandoc -t markdown \"/Users/tonymurphy/Downloads/Prospero - 303 Remuera Road.docx\")",
+      "Bash(python3 -c \"import docx\")",
+      "Bash(pip3 show *)",
+      "Bash(python3 -c ' *)",
+      "Bash(npm run *)",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('backend/main.py'\\).read\\(\\)\\)\")",
+      "Bash(env)",
+      "Bash(python3 -c \"import asyncpg\")",
+      "Bash(python3 -c \"import openai\")",
+      "Bash(git fetch *)"
     ]
   }
 }

@@ -234,8 +234,106 @@ const S = {
     borderRadius: 6, padding: '10px 14px', color: 'var(--text)', fontSize: 13,
     marginBottom: 10, fontFamily: 'var(--font-body)',
   },
+
+  // ── Day Works ────────────────────────────────────────────────────────────
+  dwToggle: { display: 'flex', gap: 0, marginBottom: 20, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)', width: 'fit-content' },
+  dwToggleBtn: (active) => ({
+    padding: '8px 22px', background: active ? 'var(--accent)' : 'transparent',
+    color: active ? '#fff' : 'var(--muted)', border: 'none',
+    fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: 13, letterSpacing: 1,
+    textTransform: 'uppercase', cursor: 'pointer', transition: 'all .15s',
+  }),
+  dwProgressTrack: { height: 3, background: 'var(--surface2)', borderRadius: 2, overflow: 'hidden' },
+  dwProgressFill: (pct) => ({ height: '100%', background: 'var(--accent)', borderRadius: 2, width: `${pct}%`, transition: 'width .2s' }),
+  dwTabRow: { display: 'flex', gap: 2, marginTop: 10, overflowX: 'auto' },
+  dwTabBtn: (active) => ({
+    flex: 'none', display: 'flex', alignItems: 'center', gap: 6, border: 'none', background: 'none',
+    fontFamily: 'var(--font-head)', fontSize: 12.5, letterSpacing: .5, textTransform: 'uppercase',
+    padding: '8px 10px', borderRadius: '6px 6px 0 0', cursor: 'pointer',
+    color: active ? 'var(--accent)' : 'var(--muted)', fontWeight: 700,
+    borderBottom: `2px solid ${active ? 'var(--accent)' : 'transparent'}`,
+  }),
+  dwTabBadge: (done, active) => ({
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
+    borderRadius: '50%', fontSize: 10.5, fontWeight: 700,
+    background: done ? 'var(--accent)' : (active ? 'transparent' : 'var(--surface2)'),
+    color: done ? '#fff' : (active ? 'var(--accent)' : 'var(--muted)'),
+    border: !done && active ? '1.5px solid var(--accent)' : 'none',
+  }),
+  dwCaptureWrap: { padding: '14px 16px', background: 'var(--surface)', borderBottom: '1px solid var(--border)' },
+  dwMicBtn: (listening) => ({
+    width: 72, height: 72, borderRadius: '50%', border: 'none', cursor: 'pointer', fontSize: 28,
+    background: listening ? 'var(--danger)' : 'var(--accent)', color: '#fff',
+    animation: listening ? 'pulse 1.4s ease-in-out infinite' : 'none',
+  }),
+  dwCaptureDisplay: { width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 14px', minHeight: 24, fontSize: 13.5, color: 'var(--text)', lineHeight: 1.5 },
+  dwCaptureBar: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' },
+  dwLastParsed: { marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, fontSize: 12.5, color: 'var(--accent)', background: 'rgba(27,158,212,.1)', border: '1px solid rgba(27,158,212,.3)', borderRadius: 7, padding: '8px 10px' },
+  dwSection: { background: 'var(--surface)', margin: '14px 14px 0', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' },
+  dwSectionPad: { background: 'var(--surface)', margin: '14px 14px 0', border: '1px solid var(--border)', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', gap: 14 },
+  dwSectionHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: '1px solid var(--border)' },
+  dwSectionTitle: { fontFamily: 'var(--font-head)', fontSize: 15, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--muted)' },
+  dwRow: { padding: '14px 16px', borderBottom: '1px solid var(--surface2)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 },
+  dwRowEmpty: { padding: '22px 16px', textAlign: 'center', fontSize: 13, color: 'var(--muted)' },
+  dwFieldWrap: { display: 'flex', flexDirection: 'column', gap: 6 },
+  dwYesNo: { display: 'flex', border: '1px solid var(--border)', borderRadius: 6, overflow: 'hidden' },
+  dwYesNoBtn: (active, first) => ({
+    flex: 1, border: 'none', padding: 11, fontFamily: 'var(--font-head)', fontSize: 14, fontWeight: 700,
+    letterSpacing: .5, textTransform: 'uppercase', cursor: 'pointer',
+    background: active ? 'var(--accent)' : 'var(--surface2)', color: active ? '#fff' : 'var(--muted)',
+    borderRight: first && !active ? '1px solid var(--border)' : 'none',
+  }),
+  dwCompleteWrap: { padding: '48px 24px', display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center', textAlign: 'center' },
+  dwCheckCircle: { width: 64, height: 64, borderRadius: '50%', background: 'rgba(76,175,125,.12)', border: '1px solid var(--success)', color: 'var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 },
+  dwWebhookNote: { marginTop: 2, display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(27,158,212,.1)', border: '1px solid rgba(27,158,212,.3)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--muted)' },
+  dwLogCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 14, marginBottom: 10 },
+  dwStatusBadge: (color) => ({ fontFamily: 'var(--font-head)', fontSize: 11, fontWeight: 700, letterSpacing: .5, textTransform: 'uppercase', padding: '4px 10px', borderRadius: 20, background: color + '26', color }),
+  dwPdfPage: { background: '#eef1f5', minHeight: 400, padding: 18, borderRadius: 8, color: '#1a1f27' },
+  dwPdfSheet: { background: '#fff', borderRadius: 6, padding: '22px 20px', fontFamily: 'Arial,Helvetica,sans-serif', color: '#1a1f27', boxShadow: '0 2px 10px rgba(0,0,0,.08)' },
+  dwPdfTh: { border: '1px solid #ccc', padding: 5, textAlign: 'left', background: '#f3f4f6' },
+  dwPdfTd: { border: '1px solid #ccc', padding: 5 },
 }
 
+
+// ── Day Works helpers ─────────────────────────────────────────────────────────
+const DW_TABS = [
+  { id: 'details', label: 'Details' },
+  { id: 'labour', label: 'Labour' },
+  { id: 'materials', label: 'Materials' },
+  { id: 'comments', label: 'Comments' },
+  { id: 'signoff', label: 'Sign-off' },
+]
+const DW_UNIT_WORDS = ['bags', 'bag', 'metres', 'meters', 'm', 'kg', 'tonnes', 'tonne', 'boxes', 'box', 'units', 'unit', 'litres', 'litre', 'l', 'pieces', 'piece', 'sheets', 'sheet', 'rolls', 'roll']
+
+function dwTodayISO() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function dwParseTimeToMinutes(raw) {
+  const m = raw.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i)
+  if (!m) return null
+  let h = parseInt(m[1], 10)
+  const min = m[2] ? parseInt(m[2], 10) : 0
+  const mer = m[3].toLowerCase()
+  if (mer === 'pm' && h !== 12) h += 12
+  if (mer === 'am' && h === 12) h = 0
+  return h * 60 + min
+}
+
+function dwFormatMinutes(mins) {
+  let h = Math.floor(mins / 60)
+  const mm = mins % 60
+  const mer = h >= 12 ? 'pm' : 'am'
+  let h12 = h % 12; if (h12 === 0) h12 = 12
+  return mm ? `${h12}:${String(mm).padStart(2, '0')}${mer}` : `${h12}${mer}`
+}
+
+const DW_FRESH_FORM = {
+  dwJob: '', dwDate: dwTodayISO(), dwVariation: '', dwVoNumber: '', dwLocation: '',
+  dwLabourRows: [], dwMaterialRows: [], dwComments: '', dwPhotos: [],
+  dwCaptureText: '', dwLastParsed: null, dwSignoffMode: 'glass', dwClientName: '', dwClientEmail: '',
+  dwSigned: false, dwValidationMsg: '', dwActiveTab: 'details', dwInputMode: 'voice',
+}
 
 export default function App() {
   const [tab, setTab] = useState('capture')
@@ -256,6 +354,7 @@ export default function App() {
   const [textInput, setTextInput] = useState('')
   const [jobs, setJobs] = useState([])
   const [products, setProducts] = useState([])
+  const [vos, setVos] = useState([])
 
   // Reference tab state
   const [refTab, setRefTab] = useState('tools') // 'tools' | 'products'
@@ -323,6 +422,48 @@ export default function App() {
   const [settingsPassword, setSettingsPassword] = useState('')
   const [settingsPasswordError, setSettingsPasswordError] = useState(false)
 
+  // ── Day Works ────────────────────────────────────────────────────
+  const [dwView, setDwView] = useState('new') // 'new' | 'log'
+  const [dwStep, setDwStep] = useState('form') // 'form' | 'complete' | 'pdfPreview'
+  const [dwJob, setDwJob] = useState('')
+  const [dwDate, setDwDate] = useState(() => dwTodayISO())
+  const [dwVariation, setDwVariation] = useState('')
+  const [dwVoNumber, setDwVoNumber] = useState('')
+  const [dwLocation, setDwLocation] = useState('')
+  const [dwLabourRows, setDwLabourRows] = useState([])
+  const [dwMaterialRows, setDwMaterialRows] = useState([])
+  const [dwComments, setDwComments] = useState('')
+  const [dwPhotos, setDwPhotos] = useState([])
+  const [dwCaptureText, setDwCaptureText] = useState('')
+  const [dwLastParsed, setDwLastParsed] = useState(null)
+  const [dwSignoffMode, setDwSignoffMode] = useState('glass')
+  const [dwClientName, setDwClientName] = useState('')
+  const [dwClientEmail, setDwClientEmail] = useState('')
+  const [dwSigned, setDwSigned] = useState(false)
+  const [dwValidationMsg, setDwValidationMsg] = useState('')
+  const [dwActiveTab, setDwActiveTab] = useState('details')
+  const [dwInputMode, setDwInputMode] = useState('voice')
+  const [dwListening, setDwListening] = useState(false)
+  const [dwSubmitting, setDwSubmitting] = useState(false)
+  const [dwLastSubmitted, setDwLastSubmitted] = useState(null)
+
+  const [dwEntries, setDwEntries] = useState([])
+  const [dwFilterJob, setDwFilterJob] = useState('')
+  const [dwFilterVariation, setDwFilterVariation] = useState('all')
+  const [dwFilterStatus, setDwFilterStatus] = useState('all')
+
+  const [dwJobSearch, setDwJobSearch] = useState('')
+  const [dwJobDropOpen, setDwJobDropOpen] = useState(false)
+  const dwJobSearchRef = useRef(null)
+
+  const [dwWebhookUrl, setDwWebhookUrl] = useState(() => localStorage.getItem('sb_dayworks_webhook') || '')
+
+  const dwRecognitionRef = useRef(null)
+  const dwFileInputRef = useRef(null)
+  const dwSigCanvasRef = useRef(null)
+  const dwDrawingRef = useRef(false)
+  const dwIdSeqRef = useRef(1)
+
   const recognitionRef = useRef(null)
   const transcriptRef = useRef('')
   const lastChunkRef = useRef('')
@@ -334,6 +475,7 @@ export default function App() {
       if (editJobSearchRef.current && !editJobSearchRef.current.contains(e.target)) setEditJobDropOpen(false)
       if (editToolJobSearchRef.current && !editToolJobSearchRef.current.contains(e.target)) setEditToolJobDropOpen(false)
       if (basketJobSearchRef.current && !basketJobSearchRef.current.contains(e.target)) setBasketJobDropOpen(false)
+      if (dwJobSearchRef.current && !dwJobSearchRef.current.contains(e.target)) setDwJobDropOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -348,10 +490,19 @@ export default function App() {
   useEffect(() => {
     loadEntries()
     loadToolEntries()
+    loadDayworksEntries()
     fetch('/api/jobs').then(r => r.json()).then(setJobs).catch(() => {})
     fetch('/api/hand-tools').then(r => r.json()).then(setHandTools).catch(() => {})
     fetch('/api/products').then(r => r.json()).then(setProducts).catch(() => {})
+    fetch('/api/vos').then(r => r.json()).then(setVos).catch(() => {})
   }, [])
+
+  async function loadDayworksEntries() {
+    try {
+      const r = await fetch('/api/dayworks')
+      setDwEntries(await r.json())
+    } catch {}
+  }
 
   useEffect(() => {
     if (tab === 'settings') loadWebhookStatus()
@@ -753,6 +904,218 @@ export default function App() {
     if (v.length === 4) setTimeout(() => doUnlock(v), 130)
   }
 
+  // ── Day Works handlers ──────────────────────────────────────────────
+  function dwSetTab(id) { setDwActiveTab(id); setDwValidationMsg('') }
+
+  function dwGoPrevTab() {
+    const idx = DW_TABS.findIndex(t => t.id === dwActiveTab)
+    if (idx > 0) { setDwActiveTab(DW_TABS[idx - 1].id); setDwValidationMsg('') }
+  }
+
+  function dwGoNext() {
+    const idx = DW_TABS.findIndex(t => t.id === dwActiveTab)
+    if (dwActiveTab === 'details') {
+      if (!dwJob) { setDwValidationMsg('Job Name is required.'); return }
+      if (!dwVariation) { setDwValidationMsg('Select whether this is Variation Work.'); return }
+      if (dwVariation === 'Yes' && !dwVoNumber) { setDwValidationMsg('Select a Variation Number.'); return }
+    }
+    if (idx < DW_TABS.length - 1) { setDwActiveTab(DW_TABS[idx + 1].id); setDwValidationMsg('') }
+  }
+
+  function dwOnCaptureSubmit(overrideText) {
+    const text = (overrideText ?? dwCaptureText).trim()
+    if (!text) return
+    const lower = text.toLowerCase()
+    const looksLikeLabour = /(am|pm|start|finish|worked|working)/i.test(lower)
+    const looksLikeMaterial = /^\s*\d/.test(text) || DW_UNIT_WORDS.some(u => new RegExp(`\\d+\\s*${u}\\b`, 'i').test(lower))
+
+    if (looksLikeLabour) {
+      const nameMatch = text.match(/^([A-Za-z]+(?:\s[A-Za-z]+)?)\s+(?:was|worked|is)/i)
+      const name = nameMatch ? nameMatch[1] : text.split(' ')[0]
+      const times = [...lower.matchAll(/\d{1,2}(?::\d{2})?\s*(?:am|pm)/gi)].map(m => m[0])
+      const startRaw = times[0], endRaw = times[1]
+      const startMin = startRaw ? dwParseTimeToMinutes(startRaw) : null
+      const endMin = endRaw ? dwParseTimeToMinutes(endRaw) : null
+      let hoursLabel = '—'
+      if (startMin != null && endMin != null) {
+        let diff = endMin - startMin
+        if (diff < 0) diff += 24 * 60
+        hoursLabel = (diff / 60).toFixed(1).replace(/\.0$/, '') + ' hrs'
+      }
+      const activityMatch = text.match(/on ([a-zA-Z\s]+?)(?:\.|$)/i)
+      const activity = activityMatch ? activityMatch[1].trim() : 'General labour'
+      const row = {
+        id: dwIdSeqRef.current++, name, activity,
+        start: startRaw ? dwFormatMinutes(startMin) : '—',
+        end: endRaw ? dwFormatMinutes(endMin) : '—',
+        hoursLabel,
+      }
+      setDwLabourRows(rows => [...rows, row])
+      setDwCaptureText('')
+      setDwActiveTab('labour')
+      setDwLastParsed({ type: 'labour', id: row.id, summary: `Added ${name} · ${row.hoursLabel} (${activity})` })
+      return
+    }
+
+    if (looksLikeMaterial) {
+      const qtyMatch = text.match(/(\d+(?:\.\d+)?)/)
+      const qty = qtyMatch ? qtyMatch[1] : ''
+      const unitMatch = lower.match(new RegExp(`\\b(${DW_UNIT_WORDS.join('|')})\\b`))
+      const unit = unitMatch ? unitMatch[1] : ''
+      let item = text
+      const ofMatch = text.match(/of\s+(.+)$/i)
+      if (ofMatch) item = ofMatch[1]
+      else if (unitMatch) item = text.slice(text.toLowerCase().indexOf(unitMatch[1]) + unitMatch[1].length).replace(/^of\s+/i, '').trim()
+      item = item.trim().replace(/\.$/, '') || text
+      const row = { id: dwIdSeqRef.current++, item, unit: unit || 'unit', qty: qty || '1' }
+      setDwMaterialRows(rows => [...rows, row])
+      setDwCaptureText('')
+      setDwActiveTab('materials')
+      setDwLastParsed({ type: 'material', id: row.id, summary: `Added ${qty || 1} ${unit || 'unit'} — ${item}` })
+      return
+    }
+
+    setDwLastParsed({ type: 'unknown', id: null, summary: `Couldn't tell if that's labour or materials — try "Steve worked 9am-5pm" or "20 bags of cement"` })
+    setDwCaptureText('')
+  }
+
+  function dwOnCaptureKeyDown(e) { if (e.key === 'Enter') dwOnCaptureSubmit() }
+
+  function dwUndoLast() {
+    if (!dwLastParsed) return
+    if (dwLastParsed.type === 'labour') setDwLabourRows(rows => rows.filter(r => r.id !== dwLastParsed.id))
+    else if (dwLastParsed.type === 'material') setDwMaterialRows(rows => rows.filter(r => r.id !== dwLastParsed.id))
+    setDwLastParsed(null)
+  }
+
+  function dwDeleteLabourRow(id) { setDwLabourRows(rows => rows.filter(r => r.id !== id)) }
+  function dwDeleteMaterialRow(id) { setDwMaterialRows(rows => rows.filter(r => r.id !== id)) }
+
+  function dwToggleListen() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) {
+      const fallback = dwCaptureText.trim() || 'Steve worked 9:30am to 6pm on formwork'
+      setDwCaptureText(fallback)
+      dwOnCaptureSubmit(fallback)
+      return
+    }
+    if (dwListening) { dwRecognitionRef.current?.stop(); return }
+    const rec = new SR()
+    rec.lang = 'en-NZ'
+    rec.onresult = (ev) => {
+      const text = ev.results[0][0].transcript
+      setDwCaptureText(text)
+      dwOnCaptureSubmit(text)
+    }
+    rec.onend = () => setDwListening(false)
+    rec.onerror = () => setDwListening(false)
+    dwRecognitionRef.current = rec
+    setDwListening(true)
+    rec.start()
+  }
+
+  function dwOpenCamera() { dwFileInputRef.current && dwFileInputRef.current.click() }
+  function dwOnFilesSelected(e) {
+    const files = Array.from(e.target.files || [])
+    files.forEach((f) => {
+      const reader = new FileReader()
+      reader.onload = () => setDwPhotos(p => [...p, { id: dwIdSeqRef.current++, src: reader.result }])
+      reader.readAsDataURL(f)
+    })
+    e.target.value = ''
+  }
+  function dwRemovePhoto(id) { setDwPhotos(p => p.filter(x => x.id !== id)) }
+
+  function dwGetPos(e) {
+    const canvas = dwSigCanvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY }
+  }
+  function dwOnSigDown(e) {
+    dwDrawingRef.current = true
+    const ctx = dwSigCanvasRef.current.getContext('2d')
+    const p = dwGetPos(e)
+    ctx.strokeStyle = '#e8ecf2'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'
+    ctx.beginPath(); ctx.moveTo(p.x, p.y)
+    setDwSigned(true)
+  }
+  function dwOnSigMove(e) {
+    if (!dwDrawingRef.current) return
+    const ctx = dwSigCanvasRef.current.getContext('2d')
+    const p = dwGetPos(e)
+    ctx.lineTo(p.x, p.y); ctx.stroke()
+  }
+  function dwOnSigUp() { dwDrawingRef.current = false }
+  function dwClearSignature() {
+    const canvas = dwSigCanvasRef.current
+    if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    setDwSigned(false)
+  }
+
+  function dwResetForm() {
+    setDwJob(''); setDwJobSearch(''); setDwJobDropOpen(false)
+    setDwDate(dwTodayISO()); setDwVariation(''); setDwVoNumber(''); setDwLocation('')
+    setDwLabourRows([]); setDwMaterialRows([]); setDwComments(''); setDwPhotos([])
+    setDwCaptureText(''); setDwLastParsed(null); setDwSignoffMode('glass'); setDwClientName(''); setDwClientEmail('')
+    setDwSigned(false); setDwValidationMsg(''); setDwActiveTab('details'); setDwInputMode('voice')
+    dwClearSignature()
+    setDwStep('form')
+  }
+
+  function dwStartNew() { dwResetForm(); setDwView('new') }
+
+  async function dwSendWebhook(entry) {
+    if (!dwWebhookUrl) return
+    try {
+      await fetch(dwWebhookUrl, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'dayworks_sheet_submitted', entry, at: new Date().toISOString() }),
+      })
+    } catch (e) {}
+  }
+
+  async function dwSubmitForm() {
+    if (!dwJob || !dwVariation) {
+      setDwActiveTab('details'); setDwValidationMsg('Job Name and Variation Work are required.'); return
+    }
+    if (dwVariation === 'Yes' && !dwVoNumber) {
+      setDwActiveTab('details'); setDwValidationMsg('Select a Variation Number.'); return
+    }
+    if (dwSignoffMode === 'glass' && !dwSigned) {
+      setDwActiveTab('signoff'); setDwValidationMsg('The client needs to sign before submitting.'); return
+    }
+    if (dwSignoffMode === 'email' && !dwClientEmail) {
+      setDwActiveTab('signoff'); setDwValidationMsg("Enter the client's email."); return
+    }
+    setDwSubmitting(true)
+    const signatureDataUrl = dwSignoffMode === 'glass' && dwSigCanvasRef.current ? dwSigCanvasRef.current.toDataURL() : null
+    const payload = {
+      job: dwJob, date: dwDate, variation: dwVariation, vo_number: dwVariation === 'Yes' ? dwVoNumber : null,
+      location: dwLocation, labour_rows: dwLabourRows, material_rows: dwMaterialRows, comments: dwComments,
+      photos: dwPhotos, signoff_mode: dwSignoffMode, client_name: dwClientName || null,
+      client_email: dwSignoffMode === 'email' ? dwClientEmail : null,
+      signature_data_url: signatureDataUrl,
+      status: dwSignoffMode === 'glass' ? 'Signed on glass' : 'Sent to client',
+    }
+    try {
+      const r = await fetch('/api/dayworks', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      })
+      if (!r.ok) throw new Error('save failed')
+      const saved = await r.json()
+      dwSendWebhook(saved)
+      setDwLastSubmitted(saved)
+      setDwStep('complete')
+      setDwValidationMsg('')
+      loadDayworksEntries()
+    } catch (e) {
+      showToast('Save failed — try again')
+    }
+    setDwSubmitting(false)
+  }
+
   const hasMatches = matchResult?.matches?.length > 0
   const isAmbiguous = matchResult?.ambiguous && matchResult?.matches?.length > 1
   const canSubmit = confirmedProducts.length > 0
@@ -797,7 +1160,7 @@ export default function App() {
           <span className="logo-text" style={S.logoSub}>Stock Book</span>
         </div>
         <div className="desktop-tabs" style={S.tabs}>
-          {[['capture','⬤ Capture'],['log','☰ Log'],['reference','📋 Reference'],['qr','⊞ QR'],['settings','⚙ Settings']].map(([t,label]) => (
+          {[['capture','⬤ Capture'],['log','☰ Log'],['dayworks','🧾 Day Works'],['reference','📋 Reference'],['qr','⊞ QR'],['settings','⚙ Settings']].map(([t,label]) => (
             <button key={t} style={S.tab(tab===t)} onClick={() => setTab(t)}>{label}</button>
           ))}
         </div>
@@ -845,6 +1208,7 @@ export default function App() {
         {[
           ['capture', '⬤', 'Capture'],
           ['log', '☰', 'Log'],
+          ['dayworks', '🧾', 'Dayworks'],
           ['reference', '📋', 'Reference'],
           ['qr', '⊞', 'QR'],
           ['settings', '⚙', 'Settings'],
@@ -1785,6 +2149,422 @@ export default function App() {
           </div>
         )}
 
+        {/* ── DAY WORKS TAB ────────────────────────────────────────── */}
+        {tab === 'dayworks' && (() => {
+          const dwIdx = DW_TABS.findIndex(t => t.id === dwActiveTab)
+          const dwDetailsDone = !!dwJob && !!dwVariation && (dwVariation !== 'Yes' || !!dwVoNumber)
+          const dwLabourDone = dwLabourRows.length > 0
+          const dwMaterialsDone = dwMaterialRows.length > 0
+          const dwCommentsDone = dwComments.trim().length > 0 || dwPhotos.length > 0
+          const dwSignoffDone = dwSignoffMode === 'glass' ? dwSigned : !!dwClientEmail
+          const dwDoneMap = { details: dwDetailsDone, labour: dwLabourDone, materials: dwMaterialsDone, comments: dwCommentsDone, signoff: dwSignoffDone }
+          const dwIsLastTab = dwIdx === DW_TABS.length - 1
+          const dwProgressPct = (dwIdx / (DW_TABS.length - 1)) * 100
+          const dwQ = dwJobSearch.toLowerCase()
+          const dwJobMatches = jobs.filter(j => j.toLowerCase().includes(dwQ))
+          const dwJobNumber = (dwJob.split(' - ')[0] || '').trim()
+          const dwJobVos = vos.filter(v => v.job === dwJobNumber)
+
+          const dwFilteredLog = dwEntries.filter(e => {
+            if (dwFilterJob && !e.job.toLowerCase().includes(dwFilterJob.toLowerCase())) return false
+            if (dwFilterVariation !== 'all' && e.variation !== dwFilterVariation) return false
+            if (dwFilterStatus !== 'all' && e.status !== dwFilterStatus) return false
+            return true
+          })
+
+          return (
+          <div>
+            <div style={S.dwToggle}>
+              <button style={S.dwToggleBtn(dwView==='new')} onClick={() => setDwView('new')}>New Sheet</button>
+              <button style={S.dwToggleBtn(dwView==='log')} onClick={() => { setDwView('log'); loadDayworksEntries() }}>Log ({dwEntries.length})</button>
+            </div>
+
+            {dwView === 'new' && dwStep === 'form' && (
+              <div style={S.logCard}>
+                <div style={{padding:'16px 18px 0', borderBottom:'2px solid var(--accent)'}}>
+                  <div>
+                    <div style={{fontFamily:'var(--font-head)', fontSize:20, fontWeight:800, letterSpacing:.3, color:'var(--text)'}}>{dwJob || 'New Day Works Sheet'}</div>
+                    <div style={{display:'flex', alignItems:'center', gap:8, marginTop:2}}>
+                      <span style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1.5, color:'var(--muted)', textTransform:'uppercase'}}>Day Works</span>
+                      {dwVariation === 'Yes' && dwVoNumber && <span style={{fontFamily:'var(--font-head)', fontSize:12, fontWeight:700, color:'var(--accent)'}}>{dwVoNumber}</span>}
+                    </div>
+                  </div>
+                  <div style={{marginTop:14, paddingBottom:10}}>
+                    <div style={S.dwProgressTrack}><div style={S.dwProgressFill(dwProgressPct)} /></div>
+                    <div style={S.dwTabRow}>
+                      {DW_TABS.map((t, i) => (
+                        <button key={t.id} onClick={() => dwSetTab(t.id)} style={S.dwTabBtn(dwActiveTab === t.id)}>
+                          <span style={S.dwTabBadge(dwDoneMap[t.id], dwActiveTab === t.id)}>{dwDoneMap[t.id] ? '✓' : i + 1}</span>
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={S.dwCaptureWrap}>
+                  <div style={{...S.modeToggle, margin:'0 auto 12px'}}>
+                    {[['voice','Voice'],['text','Text']].map(([m,label]) => (
+                      <button key={m} style={S.modeBtn(dwInputMode===m)} onClick={() => setDwInputMode(m)}>{label}</button>
+                    ))}
+                  </div>
+
+                  {dwInputMode === 'voice' ? (
+                    <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap:10}}>
+                      <button style={S.dwMicBtn(dwListening)} onClick={dwToggleListen}>{dwListening ? '⏹' : '🎤'}</button>
+                      <div style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1, textTransform:'uppercase', color:'var(--muted)'}}>
+                        {dwListening ? 'Listening…' : 'Tap to speak'}
+                      </div>
+                      <div style={S.dwCaptureDisplay}>{dwCaptureText || 'Transcript will appear here'}</div>
+                    </div>
+                  ) : (
+                    <div style={S.dwCaptureBar}>
+                      <input
+                        value={dwCaptureText}
+                        onChange={e => setDwCaptureText(e.target.value)}
+                        onKeyDown={dwOnCaptureKeyDown}
+                        placeholder="Steve worked 9:30am to 6pm on formwork"
+                        style={{flex:1, border:'none', outline:'none', fontSize:13.5, background:'transparent', color:'var(--text)'}}
+                      />
+                      <button onClick={() => dwOnCaptureSubmit()} style={{border:'none', background:'var(--accent)', color:'#fff', borderRadius:6, padding:'8px 14px', fontFamily:'var(--font-head)', fontSize:12, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>Add</button>
+                    </div>
+                  )}
+
+                  {dwLastParsed && (
+                    <div style={S.dwLastParsed}>
+                      <span>{dwLastParsed.summary}</span>
+                      <button onClick={dwUndoLast} style={{border:'none', background:'none', color:'var(--text)', fontWeight:700, cursor:'pointer', fontSize:12.5, fontFamily:'var(--font-head)', letterSpacing:.5, textTransform:'uppercase'}}>Undo</button>
+                    </div>
+                  )}
+                </div>
+
+                {dwActiveTab === 'details' && (
+                  <div style={{padding:'20px 18px 32px', display:'flex', flexDirection:'column', gap:18}}>
+                    <div style={S.dwFieldWrap}>
+                      <label style={S.fieldLabel}>Job Name and Number <span style={S.requiredStar}>*</span></label>
+                      <div ref={dwJobSearchRef} style={S.jobComboWrap}>
+                        <input
+                          style={{...S.jobComboInput, borderColor: dwJobDropOpen ? 'var(--accent)' : (dwJob ? 'var(--accent)' : 'var(--border)'), borderRadius: dwJobDropOpen ? '6px 6px 0 0' : 6}}
+                          placeholder="Type job # or name to search…"
+                          value={dwJobSearch}
+                          onChange={e => { setDwJobSearch(e.target.value); setDwJob(e.target.value); setDwJobDropOpen(true) }}
+                          onFocus={() => setDwJobDropOpen(true)}
+                          autoComplete="off"
+                        />
+                        {dwJobDropOpen && dwJobMatches.length > 0 && (
+                          <div style={S.jobDropdown}>
+                            {dwJobMatches.map(j => (
+                              <div key={j} style={S.jobDropItem(false)}
+                                onMouseEnter={e => { e.currentTarget.style.background='var(--accent)'; e.currentTarget.style.color='#fff' }}
+                                onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='var(--text)' }}
+                                onMouseDown={e => { e.preventDefault(); setDwJob(j); setDwJobSearch(j); setDwJobDropOpen(false) }}
+                              >{j}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div style={S.dwFieldWrap}>
+                      <label style={S.fieldLabel}>Date <span style={S.requiredStar}>*</span></label>
+                      <input type="date" value={dwDate} onChange={e => setDwDate(e.target.value)} style={S.fieldInput} />
+                    </div>
+                    <div style={S.dwFieldWrap}>
+                      <label style={S.fieldLabel}>Variation Work? <span style={S.requiredStar}>*</span></label>
+                      <div style={S.dwYesNo}>
+                        <button style={S.dwYesNoBtn(dwVariation==='Yes', true)} onClick={() => setDwVariation('Yes')}>Yes</button>
+                        <button style={S.dwYesNoBtn(dwVariation==='No', false)} onClick={() => { setDwVariation('No'); setDwVoNumber('') }}>No</button>
+                      </div>
+                    </div>
+                    {dwVariation === 'Yes' && (
+                      <div style={S.dwFieldWrap}>
+                        <label style={S.fieldLabel}>Variation Number <span style={S.requiredStar}>*</span></label>
+                        {dwJobVos.length > 0 ? (
+                          <select value={dwVoNumber} onChange={e => setDwVoNumber(e.target.value)} style={S.fieldSelect}>
+                            <option value="">Select a VO number</option>
+                            {dwJobVos.map(v => (
+                              <option key={v.vo} value={v.vo}>{v.vo}{v.description ? ` — ${v.description}` : ''}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <>
+                            <input value={dwVoNumber} onChange={e => setDwVoNumber(e.target.value)} placeholder="e.g. VO001" style={S.fieldInput} />
+                            <div style={{fontSize:11.5, color:'var(--muted)', marginTop:4}}>No VOs on file for this job yet — enter the number manually</div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    <div style={S.dwFieldWrap}>
+                      <label style={S.fieldLabel}>Location / Grid Ref</label>
+                      <input value={dwLocation} onChange={e => setDwLocation(e.target.value)} placeholder="e.g. Zone 4 / Level 4 Unit A · Grid C7" style={S.fieldInput} />
+                    </div>
+                  </div>
+                )}
+
+                {dwActiveTab === 'labour' && (
+                  <div style={S.dwSection}>
+                    <div style={S.dwSectionHead}>
+                      <div style={S.dwSectionTitle}>Labour Hours</div>
+                      <div style={{fontSize:13, color:'var(--muted)'}}>{dwLabourRows.length} / 40</div>
+                    </div>
+                    {dwLabourRows.length === 0 ? (
+                      <div style={S.dwRowEmpty}>No workers logged yet — use voice/text above, e.g. "Steve worked 9:30am to 6pm on formwork"</div>
+                    ) : dwLabourRows.map(row => (
+                      <div key={row.id} style={S.dwRow}>
+                        <div>
+                          <div style={{fontSize:14.5, fontWeight:600, color:'var(--text)'}}>{row.name}</div>
+                          <div style={{fontSize:12.5, color:'var(--muted)', marginTop:2}}>{row.activity} · {row.start}–{row.end}</div>
+                        </div>
+                        <div style={{display:'flex', alignItems:'center', gap:10}}>
+                          <div style={{fontFamily:'var(--font-head)', fontSize:15, fontWeight:700, color:'var(--accent)'}}>{row.hoursLabel}</div>
+                          <button onClick={() => dwDeleteLabourRow(row.id)} style={{border:'none', background:'none', color:'var(--danger)', fontSize:15, cursor:'pointer'}}>✕</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {dwActiveTab === 'materials' && (
+                  <div style={S.dwSection}>
+                    <div style={S.dwSectionHead}>
+                      <div style={S.dwSectionTitle}>Materials</div>
+                      <div style={{fontSize:13, color:'var(--muted)'}}>{dwMaterialRows.length} / 24</div>
+                    </div>
+                    {dwMaterialRows.length === 0 ? (
+                      <div style={S.dwRowEmpty}>No materials logged yet — try "50 bags of cement" or "10 metres of pipe"</div>
+                    ) : dwMaterialRows.map(row => (
+                      <div key={row.id} style={S.dwRow}>
+                        <div>
+                          <div style={{fontSize:14.5, fontWeight:600, color:'var(--text)'}}>{row.item}</div>
+                          <div style={{fontSize:12.5, color:'var(--muted)', marginTop:2}}>Unit: {row.unit}</div>
+                        </div>
+                        <div style={{display:'flex', alignItems:'center', gap:10}}>
+                          <div style={{fontFamily:'var(--font-head)', fontSize:15, fontWeight:700, color:'var(--accent)'}}>{row.qty}</div>
+                          <button onClick={() => dwDeleteMaterialRow(row.id)} style={{border:'none', background:'none', color:'var(--danger)', fontSize:15, cursor:'pointer'}}>✕</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {dwActiveTab === 'comments' && (
+                  <div style={S.dwSectionPad}>
+                    <div style={S.dwSectionTitle}>Any other comments</div>
+                    <textarea value={dwComments} onChange={e => setDwComments(e.target.value)} placeholder="Notes on access, delays, safety, anything worth flagging..." style={{width:'100%', minHeight:100, border:'1px solid var(--border)', background:'var(--surface2)', borderRadius:8, padding:12, fontSize:14, color:'var(--text)', resize:'vertical'}} />
+                    <div style={{display:'flex', alignItems:'center', gap:10}}>
+                      <button onClick={dwOpenCamera} style={{display:'flex', alignItems:'center', gap:8, border:'1px solid var(--accent)', color:'var(--accent)', background:'rgba(27,158,212,.08)', borderRadius:6, padding:'9px 14px', fontFamily:'var(--font-head)', fontSize:13, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>📷 Add Photo</button>
+                      <span style={{fontSize:12.5, color:'var(--muted)'}}>{dwPhotos.length} attached</span>
+                    </div>
+                    <input ref={dwFileInputRef} onChange={dwOnFilesSelected} type="file" accept="image/*" capture="environment" multiple style={{display:'none'}} />
+                    {dwPhotos.length > 0 && (
+                      <div style={{display:'flex', flexWrap:'wrap', gap:10}}>
+                        {dwPhotos.map(p => (
+                          <div key={p.id} style={{position:'relative', width:72, height:72, borderRadius:8, overflow:'hidden', border:'1px solid var(--border)'}}>
+                            <img src={p.src} style={{width:'100%', height:'100%', objectFit:'cover'}} />
+                            <button onClick={() => dwRemovePhoto(p.id)} style={{position:'absolute', top:2, right:2, width:18, height:18, borderRadius:'50%', border:'none', background:'rgba(0,0,0,.7)', color:'#fff', fontSize:11, lineHeight:'18px', cursor:'pointer', padding:0}}>✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {dwActiveTab === 'signoff' && (
+                  <div style={S.dwSectionPad}>
+                    <div>
+                      <div style={S.dwSectionTitle}>Client Sign-off</div>
+                      <div style={{fontSize:12.5, color:'var(--muted)', marginTop:2}}>This dayworks sheet must be signed by the client to confirm the work above</div>
+                    </div>
+                    <div style={S.dwFieldWrap}>
+                      <label style={S.fieldLabel}>Client name</label>
+                      <input value={dwClientName} onChange={e => setDwClientName(e.target.value)} placeholder="Who is signing on behalf of the client?" style={S.fieldInput} />
+                    </div>
+                    <div style={S.dwYesNo}>
+                      <button style={S.dwYesNoBtn(dwSignoffMode==='glass', true)} onClick={() => setDwSignoffMode('glass')}>Client Signs Here</button>
+                      <button style={S.dwYesNoBtn(dwSignoffMode==='email', false)} onClick={() => setDwSignoffMode('email')}>Email Client</button>
+                    </div>
+                    {dwSignoffMode === 'glass' ? (
+                      <div style={{display:'flex', flexDirection:'column', gap:8}}>
+                        <div style={{fontSize:12.5, color:'var(--muted)'}}>Hand the device to the client to sign below</div>
+                        <canvas
+                          ref={dwSigCanvasRef} width={378} height={160}
+                          onPointerDown={dwOnSigDown} onPointerMove={dwOnSigMove} onPointerUp={dwOnSigUp} onPointerLeave={dwOnSigUp}
+                          style={{width:'100%', height:160, background:'var(--surface2)', border:'1px dashed var(--border)', borderRadius:8, touchAction:'none'}}
+                        />
+                        <button onClick={dwClearSignature} style={{alignSelf:'flex-start', border:'none', background:'none', color:'var(--accent)', fontFamily:'var(--font-head)', fontSize:12, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer', padding:'4px 0'}}>Clear</button>
+                      </div>
+                    ) : (
+                      <div style={S.dwFieldWrap}>
+                        <label style={S.fieldLabel}>Client email</label>
+                        <input value={dwClientEmail} onChange={e => setDwClientEmail(e.target.value)} placeholder="client@company.co.nz" style={S.fieldInput} />
+                        <div style={{fontSize:12, color:'var(--muted)'}}>The client will get a link to review and sign the PDF sheet remotely.</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div style={{padding:'20px 16px 4px', display:'flex', gap:10}}>
+                  {dwIdx > 0 && (
+                    <button onClick={dwGoPrevTab} style={{flex:'none', border:'1px solid var(--border)', background:'transparent', color:'var(--muted)', borderRadius:6, padding:'14px 18px', fontFamily:'var(--font-head)', fontSize:14, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>Back</button>
+                  )}
+                  <button
+                    onClick={() => dwIsLastTab ? dwSubmitForm() : dwGoNext()}
+                    disabled={dwSubmitting}
+                    style={{flex:1, border:'none', background:'var(--accent)', color:'#fff', borderRadius:6, padding:14, fontFamily:'var(--font-head)', fontSize:15, fontWeight:700, letterSpacing:1, textTransform:'uppercase', cursor:'pointer', opacity: dwSubmitting ? .6 : 1}}
+                  >
+                    {dwIsLastTab ? (dwSubmitting ? 'Saving…' : (dwSignoffMode === 'email' ? 'Send for signature' : 'Complete')) : 'Next'}
+                  </button>
+                </div>
+                {dwValidationMsg && <div style={{padding:'8px 16px 24px', fontSize:12.5, color:'var(--danger)', textAlign:'center'}}>{dwValidationMsg}</div>}
+              </div>
+            )}
+
+            {dwView === 'new' && dwStep === 'complete' && dwLastSubmitted && (
+              <div style={{...S.logCard, ...S.dwCompleteWrap}}>
+                <div style={S.dwCheckCircle}>✓</div>
+                <div style={{fontFamily:'var(--font-head)', fontSize:22, fontWeight:800, letterSpacing:.5, textTransform:'uppercase', color:'var(--text)'}}>Dayworks sheet sent</div>
+                <div style={{fontSize:14, color:'var(--muted)', lineHeight:1.5}}>
+                  A PDF summary with all labour, materials, photos and the client's sign-off{' '}
+                  {dwLastSubmitted.signoff_mode === 'email'
+                    ? <>has been emailed to <b style={{color:'var(--text)'}}>{dwLastSubmitted.client_email}</b> for the client to sign</>
+                    : <>has been filed against {dwLastSubmitted.job}</>}.
+                </div>
+                {dwWebhookUrl ? (
+                  <div style={S.dwWebhookNote}><span style={{fontSize:15}}>📧</span><span>Sent to your configured automation for emailing</span></div>
+                ) : (
+                  <div style={S.dwWebhookNote}><span style={{fontSize:15}}>ℹ️</span><span>No automation webhook configured yet — add one in Settings to auto-email this via Make.com</span></div>
+                )}
+                <button onClick={() => setDwStep('pdfPreview')} style={{border:'1px solid var(--border)', background:'transparent', color:'var(--muted)', borderRadius:6, padding:'10px 18px', fontFamily:'var(--font-head)', fontSize:12.5, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>Preview PDF sent</button>
+                <button onClick={() => { setDwView('log'); dwResetForm() }} style={{marginTop:8, border:'none', background:'var(--accent)', color:'#fff', borderRadius:6, padding:'12px 22px', fontFamily:'var(--font-head)', fontSize:14, fontWeight:700, letterSpacing:1, textTransform:'uppercase', cursor:'pointer'}}>View Log</button>
+                <button onClick={dwStartNew} style={{border:'none', background:'none', color:'var(--muted)', fontFamily:'var(--font-head)', fontSize:12, fontWeight:700, letterSpacing:1, textTransform:'uppercase', cursor:'pointer', padding:6}}>Start another sheet</button>
+              </div>
+            )}
+
+            {dwView === 'new' && dwStep === 'pdfPreview' && dwLastSubmitted && (() => {
+              const ent = dwLastSubmitted
+              const loc = ent.location || ''
+              const pdfLocationPart = loc.split('/')[0] || '—'
+              const pdfGridPart = (loc.match(/grid\s*(.+)$/i) || [])[1] || (loc.split('·')[1] || '—')
+              const labourRows = ent.labour_rows || []
+              const materialRows = ent.material_rows || []
+              const photos = ent.photos || []
+              return (
+                <div style={S.dwPdfPage}>
+                  <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14}}>
+                    <button onClick={() => setDwStep('complete')} style={{border:'none', background:'none', fontSize:14, color:'#3f5064', cursor:'pointer', fontFamily:'var(--font-head)', fontWeight:700, letterSpacing:.5, textTransform:'uppercase'}}>← Back</button>
+                    <div style={{fontSize:11, color:'#6a8099'}}>{dwWebhookUrl ? 'Sent to your configured automation' : 'No automation configured'}</div>
+                  </div>
+                  <div style={S.dwPdfSheet}>
+                    <div style={{fontSize:17, fontWeight:700, borderBottom:'2px solid #1a1f27', paddingBottom:8, marginBottom:12}}>Daily Labour Records</div>
+                    <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px 14px', fontSize:11.5, marginBottom:14}}>
+                      <div><b>Job Number / Name:</b> {ent.job}</div>
+                      <div><b>Date:</b> {String(ent.entry_date).slice(0,10)}</div>
+                      <div><b>Location:</b> {pdfLocationPart}</div>
+                      <div><b>Grid:</b> {pdfGridPart}</div>
+                      {ent.variation === 'Yes' && <div><b>Variation No:</b> {ent.vo_number}</div>}
+                    </div>
+                    <table style={{width:'100%', borderCollapse:'collapse', fontSize:10.5, marginBottom:14}}>
+                      <thead><tr>
+                        {['Name','Activity','Start','Finish','Total hours','Chargeable hours'].map(h => <th key={h} style={S.dwPdfTh}>{h}</th>)}
+                      </tr></thead>
+                      <tbody>
+                        {labourRows.map((row,i) => (
+                          <tr key={i}>
+                            <td style={S.dwPdfTd}>{row.name}</td>
+                            <td style={S.dwPdfTd}>{row.activity}</td>
+                            <td style={S.dwPdfTd}>{row.start}</td>
+                            <td style={S.dwPdfTd}>{row.end}</td>
+                            <td style={S.dwPdfTd}>{row.hoursLabel}</td>
+                            <td style={S.dwPdfTd}>{row.hoursLabel}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div style={{fontSize:12, fontWeight:700, marginBottom:6}}>Materials</div>
+                    <table style={{width:'100%', borderCollapse:'collapse', fontSize:10.5, marginBottom:14}}>
+                      <thead><tr>{['Item','Qty','Unit'].map(h => <th key={h} style={S.dwPdfTh}>{h}</th>)}</tr></thead>
+                      <tbody>
+                        {materialRows.map((row,i) => (
+                          <tr key={i}><td style={S.dwPdfTd}>{row.item}</td><td style={S.dwPdfTd}>{row.qty}</td><td style={S.dwPdfTd}>{row.unit}</td></tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {photos.length > 0 && (
+                      <>
+                        <div style={{fontSize:12, fontWeight:700, marginBottom:6}}>Photos ({photos.length})</div>
+                        <div style={{display:'flex', flexWrap:'wrap', gap:6, marginBottom:14}}>
+                          {photos.map((p,i) => <img key={i} src={p.src} style={{width:52, height:52, objectFit:'cover', border:'1px solid #ccc', borderRadius:3}} />)}
+                        </div>
+                      </>
+                    )}
+                    <div style={{fontSize:12, fontWeight:700, borderTop:'1px solid #ccc', paddingTop:10, marginTop:4}}>Client sign off</div>
+                    <div style={{fontSize:11, marginTop:8}}>Signature:</div>
+                    <div style={{border:'1px dashed #ccc', borderRadius:4, height:56, display:'flex', alignItems:'center', justifyContent:'center', marginTop:4}}>
+                      {ent.signature_data_url ? <img src={ent.signature_data_url} style={{maxHeight:52}} /> : <span style={{fontSize:10.5, color:'#9aa3b0'}}>Signed remotely by client</span>}
+                    </div>
+                    <div style={{fontSize:11, marginTop:8}}>Name: {ent.client_name || '—'} &nbsp;&nbsp; Date: {String(ent.entry_date).slice(0,10)}</div>
+                  </div>
+                </div>
+              )
+            })()}
+
+            {dwView === 'log' && (
+              <div style={S.logCard}>
+                <div style={S.logHeader}>
+                  <div style={S.logTitleRow}>
+                    <div style={S.logTitle}>Dayworks Log ({dwFilteredLog.length})</div>
+                    <button style={S.exportBtn} onClick={dwStartNew}>+ New</button>
+                  </div>
+                  <div style={{display:'flex', flexDirection:'column', gap:8}}>
+                    <input value={dwFilterJob} onChange={e => setDwFilterJob(e.target.value)} placeholder="Search by job name" style={S.fieldInput} />
+                    <div style={{display:'flex', gap:8}}>
+                      <select value={dwFilterVariation} onChange={e => setDwFilterVariation(e.target.value)} style={{...S.fieldSelect, flex:1}}>
+                        <option value="all">All work types</option>
+                        <option value="Yes">Variation (VO) only</option>
+                        <option value="No">Non-variation only</option>
+                      </select>
+                      <select value={dwFilterStatus} onChange={e => setDwFilterStatus(e.target.value)} style={{...S.fieldSelect, flex:1}}>
+                        <option value="all">All statuses</option>
+                        <option value="Signed on glass">Signed on-site</option>
+                        <option value="Sent to client">Awaiting client</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                {dwFilteredLog.length === 0 ? (
+                  <div style={S.empty}>No dayworks sheets match yet</div>
+                ) : (
+                  <div style={{padding:'14px 16px', display:'flex', flexDirection:'column', gap:10}}>
+                    {dwFilteredLog.map(e => {
+                      const labourHoursTotal = (e.labour_rows || []).reduce((sum, r) => { const n = parseFloat(r.hoursLabel); return sum + (isNaN(n) ? 0 : n) }, 0)
+                      const statusColor = e.status === 'Signed on glass' ? '#4caf7d' : '#E8A33D'
+                      return (
+                        <div key={e.id} style={S.dwLogCard}>
+                          <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8}}>
+                            <div>
+                              <div style={{fontFamily:'var(--font-head)', fontSize:16, fontWeight:700, letterSpacing:.3, color:'var(--text)'}}>{e.job}</div>
+                              <div style={{fontSize:12, color:'var(--muted)', marginTop:2}}>
+                                {String(e.entry_date).slice(0,10)}
+                                {e.variation === 'Yes' && <> · <span style={{color:'var(--accent)', fontWeight:700}}>{e.vo_number}</span></>}
+                              </div>
+                            </div>
+                            <div style={S.dwStatusBadge(statusColor)}>{e.status}</div>
+                          </div>
+                          <div style={{display:'flex', gap:16, marginTop:10, fontSize:12.5, color:'#9db0c2'}}>
+                            <div>{labourHoursTotal ? labourHoursTotal.toFixed(1).replace(/\.0$/,'') : 0} labour hrs</div>
+                            <div>{(e.material_rows||[]).length} materials</div>
+                            <div>{(e.photos||[]).length} photos</div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          )
+        })()}
+
         {/* ── REFERENCE TAB ────────────────────────────────────────── */}
         {tab === 'reference' && (
           <div style={S.logCard}>
@@ -1918,6 +2698,16 @@ export default function App() {
               <div style={S.field}><label style={S.fieldLabel}>Webhook URL (Make / Zapier)</label><input style={S.syncInput} value={lockWebhook} onChange={e => { setLockWebhook(e.target.value); localStorage.setItem('sb_lock_webhook', e.target.value) }} placeholder="https://hook.make.com/..." /></div>
               <div style={S.field}><label style={S.fieldLabel}>Test</label>
                 <button style={S.syncBtn} onClick={() => setShowLockModal(true)}>Try locking the room</button>
+              </div>
+            </div>
+
+            {/* Day Works automation */}
+            <div style={S.settingSection}>
+              <div style={S.settingTitle}>Day Works Automation</div>
+              <div style={S.settingDesc}>When a Day Works sheet is submitted, the app POSTs the full sheet (job, labour, materials, photos, signature, sign-off details) to this webhook. Point it at a Make.com scenario to handle emailing the client and accountspayable@sansom.co.nz.</div>
+              <div style={S.field}>
+                <label style={S.fieldLabel}>Make.com Webhook URL</label>
+                <input style={S.syncInput} value={dwWebhookUrl} onChange={e => { setDwWebhookUrl(e.target.value); localStorage.setItem('sb_dayworks_webhook', e.target.value) }} placeholder="https://hook.make.com/..." />
               </div>
             </div>
 

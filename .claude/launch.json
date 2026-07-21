@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prospero-site",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start", "--prefix", "/Users/tonymurphy/Downloads/Prospero-main"],
+      "port": 3000
+    },
+    {
+      "name": "stockbook-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "frontend"],
+      "port": 5173
+    }
+  ]
+}
