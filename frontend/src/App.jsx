@@ -994,9 +994,7 @@ export default function App() {
   function dwToggleListen() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) {
-      const fallback = dwCaptureText.trim() || 'Steve worked 9:30am to 6pm on formwork'
-      setDwCaptureText(fallback)
-      dwOnCaptureSubmit(fallback)
+      setDwLastParsed({ type: 'unsupported', id: null, summary: "Voice input isn't supported in this browser (common on Safari/iPhone) — switch to Text instead." })
       return
     }
     if (dwListening) { dwRecognitionRef.current?.stop(); return }
@@ -2269,41 +2267,50 @@ export default function App() {
                   </div>
                 </div>
 
-                <div style={S.dwCaptureWrap}>
-                  <div style={{...S.modeToggle, margin:'0 auto 12px'}}>
-                    {[['voice','Voice'],['text','Text']].map(([m,label]) => (
-                      <button key={m} style={S.modeBtn(dwInputMode===m)} onClick={() => setDwInputMode(m)}>{label}</button>
-                    ))}
-                  </div>
-
-                  {dwInputMode === 'voice' ? (
-                    <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap:10}}>
-                      <button style={S.dwMicBtn(dwListening)} onClick={dwToggleListen}>{dwListening ? '⏹' : '🎤'}</button>
-                      <div style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1, textTransform:'uppercase', color:'var(--muted)'}}>
-                        {dwListening ? 'Listening…' : 'Tap to speak'}
+                {(dwActiveTab === 'labour' || dwActiveTab === 'materials') && (() => {
+                  const dwCaptureExample = dwActiveTab === 'labour'
+                    ? 'Steve worked 9:30am to 6pm on formwork'
+                    : '50 bags of cement'
+                  return (
+                    <div style={S.dwCaptureWrap}>
+                      <div style={{...S.modeToggle, margin:'0 auto 12px'}}>
+                        {[['voice','Voice'],['text','Text']].map(([m,label]) => (
+                          <button key={m} style={S.modeBtn(dwInputMode===m)} onClick={() => setDwInputMode(m)}>{label}</button>
+                        ))}
                       </div>
-                      <div style={S.dwCaptureDisplay}>{dwCaptureText || 'Transcript will appear here'}</div>
-                    </div>
-                  ) : (
-                    <div style={S.dwCaptureBar}>
-                      <input
-                        value={dwCaptureText}
-                        onChange={e => setDwCaptureText(e.target.value)}
-                        onKeyDown={dwOnCaptureKeyDown}
-                        placeholder="Steve worked 9:30am to 6pm on formwork"
-                        style={{flex:1, border:'none', outline:'none', fontSize:13.5, background:'transparent', color:'var(--text)'}}
-                      />
-                      <button onClick={() => dwOnCaptureSubmit()} style={{border:'none', background:'var(--accent)', color:'#fff', borderRadius:6, padding:'8px 14px', fontFamily:'var(--font-head)', fontSize:12, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>Add</button>
-                    </div>
-                  )}
 
-                  {dwLastParsed && (
-                    <div style={S.dwLastParsed}>
-                      <span>{dwLastParsed.summary}</span>
-                      <button onClick={dwUndoLast} style={{border:'none', background:'none', color:'var(--text)', fontWeight:700, cursor:'pointer', fontSize:12.5, fontFamily:'var(--font-head)', letterSpacing:.5, textTransform:'uppercase'}}>Undo</button>
+                      {dwInputMode === 'voice' ? (
+                        <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap:10}}>
+                          <button style={S.dwMicBtn(dwListening)} onClick={dwToggleListen}>{dwListening ? '⏹' : '🎤'}</button>
+                          <div style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1, textTransform:'uppercase', color:'var(--muted)'}}>
+                            {dwListening ? 'Listening…' : 'Tap to speak'}
+                          </div>
+                          <div style={S.dwCaptureDisplay}>{dwCaptureText || 'Transcript will appear here'}</div>
+                        </div>
+                      ) : (
+                        <div style={S.dwCaptureBar}>
+                          <input
+                            value={dwCaptureText}
+                            onChange={e => setDwCaptureText(e.target.value)}
+                            onKeyDown={dwOnCaptureKeyDown}
+                            placeholder={dwCaptureExample}
+                            style={{flex:1, border:'none', outline:'none', fontSize:13.5, background:'transparent', color:'var(--text)'}}
+                          />
+                          <button onClick={() => dwOnCaptureSubmit()} style={{border:'none', background:'var(--accent)', color:'#fff', borderRadius:6, padding:'8px 14px', fontFamily:'var(--font-head)', fontSize:12, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>Add</button>
+                        </div>
+                      )}
+
+                      {dwLastParsed && (
+                        <div style={S.dwLastParsed}>
+                          <span>{dwLastParsed.summary}</span>
+                          <button onClick={dwUndoLast} style={{border:'none', background:'none', color:'var(--text)', fontWeight:700, cursor:'pointer', fontSize:12.5, fontFamily:'var(--font-head)', letterSpacing:.5, textTransform:'uppercase'}}>
+                            {dwLastParsed.type === 'labour' || dwLastParsed.type === 'material' ? 'Undo' : 'Dismiss'}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  )
+                })()}
 
                 {dwActiveTab === 'details' && (
                   <div style={{padding:'20px 18px 32px', display:'flex', flexDirection:'column', gap:18}}>
