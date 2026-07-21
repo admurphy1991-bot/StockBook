@@ -389,7 +389,6 @@ export default function App() {
   const [lockPin, setLockPin] = useState(() => localStorage.getItem('sb_pin') || '4729')
   const [lockWebhook, setLockWebhook] = useState(() => localStorage.getItem('sb_lock_webhook') || '')
   const [lockNote, setLockNote] = useState(() => localStorage.getItem('sb_lock_note') || 'Hemi Walker')
-  const [confirmingAdd, setConfirmingAdd] = useState(false)
 
   // Pending tools from AI match (before adding to basket)
   const [pendingTools, setPendingTools] = useState([]) // string[]
@@ -654,6 +653,7 @@ export default function App() {
             unit: p.unit,
             gl_code: p.gl || '',
             worker_name: form.worker_name,
+            source: inputMode,
           }),
         })
       }
@@ -665,7 +665,7 @@ export default function App() {
         await fetch('/api/tool-entries', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty }),
+          body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty, source: inputMode }),
         })
         savedTools.push({ ...tool, quantity: qty })
       }
@@ -1120,6 +1120,7 @@ export default function App() {
   const isAmbiguous = matchResult?.ambiguous && matchResult?.matches?.length > 1
   const canSubmit = confirmedProducts.length > 0
     && confirmedProducts.every(p => p.quantity && String(p.quantity).trim() !== '')
+    && confirmedProducts.every(p => !qtyWarn(p, p.quantity) || p._qtyAck)
     && form.job.trim()
     && form.worker_name.trim()
 
@@ -1396,8 +1397,8 @@ export default function App() {
               {inputMode === 'voice' ? (
                 <>
                   <div style={S.hint}>
-                    Tap the mic and say the product name, job number, quantity, your name — and any tools you're taking.<br/>
-                    <em style={{color:'var(--accent)'}}>e.g. "Hey it's Tony, 5 bags of concrete to job S34477, also grabbed a handsaw, hammer and blade"</em>
+                    Say it all in one go — multiple products, tools, the job and your name. Tap the mic and the app splits it into lines you can check.<br/>
+                    <em style={{color:'var(--accent)'}}>e.g. "Bag of waterstop and two Bituthene 5000 rolls to building G, plus a handsaw and hammer — it's Tony"</em>
                   </div>
                   <button style={S.micBtn(listening)} onClick={toggleListening}>
                     {listening ? '⏹' : '🎤'}
@@ -1421,8 +1422,8 @@ export default function App() {
               ) : (
                 <>
                   <div style={S.hint}>
-                    Type the product name, job number, quantity, your name — and any tools you're taking.<br/>
-                    <em style={{color:'var(--accent)'}}>e.g. "5 bags of concrete, job S34477, Tony — also handsaw, hammer and blade"</em>
+                    Say it all in one go — multiple products, tools, the job and your name. The app splits it into lines you can check.<br/>
+                    <em style={{color:'var(--accent)'}}>e.g. "Bag of waterstop and two Bituthene 5000 rolls to building G, plus a handsaw and hammer — it's Tony"</em>
                   </div>
                   <textarea
                     value={textInput}
@@ -1473,11 +1474,13 @@ export default function App() {
                 {/* One row per product, each with its own qty input */}
                 {confirmedProducts.map((p, i) => {
                   const missingQty = !p.quantity || String(p.quantity).trim() === ''
+                  const warn = !missingQty ? qtyWarn(p, p.quantity) : null
+                  const showWarn = warn && !p._qtyAck
                   return (
                     <div key={p.code} style={{
                       background: 'var(--surface2)', borderRadius: 8, padding: '12px 16px',
                       marginBottom: 10,
-                      border: `1px solid ${missingQty ? 'var(--danger)' : 'var(--border)'}`,
+                      border: `1px solid ${missingQty ? 'var(--danger)' : showWarn ? '#E8A33D' : 'var(--border)'}`,
                     }}>
                       <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12}}>
                         <div style={{flex:1, minWidth:0}}>
@@ -1491,13 +1494,48 @@ export default function App() {
                             <span style={S.unitHint}>{p.unit}</span>
                           </label>
                           <div style={{display:'flex', alignItems:'center', gap:6}}>
+                            <button
+                              type="button"
+                              title="Decrease"
+                              onClick={() => setConfirmedProducts(cp => cp.map((x, j) => {
+                                if (j !== i) return x
+                                const next = Math.max(0, (parseFloat(x.quantity) || 0) - 1)
+                                return {...x, quantity: String(next), _qtyAck: false}
+                              }))}
+                              style={{
+                                width:40, height:40, borderRadius:8, background:'var(--surface)',
+                                border:'1px solid var(--border)', color:'var(--text)', fontSize:20,
+                                fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center',
+                                justifyContent:'center', flexShrink:0,
+                              }}
+                            >−</button>
                             <input
-                              style={{...S.fieldInput, width:90, textAlign:'right', borderColor: missingQty ? 'var(--danger)' : 'var(--border)'}}
+                              style={{...S.fieldInput, width:80, textAlign:'center', fontSize:18, fontWeight:700, fontFamily:'var(--font-head)', borderColor: missingQty ? 'var(--danger)' : showWarn ? '#E8A33D' : 'var(--border)'}}
                               type="number"
                               value={p.quantity}
                               placeholder="—"
-                              onChange={e => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, quantity: e.target.value} : x))}
+                              onChange={e => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, quantity: e.target.value, _qtyAck: false} : x))}
                             />
+                            <button
+                              type="button"
+                              title="Increase"
+                              onClick={() => setConfirmedProducts(cp => cp.map((x, j) => {
+                                if (j !== i) return x
+                                const next = (parseFloat(x.quantity) || 0) + 1
+                                return {...x, quantity: String(next), _qtyAck: false}
+                              }))}
+                              style={{
+                                width:40, height:40, borderRadius:8, background:'var(--surface)',
+                                border:'1px solid var(--border)', color:'var(--text)', fontSize:20,
+                                fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center',
+                                justifyContent:'center', flexShrink:0,
+                              }}
+                            >+</button>
+                            <span style={{
+                              fontFamily:'var(--font-head)', fontWeight:700, fontSize:11, letterSpacing:1,
+                              color:'var(--accent)', background:'rgba(27,158,212,.12)',
+                              border:'1px solid rgba(27,158,212,.35)', borderRadius:6, padding:'4px 8px', flexShrink:0,
+                            }}>{p.unit}</span>
                             <button
                               title="Remove this product"
                               onClick={() => setConfirmedProducts(cp => cp.filter((_, j) => j !== i))}
@@ -1514,6 +1552,33 @@ export default function App() {
                       {missingQty && (
                         <div style={{fontSize:11, color:'var(--danger)', marginTop:6, fontFamily:'var(--font-head)', letterSpacing:.5}}>
                           ⚠ Quantity required
+                        </div>
+                      )}
+                      {showWarn && (
+                        <div style={{marginTop:10, padding:'10px 12px', background:'rgba(232,163,61,.1)', border:'1px solid rgba(232,163,61,.35)', borderRadius:8}}>
+                          <div style={{fontSize:12.5, color:'#e3c389', lineHeight:1.5, display:'flex', gap:6}}>
+                            <span>⚠</span><span>{warn.msg}</span>
+                          </div>
+                          <div style={{display:'flex', gap:8, marginTop:8}}>
+                            {warn.suggest != null && (
+                              <button
+                                onClick={() => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, quantity: String(warn.suggest), _qtyAck: true} : x))}
+                                style={{
+                                  background:'#E8A33D', color:'#1a1206', border:'none', borderRadius:6,
+                                  padding:'8px 14px', fontFamily:'var(--font-head)', fontWeight:800,
+                                  fontSize:12.5, letterSpacing:.5, cursor:'pointer',
+                                }}
+                              >USE {warn.suggest} {p.unit}</button>
+                            )}
+                            <button
+                              onClick={() => setConfirmedProducts(cp => cp.map((x, j) => j === i ? {...x, _qtyAck: true} : x))}
+                              style={{
+                                background:'transparent', color:'var(--muted)', border:'1px solid var(--border)',
+                                borderRadius:6, padding:'8px 14px', fontFamily:'var(--font-head)', fontWeight:700,
+                                fontSize:12.5, letterSpacing:.5, cursor:'pointer',
+                              }}
+                            >KEEP AS-IS</button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1638,15 +1703,11 @@ export default function App() {
                 <div style={S.btnRow}>
                   <button style={S.btnSecondary} onClick={resetCapture}>Cancel</button>
                   <button
-                    style={{...S.btnPrimary(canSubmit), background: confirmingAdd ? '#E8A33D' : undefined}}
+                    style={S.btnPrimary(canSubmit)}
                     disabled={!canSubmit}
-                    onClick={() => {
-                      const flagged = confirmedProducts.filter(p => qtyWarn(p, p.quantity)).length
-                      if (flagged > 0 && !confirmingAdd) { setConfirmingAdd(true); showToast('Check the amber quantities — tap again to add anyway'); return }
-                      setConfirmingAdd(false); submitEntry()
-                    }}
+                    onClick={submitEntry}
                   >
-                    {confirmingAdd ? '⚠ Yes, add anyway' : basket.length > 0 ? '+ Add to Basket (' + basket.length + ')' : 'Add to Basket'}
+                    {basket.length > 0 ? '+ Add to Basket (' + basket.length + ')' : 'Add to Basket'}
                   </button>
                 </div>
               </div>
@@ -1761,7 +1822,7 @@ export default function App() {
                             await fetch('/api/tool-entries', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty }),
+                              body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty, source: inputMode }),
                             })
                           }
                           if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
@@ -1964,7 +2025,10 @@ export default function App() {
                         <div style={{fontFamily:'var(--font-head)',fontWeight:700,fontSize:13}}>
                           {e.cost_quantity}<span style={{fontSize:10,color:'var(--muted)',marginLeft:2}}>{e.unit}</span>
                         </div>
-                        <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.worker_name}>{e.worker_name || '—'}</div>
+                        <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',display:'flex',alignItems:'center',gap:5}} title={e.worker_name}>
+                          {e.source && <span title={e.source === 'voice' ? 'Voice entry' : 'Typed entry'} style={{fontSize:11,flexShrink:0}}>{e.source === 'voice' ? '🎤' : '⌨️'}</span>}
+                          <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</span>
+                        </div>
                         <button
                           style={{padding:'4px 8px', background:'transparent', color:'var(--accent)', fontSize:14, borderRadius:4, border:'1px solid transparent', cursor:'pointer'}}
                           onClick={() => { setEditingEntry(e); setEditForm({ job: e.job, cost_quantity: e.cost_quantity, worker_name: e.worker_name || '' }); setEditJobSearch(e.job || ''); setEditJobDropOpen(false) }}
@@ -2067,7 +2131,10 @@ export default function App() {
                             <div style={{color:'var(--text)',fontSize:12,fontFamily:'var(--font-head)',fontWeight:600}}>{lineTotal != null ? `$${lineTotal}` : '—'}</div>
                             <div style={{color:'var(--muted)',fontSize:12}}>{String(e.entry_date).slice(0,10)}</div>
                             <div style={{color:'var(--text)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={e.job}>{e.job}</div>
-                            <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</div>
+                            <div style={{color:'var(--muted)',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',display:'flex',alignItems:'center',gap:5}}>
+                              {e.source && <span title={e.source === 'voice' ? 'Voice entry' : 'Typed entry'} style={{fontSize:11,flexShrink:0}}>{e.source === 'voice' ? '🎤' : '⌨️'}</span>}
+                              <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.worker_name || '—'}</span>
+                            </div>
                             <button
                               style={{padding:'4px 8px', background:'transparent', color:'var(--accent)', fontSize:14, borderRadius:4, border:'1px solid transparent', cursor:'pointer'}}
                               onClick={() => { setEditingToolEntry(e); setEditToolForm({ job: e.job, quantity: qty, worker_name: e.worker_name || '' }); setEditToolJobSearch(e.job || ''); setEditToolJobDropOpen(false) }}
@@ -2735,6 +2802,48 @@ export default function App() {
                 <div style={{color:'var(--muted)', fontSize:13}}>Loading status…</div>
               )}
             </div>
+
+            {/* Entry source tracker (voice vs type) */}
+            <div style={S.settingSection}>
+              <div style={S.settingTitle}>Entry Source</div>
+              <div style={S.settingDesc}>How workers are logging entries — by speaking into the mic or typing manually.</div>
+              {(() => {
+                const all = [...entries, ...toolEntries]
+                const voiceCount = all.filter(e => e.source === 'voice').length
+                const textCount = all.filter(e => e.source === 'text').length
+                const unknownCount = all.length - voiceCount - textCount
+                const total = all.length || 1
+                const pct = n => Math.round((n / total) * 100)
+                return (
+                  <>
+                    <div style={{display:'flex', gap:16, flexWrap:'wrap', marginBottom:14}}>
+                      <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)', flex:1, minWidth:140}}>
+                        <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>🎤 VOICE</div>
+                        <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{voiceCount}</div>
+                        <div style={{fontSize:11, color:'var(--muted)'}}>{pct(voiceCount)}% of entries</div>
+                      </div>
+                      <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)', flex:1, minWidth:140}}>
+                        <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>⌨️ TYPED</div>
+                        <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--accent)'}}>{textCount}</div>
+                        <div style={{fontSize:11, color:'var(--muted)'}}>{pct(textCount)}% of entries</div>
+                      </div>
+                      {unknownCount > 0 && (
+                        <div style={{background:'var(--surface2)', borderRadius:8, padding:'12px 18px', border:'1px solid var(--border)', flex:1, minWidth:140}}>
+                          <div style={{fontSize:11, color:'var(--muted)', fontFamily:'var(--font-head)', letterSpacing:1, marginBottom:4}}>UNKNOWN</div>
+                          <div style={{fontFamily:'var(--font-head)', fontSize:24, fontWeight:800, color:'var(--muted)'}}>{unknownCount}</div>
+                          <div style={{fontSize:11, color:'var(--muted)'}}>logged before tracking</div>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{height:8, borderRadius:4, overflow:'hidden', display:'flex', background:'var(--surface2)', border:'1px solid var(--border)'}}>
+                      <div style={{width:`${pct(voiceCount)}%`, background:'var(--accent)'}} />
+                      <div style={{width:`${pct(textCount)}%`, background:'#E8A33D'}} />
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+
 
             {/* Manual sync */}
             <div style={S.settingSection}>

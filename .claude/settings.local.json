@@ -19,7 +19,9 @@
       "Bash(env)",
       "Bash(python3 -c \"import asyncpg\")",
       "Bash(python3 -c \"import openai\")",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(git merge *)",
+      "Bash(echo \"no markers found \\(exit $?\\)\")"
     ]
   }
 }

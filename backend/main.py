@@ -36,6 +36,7 @@ async def startup():
                     unit TEXT,
                     gl_code TEXT,
                     worker_name TEXT,
+                    source TEXT,
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
@@ -44,9 +45,10 @@ async def startup():
                     id SERIAL PRIMARY KEY,
                     tool_name TEXT NOT NULL,
                     entry_date DATE NOT NULL,
-                     TEXT NOT NULL,
+                    job TEXT NOT NULL,
                     worker_name TEXT,
                     quantity INTEGER NOT NULL DEFAULT 1,
+                    source TEXT,
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
@@ -87,6 +89,17 @@ async def startup():
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
+            # Migrate: add source column (voice/text) to both tables if missing
+            try:
+                await conn.execute("ALTER TABLE stock_entries ADD COLUMN source TEXT")
+                print("Migrated: added source to stock_entries")
+            except Exception:
+                pass  # Column already exists
+            try:
+                await conn.execute("ALTER TABLE tool_entries ADD COLUMN source TEXT")
+                print("Migrated: added source to tool_entries")
+            except Exception:
+                pass  # Column already exists
             await conn.close()
             print("Database ready.")
             return
@@ -222,7 +235,6 @@ DEFAULT_PRODUCTS = [
     {"code": "BIBT3000", "description": "Bituthene 3000 (1.00 x 20m Roll)", "supplier": "ALLNEX", "unit": "ROLL", "gl": "2000", "alias": "bituthene three thousand, bitu three thousand, bitu roll twenty metre"},
     {"code": "CA20P", "description": "CA20P Black - Cartridge 310 ML", "supplier": "ARDEX", "unit": "ea", "gl": "2000", "alias": "CA twenty P black, black cartridge, allco black cartridge"},
     {"code": "CBFIL30", "description": "Bitumen Fillet 30mm x 30mm x 1100mm", "supplier": "ALLCOWATER", "unit": "ea", "gl": "2000", "alias": "bitumen fillet thirty mil, small bitu fillet, bitu corner fillet"},
-    {"code": "CBW426157", "description": "IMPRABOARD¬†¬Æ¬†WHITE¬†680GSM 1200 x 4mm (10 sheets per bag)", "supplier": "MULF", "unit": "SHEET", "gl": "2000", "alias": "impraboard white, protection board white, white foam board"},
     {"code": "COREFL18", "description": "Allguard Coreflute 1800 x 1150 x 4mm", "supplier": "ALLCOWATER", "unit": "SHEET", "gl": "2000", "alias": "coreflute, protection board, allguard coreflute, allco coreflute"},
     {"code": "COREFL18", "description": "Mulfords Coreflute 1800 x 1150 x 4mm", "supplier": "MULFORDS", "unit": "SHEET", "gl": "2000", "alias": "mulfords coreflute, mulford coreflute, coreflute mulfords"},
     {"code": "COREFL18", "description": "Recycled Coreflute 1800 x 1150 x 4mm", "supplier": "", "unit": "SHEET", "gl": "2000", "alias": "recycled coreflute, recycled protection board, eco coreflute"},
@@ -297,7 +309,8 @@ DEFAULT_PRODUCTS = [
 ]
 
 DEFAULT_JOBS = [
-"2306 - Warranty Work - Sansom Construction Systems Ltd",
+    "2306 - Warranty Work - Sansom Construction Systems Ltd",
+    "0001NOJOB - NONJOBRELATED",
     "17221 - WTJO Gt Nth Rd 1405 Waterview",
     "19239 - Sansom Concrete Repairs",
     "R9999 - Pre-Investigation / Quote / Admin Time",
@@ -317,11 +330,9 @@ DEFAULT_JOBS = [
     "S34086 - H47 - Gorst Lane Membrane Works",
     "23245 - AATH Facade Package",
     "S34131 - Lorne Street - Student Accommodation",
-    "S34160 - Precinct Apartments - 6-8 Lorne Street Auckland CBD",
     "S34182 - AIAL Domestic Processor - Headhouse",
     "S34183 - Waitakere Hospital - Tanking",
     "S34194 - Project Waka - Stage 2 Waterproofing",
-    "S34197 - Te Puaruruhau L3, 99 Grafton Road",
     "R626 - Mt Eden 101, Concrete Office / Yard",
     "S34228 - JTFJ Costs Mt Eden Road 101",
     "S34248 - Mayfair Retirement Village - Oteha Valley 14",
@@ -339,9 +350,9 @@ DEFAULT_JOBS = [
     "S34466 - Queen Street 256 Student Accommodation",
     "S34467 - Albert Street 99",
     "S34477 - Summerset St Johns - Building G - Excavation, Inground Plumbing and Tanking",
+    "R776 - Arthurs Pass, Kiwirail Tunnel Repairs",
     "S34482 - Orams Commercial Buildings B1A & B1B",
     "S34490 - Marine Parade 13 - Tanking",
-    "S34496 - HV.2 Hobsonville Data Centre - Joint Sealant",
     "101 - Rates",
     "S34528 - Murphy House Stage 2 - Tara Iti",
     "S200STOCK - Sansom Ltd Stock Purchases",
@@ -372,13 +383,14 @@ DEFAULT_JOBS = [
     "S34688 - Auckland City Mission - Shade Sail post detailing",
     "R937 - The Hill - Belvedere, Screeding",
     "R0001NOJOB - Sansom Concrete Repairs - NONJOBRELEATED",
+    "R967 - Fort Street, Auckland - Facade Concrete Remedial Project",
     "R980 - 33 Federal Sansom Crack injection",
     "S34754 - Sansom Maintenance - Investigation Costs",
     "S34763 - Jervois Road 41",
     "S34766 - Alberton Avenue 57",
     "R1001 - Gorst Lane  - Wall and Carpark Pillar Remedials",
     "S34772 - Sarsfied, 81 -  Waterproofing",
-    "S34774 - H47 Apartments - Exterior Main Roof Top Entrance area & Stair works",
+    "R1008 - Orams Marine Footpath Saw Cut",
     "S34808 - 147 Captain Springs Road  -  Aquakem Coating to walls",
     "S34822 - Fisher & Paykel Healthcare B5.1 - Seismic Joint",
     "R1028 - 22 Fleet Street Structural Investigation",
@@ -386,7 +398,6 @@ DEFAULT_JOBS = [
     "S34846 - 74 - 76 Grafton Road - Grafton Meditel Hotel",
     "S34854 - ARWCF Gate House - Roof Gutters Works",
     "R1046 - Carbodur NSM BC12 Rods for St Lukes Gardens",
-    "S34868 - ADHB - Waterproofing 91 Pipes",
     "S34870 - MPI PHEC - Membrane Roofing and Emseal Package",
     "S34872 - Snells Beach Waste Water Treatment Plant Injection",
     "S34874 - Air NZ Hangar 4 (JFC) - Flame Trap 4",
@@ -395,7 +406,6 @@ DEFAULT_JOBS = [
     "S34889 - 985 Mount Eden Road - Kingsway Connection (A01/A02) Lift",
     "S34897 - Glen Innes, Te Mahia & Takanini Station - Pedestrian Crossings Waterproofing",
     "S34902 - AIAL TH01 – Remedial Works",
-    "S34903 - Glanville Terrace 42 - Remedial Work",
     "R1073 - Air NZ Hangar 2 Re-life",
     "S34910 - Broadway 255, Newmarket, Auckland -  Canopy Remediation works",
     "S34914 - Waitemata (Britomart) Train Station Escalators",
@@ -403,6 +413,7 @@ DEFAULT_JOBS = [
     "S34931 - Starship Childrens Hospital - PC3 Atrium Infill, duct Extract",
     "R1103 - 454 Remuera - Concrete cut nib, screed and core drill",
     "R1104 - Stanmore Watercare Pump Station Investigation",
+    "S34947 - Rosedale Bus Station and Corridor - Tanking",
     "S34950 - Painton Road,5, Silverdale -  Install Membrane Plinths",
     "R1112 - Bridge 43 MSL 96.765km. - Impact Beam Replacement",
     "S34956 - Beresford Square 16-18",
@@ -416,22 +427,19 @@ DEFAULT_JOBS = [
     "S34982 - Henderson Station - Platform Joint Seal",
     "S34984 - 7 Winn Road, Freemans Bay - Waterproofing Works",
     "R1155 - Concrete Repairs - Small Sales",
-    "S34990 - Tamaki Drive 256 - Tanking Design",
+    "S34993 - Auckland Airport WP3 Main Works 2.13 Roofing (Membrane)",
     "S34996 - Three Kings - Maintenance Annual inspections",
     "S34999 - 101 Mt Eden Road, Mt Eden - Rear Deck and Lower Roof Membrane Replacement",
     "S35010 - ADHB A01 Entrance Area Coating Works",
     "S35013 - CDC HV2.2 - Roofing",
-    "S35015 - Skycity Membrane Remedial Works",
     "S35021 - PaknSave Albany",
     "S35023 - Manawaora Road 285",
     "R1186 - Northridge Apartments, Stanwell Street Parnell , 28",
+    "R1194 - Stanbeth Building, Commerce Street,6 - Crack Repairs",
     "S35035 - BEKS2025 Limited",
     "S35036 - Bledisloe Cruise Terminal - Tanking",
-    "S35037 - 6 Brighton Road - Stage 2 Membrane Replacement",
+    "S35042 - AUT, Wakefield Street, 56 -  Roof Repairs",
     "R1206 - Fort Street Wilson Car Park 34 Shortland Street",
-    "R1208 - WSL Mangere WWTP  - Sikagard 63",
-    "S35044 - Onyx Apartments, Mt Eden Rd 987 , Three Kings - Maintenance Remedial Work",
-    "S35047 - 308-310 Great North Road – Seismic Joints",
     "S35048 - Racecourse Parade, 26  -  Sansom Annual Maintenance Inspection",
     "S35049 - Greenside Rd, 101 - Annual Maintenance Inspection",
     "R1213 - Saint Paul Street, 47, Auckland Central -  Northern Façade Concrete Wall Repair",
@@ -444,33 +452,25 @@ DEFAULT_JOBS = [
     "S35074 - Pipe Penetrations",
     "S35077 - Ascot Office Park - 93-95 Ascot Ave, Greenlane",
     "S35078 - Gibbons Road, 8B -  Membrane Remedial Works",
-    "S35080 - The Southern Cross Building - 59- 67 High Street - Maintenance to External Deck",
     "R1241 - Waikeria, Ngaio Prison  - Stage 2 A&B",
+    "S35085 - Remuera Road, 464, Auckland - Roof membrane Maintenance Remedial Works",
     "S35087 - 6 Pekapeka Street, Raglan - Tanking Remediation Consultant",
     "S35088 - 19 Ngaiwi St, Orakei - Roof Membrane",
-    "S35089 - Walmer Road, 9, Point Chevalier, Auckland -  Roof membrane remedial works",
     "S35092 - Medlands Beach GBI - Hays",
     "S35099 - Island View Drive 47, Gulf Harbour - Newtons",
     "S35103 - 107 Carlton Gore Road  - Drainage Improvement",
-    "S35107 - St Cuthberts College Information Centre - Maintenance Remedial Works",
     "R1271 - Kaitaia Hospital Stage 2 Crack Repair",
     "S35110 - Gould Street 9 - Russell (Beach House)",
     "S35111 - Gould Street 7 - Russell (Boat House)",
     "S35114 - 41C Sandpiper Ave- TPO Roof Membrane",
-    "S35120 - SkyCity I Group Roof -  Membrane Remedial Works",
-    "S35121 - Grand Hotel, Federal Street, L6 - Exterior Canopy Membrane Remedial Works",
     "S35123 - 34 Rawene Avenue, Westmere - Membrane Replacement",
-    "S35125 - ADHB A32 Main Entrance - Membrane Works",
     "S35135 - Mt Wellington Estate Warehouse 1  -  2 Monahan Road, Mt Wellington - Tanking",
     "R1290 - Warranty Repair work - Concrete Repairs",
-    "R1292 - Mason Square Apartments , Madson Otahuhu, 20 -  Stair Remediation",
-    "R1293 - Esplanade Road,44, Mount Albert - Balcony Edge Repair",
     "R1294 - Cliff Rd, Torbay, 76 -  Concrete Restoration",
-    "R1296 - Fisher and Paykel - Nassipour Way, East Tamaki",
     "S35141 - Vulcan Lane 10",
     "S35142 - TVNZ - 100 Victoria Street West - Membrane Re-roof Works",
     "S35150 - MIT Manukau Campus - Interior Plant Room Works",
-    "S35152 - Auckland International Airport - Roof Membrane",
+    "R1300 - Westgate  Bus Station -  Fire Doors Grouting",
     "S35153 - 1625 Howick Pakuranga Community Sport Centre",
     "S35154 - Grey Ave 139  Auckland - Annual Maintenance Investigation",
     "R1303 - Mt  Messenger Pier - Concrete Repair",
@@ -480,6 +480,7 @@ DEFAULT_JOBS = [
     "S35158 - Epsom Retirement Village - Membrane Works",
     "S35168 - UoA, Waiparuru Hall, B441 and B442 - Membrane Roof Report",
     "S35169 - 78 View Road - Newtons",
+    "R1311 - Spark Arena - Concrete Cuts",
     "S2309 - Athens Road 1/59, Onehunga",
     "S2310 - Riddell Rd 283, Glendowie",
     "S2311 - Speights Rd 8, Kohimararama",
@@ -487,14 +488,26 @@ DEFAULT_JOBS = [
     "S2313 - ILD Australia PTY",
     "R1315 - Block 10 St Lukes Gardens Crack Repairs",
     "S35173 - Woolworths Ponsonby - B2 Carpark Storage Room",
-    "S35174 - Air NZ Hub, Fanshawe Street, 185",
-    "S35175 - 42 Glanville Terrace, Parnell - Remedial Waterproofing",
     "S10001 - Tanking Tenders",
     "S11002 - Membrane Tenders",
     "S17003 - Facade Tenders",
     "S19004 - Maintenance Tenders",
+    "S35185 - 18 Taurarua Terrace, Parnell - Balcony Remedial",
     "S35187 - Pitt Street, 21 - Membrane Works",
     "S35190 - Bledisloe Cruise Terminal  - Sikalastic to Columns",
+    "R1329 - Britomart Station Core Drilling and PH Testing",
+    "S35197 - Long Bay High School - Temporary Waterproofing",
+    "R1338 - WSL Mangere WWTP - Splitter Box 1",
+    "S35198 - 4B/15 Fleet Street - Podium Deck Water Ingress",
+    "S35199 - Site 6 - Annual Maintenance Inspection",
+    "S35200 - Greys Ave, 139 -  Maintenance Remedial Works",
+    "S35201 - 30 York Street, Parnell - Membrane Waterproofing",
+    "S35202 - 66a Grafton Road, Grafton - Garage Slab Leaks",
+    "S35206 - Auckland Art Gallery - Storage Room Water Ingress",
+    "R1339 - Central Police Station - Helibar",
+    "R1343 - Rosedale WWTP - Concrete Repairs",
+    "S35208 - Greenlane Hospital G15 Building - Membrane Investigation Works",
+    "S35209 - University of Auckland B315 - Kate Edgar Building",
 ]
 
 # ── Job Variation Orders (VOs) ────────────────────────────────────────────────
@@ -1739,6 +1752,7 @@ class EntryCreate(BaseModel):
     unit: str
     gl_code: Optional[str] = None
     worker_name: Optional[str] = None
+    source: Optional[str] = None  # 'voice' or 'text'
 
 @app.get("/api/products")
 async def get_products():
@@ -1812,10 +1826,10 @@ async def create_entry(entry: EntryCreate):
     try:
         nz_today = datetime.now(NZ_TZ).date()
         row = await conn.fetchrow("""
-            INSERT INTO stock_entries (item_code, entry_date, job, supplier, description, cost_quantity, unit, gl_code, worker_name)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *
+            INSERT INTO stock_entries (item_code, entry_date, job, supplier, description, cost_quantity, unit, gl_code, worker_name, source)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *
         """, entry.item_code, nz_today, entry.job, entry.supplier,
-            entry.description, entry.cost_quantity, entry.unit, entry.gl_code, entry.worker_name)
+            entry.description, entry.cost_quantity, entry.unit, entry.gl_code, entry.worker_name, entry.source)
         return dict(row)
     finally:
         await conn.close()
@@ -1930,6 +1944,7 @@ class ToolEntryCreate(BaseModel):
     job: str
     worker_name: Optional[str] = None
     quantity: int = 1
+    source: Optional[str] = None  # 'voice' or 'text'
 
 @app.post("/api/tool-entries")
 async def create_tool_entry(entry: ToolEntryCreate):
@@ -1937,9 +1952,9 @@ async def create_tool_entry(entry: ToolEntryCreate):
     try:
         nz_today = datetime.now(NZ_TZ).date()
         row = await conn.fetchrow("""
-            INSERT INTO tool_entries (tool_name, entry_date, job, worker_name, quantity)
-            VALUES ($1,$2,$3,$4,$5) RETURNING *
-        """, entry.tool_name, nz_today, entry.job, entry.worker_name, entry.quantity)
+            INSERT INTO tool_entries (tool_name, entry_date, job, worker_name, quantity, source)
+            VALUES ($1,$2,$3,$4,$5,$6) RETURNING *
+        """, entry.tool_name, nz_today, entry.job, entry.worker_name, entry.quantity, entry.source)
         return dict(row)
     finally:
         await conn.close()
