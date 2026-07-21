@@ -2271,6 +2271,11 @@ export default function App() {
                 {(dwActiveTab === 'labour' || dwActiveTab === 'materials') && (() => {
                   return (
                     <div style={S.dwCaptureWrap}>
+                      <div style={{textAlign:'center', fontSize:13, color:'var(--muted)', lineHeight:1.5, marginBottom:14}}>
+                        {dwActiveTab === 'labour'
+                          ? 'Just state a name, start time and end time — AI will do the rest.'
+                          : 'Just state the item, unit of measure and how many you used — simple.'}
+                      </div>
                       <div style={{...S.modeToggle, margin:'0 auto 12px'}}>
                         {[['voice','Voice'],['text','Text']].map(([m,label]) => (
                           <button key={m} style={S.modeBtn(dwInputMode===m)} onClick={() => setDwInputMode(m)}>{label}</button>
