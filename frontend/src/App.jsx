@@ -269,6 +269,13 @@ const S = {
   dwSectionTitle: { fontFamily: 'var(--font-head)', fontSize: 15, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--muted)' },
   dwRow: { padding: '14px 16px', borderBottom: '1px solid var(--surface2)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 },
   dwRowEmpty: { padding: '22px 16px', textAlign: 'center', fontSize: 13, color: 'var(--muted)' },
+  dwTableWrap: { overflowX: 'auto' },
+  dwTable: { width: '100%', borderCollapse: 'collapse' },
+  dwTableTh: { textAlign: 'left', padding: '8px 10px', fontFamily: 'var(--font-head)', fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid var(--border)' },
+  dwTableThEnd: { borderBottom: '1px solid var(--border)' },
+  dwTableTd: { padding: '6px 10px', borderBottom: '1px solid var(--surface2)' },
+  dwTableInput: { width: '100%', border: 'none', background: 'transparent', color: 'var(--text)', fontSize: 13.5, padding: '4px 0' },
+  dwAddRowBtn: { width: '100%', border: 'none', borderTop: '1px solid var(--border)', background: 'transparent', color: 'var(--accent)', padding: 12, fontFamily: 'var(--font-head)', fontSize: 12.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer' },
   dwFieldWrap: { display: 'flex', flexDirection: 'column', gap: 6 },
   dwYesNo: { display: 'flex', border: '1px solid var(--border)', borderRadius: 6, overflow: 'hidden' },
   dwYesNoBtn: (active, first) => ({
@@ -443,6 +450,7 @@ export default function App() {
   const [dwWebhookUrl, setDwWebhookUrl] = useState(() => localStorage.getItem('sb_dayworks_webhook') || '')
 
   const dwFileInputRef = useRef(null)
+  const dwGalleryInputRef = useRef(null)
   const dwSigCanvasRef = useRef(null)
   const dwDrawingRef = useRef(false)
   const dwIdSeqRef = useRef(1)
@@ -976,7 +984,36 @@ export default function App() {
   function dwDeleteLabourRow(id) { setDwLabourRows(rows => rows.filter(r => r.id !== id)) }
   function dwDeleteMaterialRow(id) { setDwMaterialRows(rows => rows.filter(r => r.id !== id)) }
 
+  function dwAddLabourRow() {
+    setDwLabourRows(rows => [...rows, { id: dwIdSeqRef.current++, name: '', activity: '', start: '', end: '', hoursLabel: '—' }])
+  }
+  function dwAddMaterialRow() {
+    setDwMaterialRows(rows => [...rows, { id: dwIdSeqRef.current++, item: '', unit: '', qty: '' }])
+  }
+  function dwUpdateLabourField(id, field, value) {
+    setDwLabourRows(rows => rows.map(r => {
+      if (r.id !== id) return r
+      const updated = { ...r, [field]: value }
+      if (field === 'start' || field === 'end') {
+        const startMin = dwParseTimeToMinutes(updated.start || '')
+        const endMin = dwParseTimeToMinutes(updated.end || '')
+        if (startMin != null && endMin != null) {
+          let diff = endMin - startMin
+          if (diff < 0) diff += 24 * 60
+          updated.hoursLabel = (diff / 60).toFixed(1).replace(/\.0$/, '') + ' hrs'
+        } else {
+          updated.hoursLabel = '—'
+        }
+      }
+      return updated
+    }))
+  }
+  function dwUpdateMaterialField(id, field, value) {
+    setDwMaterialRows(rows => rows.map(r => (r.id === id ? { ...r, [field]: value } : r)))
+  }
+
   function dwOpenCamera() { dwFileInputRef.current && dwFileInputRef.current.click() }
+  function dwOpenGallery() { dwGalleryInputRef.current && dwGalleryInputRef.current.click() }
   function dwOnFilesSelected(e) {
     const files = Array.from(e.target.files || [])
     files.forEach((f) => {
@@ -2328,18 +2365,35 @@ export default function App() {
                     </div>
                     {dwLabourRows.length === 0 ? (
                       <div style={S.dwRowEmpty}>No workers logged yet — type above, e.g. "Steve worked 9:30am to 6pm on formwork"</div>
-                    ) : dwLabourRows.map(row => (
-                      <div key={row.id} style={S.dwRow}>
-                        <div>
-                          <div style={{fontSize:14.5, fontWeight:600, color:'var(--text)'}}>{row.name}</div>
-                          <div style={{fontSize:12.5, color:'var(--muted)', marginTop:2}}>{row.activity} · {row.start}–{row.end}</div>
-                        </div>
-                        <div style={{display:'flex', alignItems:'center', gap:10}}>
-                          <div style={{fontFamily:'var(--font-head)', fontSize:15, fontWeight:700, color:'var(--accent)'}}>{row.hoursLabel}</div>
-                          <button onClick={() => dwDeleteLabourRow(row.id)} style={{border:'none', background:'none', color:'var(--danger)', fontSize:15, cursor:'pointer'}}>✕</button>
-                        </div>
+                    ) : (
+                      <div style={S.dwTableWrap}>
+                        <table style={{...S.dwTable, minWidth:520}}>
+                          <thead>
+                            <tr>
+                              <th style={S.dwTableTh}>Name</th>
+                              <th style={S.dwTableTh}>Activity</th>
+                              <th style={S.dwTableTh}>Start</th>
+                              <th style={S.dwTableTh}>End</th>
+                              <th style={{...S.dwTableTh, color:'var(--accent)'}}>Total hrs</th>
+                              <th style={S.dwTableThEnd}></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dwLabourRows.map(row => (
+                              <tr key={row.id}>
+                                <td style={S.dwTableTd}><input value={row.name} onChange={e => dwUpdateLabourField(row.id, 'name', e.target.value)} style={S.dwTableInput} /></td>
+                                <td style={S.dwTableTd}><input value={row.activity} onChange={e => dwUpdateLabourField(row.id, 'activity', e.target.value)} style={S.dwTableInput} /></td>
+                                <td style={S.dwTableTd}><input value={row.start} onChange={e => dwUpdateLabourField(row.id, 'start', e.target.value)} placeholder="9:30am" style={{...S.dwTableInput, width:76}} /></td>
+                                <td style={S.dwTableTd}><input value={row.end} onChange={e => dwUpdateLabourField(row.id, 'end', e.target.value)} placeholder="6pm" style={{...S.dwTableInput, width:68}} /></td>
+                                <td style={{...S.dwTableTd, fontFamily:'var(--font-head)', fontWeight:700, color:'var(--accent)', fontSize:13.5, whiteSpace:'nowrap'}}>{row.hoursLabel}</td>
+                                <td style={S.dwTableTd}><button onClick={() => dwDeleteLabourRow(row.id)} style={{border:'none', background:'none', color:'var(--danger)', fontSize:15, cursor:'pointer'}}>✕</button></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    ))}
+                    )}
+                    <button onClick={dwAddLabourRow} style={S.dwAddRowBtn}>+ Add Row</button>
                   </div>
                 )}
 
@@ -2351,18 +2405,31 @@ export default function App() {
                     </div>
                     {dwMaterialRows.length === 0 ? (
                       <div style={S.dwRowEmpty}>No materials logged yet — try "50 bags of cement" or "10 metres of pipe"</div>
-                    ) : dwMaterialRows.map(row => (
-                      <div key={row.id} style={S.dwRow}>
-                        <div>
-                          <div style={{fontSize:14.5, fontWeight:600, color:'var(--text)'}}>{row.item}</div>
-                          <div style={{fontSize:12.5, color:'var(--muted)', marginTop:2}}>Unit: {row.unit}</div>
-                        </div>
-                        <div style={{display:'flex', alignItems:'center', gap:10}}>
-                          <div style={{fontFamily:'var(--font-head)', fontSize:15, fontWeight:700, color:'var(--accent)'}}>{row.qty}</div>
-                          <button onClick={() => dwDeleteMaterialRow(row.id)} style={{border:'none', background:'none', color:'var(--danger)', fontSize:15, cursor:'pointer'}}>✕</button>
-                        </div>
+                    ) : (
+                      <div style={S.dwTableWrap}>
+                        <table style={{...S.dwTable, minWidth:400}}>
+                          <thead>
+                            <tr>
+                              <th style={S.dwTableTh}>Item</th>
+                              <th style={S.dwTableTh}>Unit</th>
+                              <th style={{...S.dwTableTh, color:'var(--accent)'}}>Quantity</th>
+                              <th style={S.dwTableThEnd}></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dwMaterialRows.map(row => (
+                              <tr key={row.id}>
+                                <td style={S.dwTableTd}><input value={row.item} onChange={e => dwUpdateMaterialField(row.id, 'item', e.target.value)} style={S.dwTableInput} /></td>
+                                <td style={S.dwTableTd}><input value={row.unit} onChange={e => dwUpdateMaterialField(row.id, 'unit', e.target.value)} style={{...S.dwTableInput, width:74}} /></td>
+                                <td style={S.dwTableTd}><input value={row.qty} onChange={e => dwUpdateMaterialField(row.id, 'qty', e.target.value)} style={{...S.dwTableInput, width:60, color:'var(--accent)', fontWeight:700, fontFamily:'var(--font-head)', fontSize:14}} /></td>
+                                <td style={S.dwTableTd}><button onClick={() => dwDeleteMaterialRow(row.id)} style={{border:'none', background:'none', color:'var(--danger)', fontSize:15, cursor:'pointer'}}>✕</button></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    ))}
+                    )}
+                    <button onClick={dwAddMaterialRow} style={S.dwAddRowBtn}>+ Add Row</button>
                   </div>
                 )}
 
@@ -2372,9 +2439,11 @@ export default function App() {
                     <textarea value={dwComments} onChange={e => setDwComments(e.target.value)} placeholder="Notes on access, delays, safety, anything worth flagging..." style={{width:'100%', minHeight:100, border:'1px solid var(--border)', background:'var(--surface2)', borderRadius:8, padding:12, fontSize:14, color:'var(--text)', resize:'vertical'}} />
                     <div style={{display:'flex', alignItems:'center', gap:10}}>
                       <button onClick={dwOpenCamera} style={{display:'flex', alignItems:'center', gap:8, border:'1px solid var(--accent)', color:'var(--accent)', background:'rgba(27,158,212,.08)', borderRadius:6, padding:'9px 14px', fontFamily:'var(--font-head)', fontSize:13, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>📷 Add Photo</button>
+                      <button onClick={dwOpenGallery} style={{display:'flex', alignItems:'center', gap:8, border:'1px solid var(--border)', color:'var(--muted)', background:'var(--surface2)', borderRadius:6, padding:'9px 12px', fontFamily:'var(--font-head)', fontSize:13, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>📎 From Library</button>
                       <span style={{fontSize:12.5, color:'var(--muted)'}}>{dwPhotos.length} attached</span>
                     </div>
                     <input ref={dwFileInputRef} onChange={dwOnFilesSelected} type="file" accept="image/*" capture="environment" multiple style={{display:'none'}} />
+                    <input ref={dwGalleryInputRef} onChange={dwOnFilesSelected} type="file" accept="image/*" multiple style={{display:'none'}} />
                     {dwPhotos.length > 0 && (
                       <div style={{display:'flex', flexWrap:'wrap', gap:10}}>
                         {dwPhotos.map(p => (
