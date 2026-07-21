@@ -261,12 +261,6 @@ const S = {
     border: !done && active ? '1.5px solid var(--accent)' : 'none',
   }),
   dwCaptureWrap: { padding: '14px 16px', background: 'var(--surface)', borderBottom: '1px solid var(--border)' },
-  dwMicBtn: (listening) => ({
-    width: 72, height: 72, borderRadius: '50%', border: 'none', cursor: 'pointer', fontSize: 28,
-    background: listening ? 'var(--danger)' : 'var(--accent)', color: '#fff',
-    animation: listening ? 'pulse 1.4s ease-in-out infinite' : 'none',
-  }),
-  dwCaptureDisplay: { width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 14px', minHeight: 24, fontSize: 13.5, color: 'var(--text)', lineHeight: 1.5 },
   dwCaptureBar: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' },
   dwLastParsed: { marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, fontSize: 12.5, color: 'var(--accent)', background: 'rgba(27,158,212,.1)', border: '1px solid rgba(27,158,212,.3)', borderRadius: 7, padding: '8px 10px' },
   dwSection: { background: 'var(--surface)', margin: '14px 14px 0', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' },
@@ -326,13 +320,6 @@ function dwFormatMinutes(mins) {
   const mer = h >= 12 ? 'pm' : 'am'
   let h12 = h % 12; if (h12 === 0) h12 = 12
   return mm ? `${h12}:${String(mm).padStart(2, '0')}${mer}` : `${h12}${mer}`
-}
-
-const DW_FRESH_FORM = {
-  dwJob: '', dwDate: dwTodayISO(), dwVariation: '', dwVoNumber: '', dwLocation: '',
-  dwLabourRows: [], dwMaterialRows: [], dwComments: '', dwPhotos: [],
-  dwCaptureText: '', dwLastParsed: null, dwSignoffMode: 'glass', dwClientName: '', dwClientEmail: '',
-  dwSigned: false, dwValidationMsg: '', dwActiveTab: 'details', dwInputMode: 'voice',
 }
 
 export default function App() {
@@ -441,8 +428,6 @@ export default function App() {
   const [dwSigned, setDwSigned] = useState(false)
   const [dwValidationMsg, setDwValidationMsg] = useState('')
   const [dwActiveTab, setDwActiveTab] = useState('details')
-  const [dwInputMode, setDwInputMode] = useState('voice')
-  const [dwListening, setDwListening] = useState(false)
   const [dwSubmitting, setDwSubmitting] = useState(false)
   const [dwLastSubmitted, setDwLastSubmitted] = useState(null)
 
@@ -457,7 +442,6 @@ export default function App() {
 
   const [dwWebhookUrl, setDwWebhookUrl] = useState(() => localStorage.getItem('sb_dayworks_webhook') || '')
 
-  const dwRecognitionRef = useRef(null)
   const dwFileInputRef = useRef(null)
   const dwSigCanvasRef = useRef(null)
   const dwDrawingRef = useRef(false)
@@ -992,27 +976,6 @@ export default function App() {
   function dwDeleteLabourRow(id) { setDwLabourRows(rows => rows.filter(r => r.id !== id)) }
   function dwDeleteMaterialRow(id) { setDwMaterialRows(rows => rows.filter(r => r.id !== id)) }
 
-  function dwToggleListen() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) {
-      setDwLastParsed({ type: 'unsupported', id: null, summary: "Voice input isn't supported in this browser (common on Safari/iPhone) — switch to Text instead." })
-      return
-    }
-    if (dwListening) { dwRecognitionRef.current?.stop(); return }
-    const rec = new SR()
-    rec.lang = 'en-NZ'
-    rec.onresult = (ev) => {
-      const text = ev.results[0][0].transcript
-      setDwCaptureText(text)
-      dwOnCaptureSubmit(text)
-    }
-    rec.onend = () => setDwListening(false)
-    rec.onerror = () => setDwListening(false)
-    dwRecognitionRef.current = rec
-    setDwListening(true)
-    rec.start()
-  }
-
   function dwOpenCamera() { dwFileInputRef.current && dwFileInputRef.current.click() }
   function dwOnFilesSelected(e) {
     const files = Array.from(e.target.files || [])
@@ -1058,7 +1021,7 @@ export default function App() {
     setDwDate(dwTodayISO()); setDwVariation(''); setDwVoNumber(''); setDwLocation('')
     setDwLabourRows([]); setDwMaterialRows([]); setDwComments(''); setDwPhotos([])
     setDwCaptureText(''); setDwLastParsed(null); setDwSignoffMode('glass'); setDwClientName(''); setDwClientEmail('')
-    setDwSigned(false); setDwValidationMsg(''); setDwActiveTab('details'); setDwInputMode('voice')
+    setDwSigned(false); setDwValidationMsg(''); setDwActiveTab('details')
     dwClearSignature()
     setDwStep('form')
   }
@@ -2276,32 +2239,16 @@ export default function App() {
                           ? 'Just state a name, start time and end time — AI will do the rest.'
                           : 'Just state the item, unit of measure and how many you used — simple.'}
                       </div>
-                      <div style={{...S.modeToggle, margin:'0 auto 12px'}}>
-                        {[['voice','Voice'],['text','Text']].map(([m,label]) => (
-                          <button key={m} style={S.modeBtn(dwInputMode===m)} onClick={() => setDwInputMode(m)}>{label}</button>
-                        ))}
+                      <div style={S.dwCaptureBar}>
+                        <input
+                          value={dwCaptureText}
+                          onChange={e => setDwCaptureText(e.target.value)}
+                          onKeyDown={dwOnCaptureKeyDown}
+                          placeholder="Type here…"
+                          style={{flex:1, border:'none', outline:'none', fontSize:13.5, background:'transparent', color:'var(--text)'}}
+                        />
+                        <button onClick={() => dwOnCaptureSubmit()} style={{border:'none', background:'var(--accent)', color:'#fff', borderRadius:6, padding:'8px 14px', fontFamily:'var(--font-head)', fontSize:12, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>Add</button>
                       </div>
-
-                      {dwInputMode === 'voice' ? (
-                        <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap:10}}>
-                          <button style={S.dwMicBtn(dwListening)} onClick={dwToggleListen}>{dwListening ? '⏹' : '🎤'}</button>
-                          <div style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1, textTransform:'uppercase', color:'var(--muted)'}}>
-                            {dwListening ? 'Listening…' : 'Tap to speak'}
-                          </div>
-                          <div style={S.dwCaptureDisplay}>{dwCaptureText || 'Transcript will appear here'}</div>
-                        </div>
-                      ) : (
-                        <div style={S.dwCaptureBar}>
-                          <input
-                            value={dwCaptureText}
-                            onChange={e => setDwCaptureText(e.target.value)}
-                            onKeyDown={dwOnCaptureKeyDown}
-                            placeholder="Type here…"
-                            style={{flex:1, border:'none', outline:'none', fontSize:13.5, background:'transparent', color:'var(--text)'}}
-                          />
-                          <button onClick={() => dwOnCaptureSubmit()} style={{border:'none', background:'var(--accent)', color:'#fff', borderRadius:6, padding:'8px 14px', fontFamily:'var(--font-head)', fontSize:12, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>Add</button>
-                        </div>
-                      )}
 
                       {dwLastParsed && (
                         <div style={S.dwLastParsed}>
@@ -2384,7 +2331,7 @@ export default function App() {
                       <div style={{fontSize:13, color:'var(--muted)'}}>{dwLabourRows.length} / 40</div>
                     </div>
                     {dwLabourRows.length === 0 ? (
-                      <div style={S.dwRowEmpty}>No workers logged yet — use voice/text above, e.g. "Steve worked 9:30am to 6pm on formwork"</div>
+                      <div style={S.dwRowEmpty}>No workers logged yet — type above, e.g. "Steve worked 9:30am to 6pm on formwork"</div>
                     ) : dwLabourRows.map(row => (
                       <div key={row.id} style={S.dwRow}>
                         <div>
