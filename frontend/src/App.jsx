@@ -2268,9 +2268,6 @@ export default function App() {
                 </div>
 
                 {(dwActiveTab === 'labour' || dwActiveTab === 'materials') && (() => {
-                  const dwCaptureExample = dwActiveTab === 'labour'
-                    ? 'Steve worked 9:30am to 6pm on formwork'
-                    : '50 bags of cement'
                   return (
                     <div style={S.dwCaptureWrap}>
                       <div style={{...S.modeToggle, margin:'0 auto 12px'}}>
@@ -2293,7 +2290,7 @@ export default function App() {
                             value={dwCaptureText}
                             onChange={e => setDwCaptureText(e.target.value)}
                             onKeyDown={dwOnCaptureKeyDown}
-                            placeholder={dwCaptureExample}
+                            placeholder="Type here…"
                             style={{flex:1, border:'none', outline:'none', fontSize:13.5, background:'transparent', color:'var(--text)'}}
                           />
                           <button onClick={() => dwOnCaptureSubmit()} style={{border:'none', background:'var(--accent)', color:'#fff', borderRadius:6, padding:'8px 14px', fontFamily:'var(--font-head)', fontSize:12, fontWeight:700, letterSpacing:.5, textTransform:'uppercase', cursor:'pointer'}}>Add</button>
