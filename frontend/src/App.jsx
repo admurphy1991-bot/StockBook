@@ -1045,21 +1045,17 @@ export default function App() {
     if (dwVariation === 'Yes' && !dwVoNumber) {
       setDwActiveTab('details'); setDwValidationMsg('Select a Variation Number.'); return
     }
-    if (dwSignoffMode === 'glass' && !dwSigned) {
-      setDwActiveTab('signoff'); setDwValidationMsg('The client needs to sign before submitting.'); return
-    }
-    if (dwSignoffMode === 'email' && !dwClientEmail) {
-      setDwActiveTab('signoff'); setDwValidationMsg("Enter the client's email."); return
-    }
     setDwSubmitting(true)
-    const signatureDataUrl = dwSignoffMode === 'glass' && dwSigCanvasRef.current ? dwSigCanvasRef.current.toDataURL() : null
+    const signed = dwSignoffMode === 'glass' && dwSigned
+    const emailed = dwSignoffMode === 'email' && !!dwClientEmail
+    const signatureDataUrl = signed && dwSigCanvasRef.current ? dwSigCanvasRef.current.toDataURL() : null
     const payload = {
       job: dwJob, date: dwDate, variation: dwVariation, vo_number: dwVariation === 'Yes' ? dwVoNumber : null,
       location: dwLocation, labour_rows: dwLabourRows, material_rows: dwMaterialRows, comments: dwComments,
       photos: dwPhotos, signoff_mode: dwSignoffMode, client_name: dwClientName || null,
-      client_email: dwSignoffMode === 'email' ? dwClientEmail : null,
+      client_email: emailed ? dwClientEmail : null,
       signature_data_url: signatureDataUrl,
-      status: dwSignoffMode === 'glass' ? 'Signed on glass' : 'Sent to client',
+      status: signed ? 'Signed on glass' : emailed ? 'Sent to client' : 'Unsigned',
     }
     try {
       const r = await fetch('/api/dayworks', {
@@ -2550,6 +2546,7 @@ export default function App() {
                         <option value="all">All statuses</option>
                         <option value="Signed on glass">Signed on-site</option>
                         <option value="Sent to client">Awaiting client</option>
+                        <option value="Unsigned">Unsigned</option>
                       </select>
                     </div>
                   </div>
@@ -2560,7 +2557,7 @@ export default function App() {
                   <div style={{padding:'14px 16px', display:'flex', flexDirection:'column', gap:10}}>
                     {dwFilteredLog.map(e => {
                       const labourHoursTotal = (e.labour_rows || []).reduce((sum, r) => { const n = parseFloat(r.hoursLabel); return sum + (isNaN(n) ? 0 : n) }, 0)
-                      const statusColor = e.status === 'Signed on glass' ? '#4caf7d' : '#E8A33D'
+                      const statusColor = e.status === 'Signed on glass' ? '#4caf7d' : e.status === 'Sent to client' ? '#E8A33D' : '#6a8099'
                       return (
                         <div key={e.id} style={S.dwLogCard}>
                           <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8}}>

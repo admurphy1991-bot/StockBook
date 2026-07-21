@@ -2087,12 +2087,13 @@ class DayworksEntryCreate(BaseModel):
 async def create_dayworks_entry(entry: DayworksEntryCreate):
     conn = await get_db()
     try:
+        entry_date = date.fromisoformat(entry.date)
         row = await conn.fetchrow("""
             INSERT INTO dayworks_entries
                 (job, entry_date, variation, vo_number, location, labour_rows, material_rows,
                  comments, photos, signoff_mode, client_name, client_email, signature_data_url, status)
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *
-        """, entry.job, entry.date, entry.variation, entry.vo_number, entry.location,
+        """, entry.job, entry_date, entry.variation, entry.vo_number, entry.location,
             entry.labour_rows, entry.material_rows, entry.comments, entry.photos,
             entry.signoff_mode, entry.client_name, entry.client_email, entry.signature_data_url, entry.status)
         return dict(row)
