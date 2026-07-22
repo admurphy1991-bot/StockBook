@@ -1,10 +1,10 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
-import asyncpg, os, json, csv, io, base64, re
+import asyncpg, os, json, csv, io, base64, re, secrets
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 from openai import AsyncOpenAI
@@ -100,6 +100,16 @@ async def startup():
             try:
                 await conn.execute("ALTER TABLE tool_entries ADD COLUMN source TEXT")
                 print("Migrated: added source to tool_entries")
+            except Exception:
+                pass  # Column already exists
+            try:
+                await conn.execute("ALTER TABLE dayworks_entries ADD COLUMN sign_token TEXT")
+                print("Migrated: added sign_token to dayworks_entries")
+            except Exception:
+                pass  # Column already exists
+            try:
+                await conn.execute("ALTER TABLE dayworks_entries ADD COLUMN webhook_url TEXT")
+                print("Migrated: added webhook_url to dayworks_entries")
             except Exception:
                 pass  # Column already exists
             await conn.close()
@@ -2086,12 +2096,16 @@ class DayworksEntryCreate(BaseModel):
     status: str
     webhook_url: Optional[str] = None
 
+class DayworksSignSubmit(BaseModel):
+    client_name: Optional[str] = None
+    signature_data_url: str
+
 def _json_safe(value):
     if isinstance(value, (date, datetime)):
         return value.isoformat()
     return value
 
-async def _send_dayworks_webhook(webhook_url: str, entry: dict):
+async def _send_dayworks_webhook(webhook_url: str, entry: dict, stage: str = 'submitted', sign_url: Optional[str] = None):
     try:
         pdf_bytes = render_dayworks_pdf(entry)
         pdf_b64 = base64.b64encode(pdf_bytes).decode('ascii')
@@ -2099,38 +2113,89 @@ async def _send_dayworks_webhook(webhook_url: str, entry: dict):
         date_slug = _json_safe(entry.get('entry_date')) or 'date'
         filename = f"dayworks_{job_slug}_{date_slug}.pdf"
         json_entry = {k: _json_safe(v) for k, v in entry.items()}
+        payload = {
+            "type": "dayworks_sheet_submitted",
+            "stage": stage,
+            "entry": json_entry,
+            "pdf_base64": pdf_b64,
+            "pdf_filename": filename,
+            "at": datetime.utcnow().isoformat() + "Z",
+        }
+        if sign_url:
+            payload["sign_url"] = sign_url
         async with httpx.AsyncClient(timeout=30.0) as client:
-            await client.post(webhook_url, json={
-                "type": "dayworks_sheet_submitted",
-                "entry": json_entry,
-                "pdf_base64": pdf_b64,
-                "pdf_filename": filename,
-                "at": datetime.utcnow().isoformat() + "Z",
-            })
+            await client.post(webhook_url, json=payload)
     except Exception as e:
         print(f"Dayworks webhook failed: {e}")
 
 @app.post("/api/dayworks")
-async def create_dayworks_entry(entry: DayworksEntryCreate):
+async def create_dayworks_entry(entry: DayworksEntryCreate, request: Request):
+    sign_token = secrets.token_urlsafe(32) if entry.signoff_mode == 'email' else None
     conn = await get_db()
     try:
         entry_date = date.fromisoformat(entry.date)
         row = await conn.fetchrow("""
             INSERT INTO dayworks_entries
                 (job, entry_date, variation, vo_number, location, labour_rows, material_rows,
-                 comments, photos, signoff_mode, client_name, client_email, signature_data_url, status)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *
+                 comments, photos, signoff_mode, client_name, client_email, signature_data_url, status,
+                 sign_token, webhook_url)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *
         """, entry.job, entry_date, entry.variation, entry.vo_number, entry.location,
             entry.labour_rows, entry.material_rows, entry.comments, entry.photos,
-            entry.signoff_mode, entry.client_name, entry.client_email, entry.signature_data_url, entry.status)
+            entry.signoff_mode, entry.client_name, entry.client_email, entry.signature_data_url, entry.status,
+            sign_token, entry.webhook_url)
         saved = dict(row)
     finally:
         await conn.close()
 
     if entry.webhook_url:
-        await _send_dayworks_webhook(entry.webhook_url, saved)
+        sign_url = f"{str(request.base_url).rstrip('/')}/?sign={sign_token}" if sign_token else None
+        await _send_dayworks_webhook(entry.webhook_url, saved, stage='submitted', sign_url=sign_url)
 
     return saved
+
+@app.get("/api/dayworks/sign/{token}")
+async def get_dayworks_for_signing(token: str):
+    conn = await get_db()
+    try:
+        row = await conn.fetchrow("SELECT * FROM dayworks_entries WHERE sign_token = $1", token)
+    finally:
+        await conn.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="Invalid or expired link")
+    entry = dict(row)
+    if entry.get("signature_data_url"):
+        raise HTTPException(status_code=410, detail="This sheet has already been signed")
+    return {
+        "job": entry["job"], "entry_date": _json_safe(entry["entry_date"]),
+        "variation": entry["variation"], "vo_number": entry["vo_number"], "location": entry["location"],
+        "labour_rows": entry["labour_rows"], "material_rows": entry["material_rows"],
+        "comments": entry["comments"], "photos": entry["photos"], "client_name": entry["client_name"],
+    }
+
+@app.post("/api/dayworks/sign/{token}")
+async def submit_dayworks_signature(token: str, body: DayworksSignSubmit):
+    conn = await get_db()
+    try:
+        row = await conn.fetchrow("SELECT * FROM dayworks_entries WHERE sign_token = $1", token)
+        if not row:
+            raise HTTPException(status_code=404, detail="Invalid or expired link")
+        entry = dict(row)
+        if entry.get("signature_data_url"):
+            raise HTTPException(status_code=410, detail="This sheet has already been signed")
+        updated = await conn.fetchrow("""
+            UPDATE dayworks_entries
+            SET signature_data_url = $1, client_name = COALESCE($2, client_name), status = 'Signed remotely'
+            WHERE sign_token = $3 RETURNING *
+        """, body.signature_data_url, body.client_name, token)
+        saved = dict(updated)
+    finally:
+        await conn.close()
+
+    if saved.get('webhook_url'):
+        await _send_dayworks_webhook(saved['webhook_url'], saved, stage='signed')
+
+    return {"ok": True}
 
 @app.get("/api/dayworks")
 async def list_dayworks_entries():
