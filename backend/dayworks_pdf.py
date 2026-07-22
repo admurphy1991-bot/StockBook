@@ -22,8 +22,8 @@ TEMPLATE = _env.from_string("""
   th, td { border: 1px solid #ccc; padding: 5px 6px; text-align: left; }
   th { background: #f3f4f6; }
   .comments { margin-bottom: 16px; white-space: pre-wrap; line-height: 1.5; }
-  .photos { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
-  .photos img { width: 80px; height: 80px; object-fit: cover; border: 1px solid #ccc; border-radius: 3px; }
+  .photos { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  .photos img { width: 260px; max-width: 48%; height: auto; border: 1px solid #ccc; border-radius: 4px; display: block; }
   .signoff { border-top: 1px solid #ccc; padding-top: 12px; margin-top: 6px; }
   .sig-box { border: 1px dashed #ccc; border-radius: 4px; height: 70px; display: flex; align-items: center; justify-content: center; margin-top: 6px; }
   .sig-box img { max-height: 66px; }
