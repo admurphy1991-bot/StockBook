@@ -4,10 +4,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
-import asyncpg, os, json, csv, io
+import asyncpg, os, json, csv, io, base64, re
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 from openai import AsyncOpenAI
+import httpx
+from dayworks_pdf import render_dayworks_pdf
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -2082,6 +2084,31 @@ class DayworksEntryCreate(BaseModel):
     client_email: Optional[str] = None
     signature_data_url: Optional[str] = None
     status: str
+    webhook_url: Optional[str] = None
+
+def _json_safe(value):
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    return value
+
+async def _send_dayworks_webhook(webhook_url: str, entry: dict):
+    try:
+        pdf_bytes = render_dayworks_pdf(entry)
+        pdf_b64 = base64.b64encode(pdf_bytes).decode('ascii')
+        job_slug = re.sub(r'[^A-Za-z0-9]+', '_', entry.get('job') or 'job').strip('_') or 'job'
+        date_slug = _json_safe(entry.get('entry_date')) or 'date'
+        filename = f"dayworks_{job_slug}_{date_slug}.pdf"
+        json_entry = {k: _json_safe(v) for k, v in entry.items()}
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            await client.post(webhook_url, json={
+                "type": "dayworks_sheet_submitted",
+                "entry": json_entry,
+                "pdf_base64": pdf_b64,
+                "pdf_filename": filename,
+                "at": datetime.utcnow().isoformat() + "Z",
+            })
+    except Exception as e:
+        print(f"Dayworks webhook failed: {e}")
 
 @app.post("/api/dayworks")
 async def create_dayworks_entry(entry: DayworksEntryCreate):
@@ -2096,9 +2123,14 @@ async def create_dayworks_entry(entry: DayworksEntryCreate):
         """, entry.job, entry_date, entry.variation, entry.vo_number, entry.location,
             entry.labour_rows, entry.material_rows, entry.comments, entry.photos,
             entry.signoff_mode, entry.client_name, entry.client_email, entry.signature_data_url, entry.status)
-        return dict(row)
+        saved = dict(row)
     finally:
         await conn.close()
+
+    if entry.webhook_url:
+        await _send_dayworks_webhook(entry.webhook_url, saved)
+
+    return saved
 
 @app.get("/api/dayworks")
 async def list_dayworks_entries():

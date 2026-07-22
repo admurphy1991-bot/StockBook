@@ -1065,16 +1065,6 @@ export default function App() {
 
   function dwStartNew() { dwResetForm(); setDwView('new') }
 
-  async function dwSendWebhook(entry) {
-    if (!dwWebhookUrl) return
-    try {
-      await fetch(dwWebhookUrl, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'dayworks_sheet_submitted', entry, at: new Date().toISOString() }),
-      })
-    } catch (e) {}
-  }
-
   async function dwSubmitForm() {
     if (!dwJob || !dwVariation) {
       setDwActiveTab('details'); setDwValidationMsg('Job Name and Variation Work are required.'); return
@@ -1093,6 +1083,7 @@ export default function App() {
       client_email: emailed ? dwClientEmail : null,
       signature_data_url: signatureDataUrl,
       status: signed ? 'Signed on glass' : emailed ? 'Sent to client' : 'Unsigned',
+      webhook_url: dwWebhookUrl || null,
     }
     try {
       const r = await fetch('/api/dayworks', {
@@ -1100,7 +1091,6 @@ export default function App() {
       })
       if (!r.ok) throw new Error('save failed')
       const saved = await r.json()
-      dwSendWebhook(saved)
       setDwLastSubmitted(saved)
       setDwStep('complete')
       setDwValidationMsg('')
