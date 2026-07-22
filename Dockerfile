@@ -5,7 +5,7 @@ RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf2.0-0 \
