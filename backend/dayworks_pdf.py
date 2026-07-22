@@ -2,10 +2,11 @@
 import re
 from datetime import date, datetime
 
-from jinja2 import Template
+from jinja2 import Environment
 from weasyprint import HTML
 
-TEMPLATE = Template("""
+_env = Environment(autoescape=True)
+TEMPLATE = _env.from_string("""
 <!DOCTYPE html>
 <html>
 <head>
