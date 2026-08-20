@@ -190,6 +190,7 @@ DEFAULT_PRODUCTS = [
     {"code": "ALLWSTG", "description": "Allco - Waterstoppage 25kg bag", "supplier": "ALLCOWATER", "unit": "BAG", "gl": "2000", "alias": "waterstoppage, water stoppage bag, allco grout, chicken shit"},
     {"code": "VCS600", "description": "Cetseal (20oz) 600mls Sausage - Polymeric Sealant/Adhesive", "supplier": "ALLCOWATER", "unit": "600ML", "gl": "2000", "alias": "cetseal sausage, polymeric sealant sausage, cet seal"},
     {"code": "COREFL18", "description": "Allguard Coreflute 1800 x 1150 x 4mm", "supplier": "ALLCOWATER", "unit": "SHEET", "gl": "2000", "alias": "coreflute, protection board, allguard coreflute"},
+    {"code": "COREFL18", "description": "Mulfords Coreflute 1800 x 1150 x 4mm", "supplier": "MULFORDS", "unit": "SHEET", "gl": "2000", "alias": "mulfords coreflute, mulford coreflute, coreflute mulfords"},
     {"code": "SI212", "description": "Sika - 212 Grout 25kg", "supplier": "SIKA", "unit": "BAG", "gl": "2000", "alias": "sika two twelve grout, sika grout, two twelve bag"},
     {"code": "SI412", "description": "Sika - Monotop 412 bag", "supplier": "SIKA", "unit": "BAG", "gl": "2000", "alias": "sika monotop four twelve, monotop four twelve, sika repair bag"},
     {"code": "SI910", "description": "Sika Monotop 910N Primer 4kg", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sika monotop nine ten, monotop primer, nine ten primer"},
