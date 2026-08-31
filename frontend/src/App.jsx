@@ -1283,7 +1283,7 @@ export default function App() {
                   Multiple products found — which one?
                 </div>
                 {matchResult.matches.map(p => (
-                  <div key={p.code} style={S.productOption(confirmedProducts.some(c => c.code === p.code))}
+                  <div key={`${p.code}-${p.supplier}-${p.description}`} style={S.productOption(confirmedProducts.some(c => c.code === p.code))}
                     onClick={() => setConfirmedProducts([{ ...p, quantity: p.quantity != null ? String(p.quantity) : '' }])}>
                     <div style={S.productCode}>{p.code}</div>
                     <div>
@@ -1307,7 +1307,7 @@ export default function App() {
                   const warn = !missingQty ? qtyWarn(p, p.quantity) : null
                   const showWarn = warn && !p._qtyAck
                   return (
-                    <div key={p.code} style={{
+                    <div key={`${p.code}-${i}`} style={{
                       background: 'var(--surface2)', borderRadius: 8, padding: '12px 16px',
                       marginBottom: 10,
                       border: `1px solid ${missingQty ? 'var(--danger)' : showWarn ? '#E8A33D' : 'var(--border)'}`,
@@ -2552,8 +2552,8 @@ export default function App() {
                         <div style={S.logHead}>Description</div>
                         <div style={S.logHead}>Supplier</div>
                       </div>
-                      {filtered.map(p => (
-                        <div key={p.code} style={{display:'grid', gridTemplateColumns:'110px 1fr 100px', gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13}}>
+                      {filtered.map((p, i) => (
+                        <div key={`${p.code}-${i}`} style={{display:'grid', gridTemplateColumns:'110px 1fr 100px', gap:8, padding:'11px 20px', borderBottom:'1px solid var(--border)', alignItems:'center', fontSize:13}}>
                           <div style={{fontFamily:'var(--font-head)', fontWeight:700, color:'var(--accent)', fontSize:12}}>{p.code}</div>
                           <div style={{color:'var(--text)'}}>{p.description}</div>
                           <div style={{color:'var(--muted)', fontSize:12}}>{p.supplier}</div>
