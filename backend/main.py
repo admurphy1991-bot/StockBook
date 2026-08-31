@@ -202,7 +202,7 @@ DEFAULT_PRODUCTS = [
     {"code": "SISW53", "description": "Sika Swell A 2005 20nn x 5mm x 20m", "supplier": "SIKA", "unit": "ROLL", "gl": "2000", "alias": "sika swell A, swell strip twenty by five, hydrophilic strip sika"},
     {"code": "SISWP", "description": "SikaSwell-P 2010H 20mm x 10mm x 10m", "supplier": "SIKA", "unit": "ROLL", "gl": "2000", "alias": "sika swell P, swell profile twenty by ten, sika swellable profile"},
     {"code": "SISWS2", "description": "Sika Swell S2 600ml", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sika swell S2, swell sausage, hydrophilic sausage"},
-    {"code": "452399", "description": "Sika - Sikadur U.A 4 Lt", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sikadur UA four litre, sika UA small, sikadur urethane four litre"},
+    {"code": "452399", "description": "Sika - Sikadur U.A 4 Lt", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sika ua, sikadur ua, sikadur UA four litre, sika UA small, sikadur urethane four litre"},
     {"code": "444908", "description": "Sika Thinner C Lt (4 ltr)", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sika thinner four litre, sika C thinner small, thinner C small"},
     {"code": "92541", "description": "Sikaplug 5KG", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sikaplug, sika plug, hydraulic plug"},
     {"code": "497964", "description": "Sika AnchorFix-1 300ml", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sika anchor fix, anchor fix one, sika anchor bolt"},
@@ -254,7 +254,7 @@ DEFAULT_PRODUCTS = [
     {"code": "DEXX/GR/15", "description": "Chevaline Dexx", "supplier": "EQUUS", "unit": "ea", "gl": "2000", "alias": "chevaline dexx, dexx primer, dexx treatment"},
     {"code": "24560", "description": "WPM117 Shelterstick 15m x 1m x 2mm - roll", "supplier": "ARDEX", "unit": "ea", "gl": "2000", "alias": "shelterstick roll, WPM one seventeen, ardex shelterstick"},
     {"code": "10543", "description": "WPM3000X 20M X 1.0M X 1.5MM ROLL", "supplier": "ARDEX", "unit": "ea", "gl": "2000", "alias": "WPM roll, waterproof membrane roll, three thousand roll"},
-    {"code": "452396", "description": "Sikadur UA 8L", "supplier": "SIKA", "unit": "ea", "gl": "2000", "alias": "sikadur UA eight litre, sika UA large, sikadur urethane eight litre"},
+    {"code": "452396", "description": "Sikadur UA 8L", "supplier": "SIKA", "unit": "ea", "gl": "2000", "alias": "sika ua, sikadur ua, sikadur UA eight litre, sika UA large, sikadur urethane eight litre"},
     {"code": "ALSANMASTIC/2200", "description": "ALSAN MASTIC 2200 SEALANT (310ML/CARTRIDGE)", "supplier": "EQUUS", "unit": "ea", "gl": "2000", "alias": "alsan mastic, alsan two two hundred, alsan sealant cartridge"},
     {"code": "M1000035", "description": "Bitumen Sealant 300ml", "supplier": "MERZLTD", "unit": "ea", "gl": "2000", "alias": "bitumen sealant, bitu sealant cartridge, black sealant"},
     {"code": "CBFIL30", "description": "Bitumen Fillet 30mm x 30mm x 1100mm", "supplier": "ALLCOWATER", "unit": "ea", "gl": "2000", "alias": "bitumen fillet thirty mil, small bitu fillet, bitu corner fillet"},
@@ -1775,7 +1775,8 @@ Return JSON:
 }}
 
 - If multiple stock products mentioned, include all in matches array, each with their own quantity
-- If a word matches the alias of MORE THAN ONE product (e.g. "swelltite" matches both a bar and a roll), set ambiguous: true and include ALL matching products in matches so the user can choose
+- If a word matches the alias of MORE THAN ONE product (e.g. "swelltite" matches both a bar and a roll, or "sika ua"/"sikadur ua" matches both the 4L and 8L Sikadur UA), set ambiguous: true and include ALL matching products in matches so the user can choose. Never silently pick one size/variant over another when the transcript doesn't specify which.
+- Only match a product when the transcript genuinely overlaps its description or alias text. Sharing just a supplier name (e.g. "sika") is not enough on its own — do not force a match to an unrelated product just because it's the same supplier.
 - If no quantity stated for a product, set quantity to null and add "quantity" to missing
 - Put null and add to missing[] for job or worker_name if not in transcript
 - Only include tools that are a clear match to the HAND TOOLS list
