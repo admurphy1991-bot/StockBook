@@ -183,6 +183,7 @@ DEFAULT_PRODUCTS = [
     {"code": "ALLAQ15", "description": "Aquadrain 15 18.9m2 VAQUA15X", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "aquadrain, drainage mat, aquadrain fifteen"},
     {"code": "ALLBESA", "description": "Allco - Bentoseal 15kg", "supplier": "ALLCOWATER", "unit": "PAIL", "gl": "2000", "alias": "bentoseal, bento seal, bentonite seal"},
     {"code": "ALLCET", "description": "Allco - Cetcoat 15kg", "supplier": "ALLCOWATER", "unit": "PAIL", "gl": "2000", "alias": "cetcoat, cet coat, allco cet"},
+    {"code": "ALLCOVR", "description": "Allco - Voltex CR (5.4sqm roll)", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "voltex CR, voltex cr roll, allco voltex CR"},
     {"code": "ALLRX101", "description": "RX101T Waterstop 6.1lm per roll", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "RX one oh one waterstop, swelling waterstop, hydrophilic strip"},
     {"code": "VRX10210", "description": "Allco - RX102 Waterstop 10.2m", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "RX one oh two waterstop, RX102 strip, allco waterstop ten metre"},
     {"code": "ALLSWTB", "description": "Allco - Swelltite Termination Bar ea", "supplier": "ALLCOWATER", "unit": "ea", "gl": "2000", "alias": "swelltite bar, termination bar, swelltite termination"},
