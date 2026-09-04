@@ -173,6 +173,8 @@ HAND_TOOLS = [
 
 DEFAULT_PRODUCTS = [
     {"code": "B1BTLQM", "description": "BITUTHENE LIQUID MEMBRANE LM3000 (5.7LT)", "supplier": "ALLNEX", "unit": "ea", "gl": "2000", "alias": "bituthene liquid membrane, bitu liquid membrane, LM three thousand"},
+    {"code": "60255A02R", "description": "BITUTHENE 5000 - ROLL", "supplier": "ALLNEX", "unit": "ROLL", "gl": "2000", "alias": "bitu five thousand, bituthene roll, bitu roll"},
+    {"code": "BIBT3000", "description": "Bituthene 3000 (1.00 x 20m Roll)", "supplier": "ALLNEX", "unit": "ROLL", "gl": "2000", "alias": "bituthene three thousand, bitu three thousand, bitu roll twenty metre"},
     {"code": "PFRO017", "description": "PF Rod 20mm 60m coil (per mtr)", "supplier": "KARSTEN", "unit": "M", "gl": "2000", "alias": "backing rod twenty long roll, PF rod twenty sixty, backer twenty roll"},
     {"code": "PFRO022", "description": "PF Rod 40mm 2m length (per mtr)", "supplier": "KARSTEN", "unit": "M", "gl": "2000", "alias": "backing rod forty, PF rod forty, backer rod forty"},
     {"code": "PFRO018", "description": "PF Rod 25mm 2m length (per mtr)", "supplier": "KARSTEN", "unit": "M", "gl": "2000", "alias": "backing rod twenty five, PF rod twenty five, backer twenty five"},
