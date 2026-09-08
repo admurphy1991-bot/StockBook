@@ -1309,7 +1309,7 @@ export default function App() {
               </div>
             )}
 
-            {!processing && matchResult && !isAmbiguous && (
+            {!processing && matchResult && (!isAmbiguous || confirmedProducts.length > 0) && (
               <div style={S.cardAccent}>
                 <div style={S.titleAccent}>
                   Confirm {confirmedProducts.length > 1 ? `${confirmedProducts.length} Products` : 'Entry'}
