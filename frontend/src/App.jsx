@@ -389,6 +389,11 @@ export default function App() {
   const editJobSearchRef = useRef(null)
   const editToolJobSearchRef = useRef(null)
 
+  // Manual product picker (for products the AI match missed or got wrong)
+  const [productPickerOpen, setProductPickerOpen] = useState(false)
+  const [productPickerQuery, setProductPickerQuery] = useState('')
+  const productPickerRef = useRef(null)
+
   // Export date range state
   const [exportFrom, setExportFrom] = useState('')
   const [exportTo, setExportTo] = useState('')
@@ -454,6 +459,7 @@ export default function App() {
       if (editToolJobSearchRef.current && !editToolJobSearchRef.current.contains(e.target)) setEditToolJobDropOpen(false)
       if (basketJobSearchRef.current && !basketJobSearchRef.current.contains(e.target)) setBasketJobDropOpen(false)
       if (dwJobSearchRef.current && !dwJobSearchRef.current.contains(e.target)) setDwJobDropOpen(false)
+      if (productPickerRef.current && !productPickerRef.current.contains(e.target)) setProductPickerOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -585,6 +591,8 @@ export default function App() {
     setMatchResult(null)
     setConfirmedProducts([])
     setPendingTools([])
+    setProductPickerOpen(false)
+    setProductPickerQuery('')
     try {
       const r = await fetch('/api/match', {
         method: 'POST',
@@ -684,6 +692,13 @@ export default function App() {
     setConfirmedProducts([]); setForm({ job: '', worker_name: '' })
     setJobSearch(''); setJobDropOpen(false); setPendingTools([])
     setBasket([]); setBasketJob(''); setBasketJobSearch(''); setBasketWorker('')
+    setProductPickerOpen(false); setProductPickerQuery('')
+  }
+
+  function addPickedProduct(p) {
+    setConfirmedProducts(cp => [...cp, { ...p, quantity: '' }])
+    setProductPickerQuery('')
+    setProductPickerOpen(false)
   }
 
   async function deleteEntry(id) {
@@ -1042,9 +1057,8 @@ export default function App() {
     setDwSubmitting(false)
   }
 
-  const hasMatches = matchResult?.matches?.length > 0
   const isAmbiguous = matchResult?.ambiguous && matchResult?.matches?.length > 1
-  const canSubmit = confirmedProducts.length > 0
+  const canSubmit = (confirmedProducts.length > 0 || pendingTools.length > 0)
     && confirmedProducts.every(p => p.quantity && String(p.quantity).trim() !== '')
     && confirmedProducts.every(p => !qtyWarn(p, p.quantity) || p._qtyAck)
     && form.job.trim()
@@ -1295,11 +1309,19 @@ export default function App() {
               </div>
             )}
 
-            {!processing && hasMatches && confirmedProducts.length > 0 && (
+            {!processing && matchResult && !isAmbiguous && (
               <div style={S.cardAccent}>
                 <div style={S.titleAccent}>
                   Confirm {confirmedProducts.length > 1 ? `${confirmedProducts.length} Products` : 'Entry'}
                 </div>
+
+                {confirmedProducts.length === 0 && (
+                  <div style={{...S.hint, marginBottom: 16}}>
+                    {pendingTools.length > 0
+                      ? "No stock product matched — only tools detected below. Search below to add a product if one's missing."
+                      : "No product matched — search below to add the right one."}
+                  </div>
+                )}
 
                 {/* One row per product, each with its own qty input */}
                 {confirmedProducts.map((p, i) => {
@@ -1414,6 +1436,68 @@ export default function App() {
                     </div>
                   )
                 })}
+
+                <div ref={productPickerRef} style={{marginBottom:16}}>
+                  {!productPickerOpen ? (
+                    <button
+                      type="button"
+                      onClick={() => setProductPickerOpen(true)}
+                      style={{
+                        background:'transparent', border:'1px dashed var(--border)', color:'var(--accent)',
+                        borderRadius:8, padding:'10px 14px', width:'100%', textAlign:'left',
+                        fontSize:13, fontFamily:'var(--font-head)', letterSpacing:.5, cursor:'pointer',
+                      }}
+                    >+ Still don't see your product? Search &amp; add it</button>
+                  ) : (
+                    <div style={S.jobComboWrap}>
+                      <input
+                        autoFocus
+                        style={{...S.jobComboInput, borderColor:'var(--accent)', borderRadius:'6px 6px 0 0'}}
+                        placeholder="Search products by name, code, or supplier…"
+                        value={productPickerQuery}
+                        onChange={e => setProductPickerQuery(e.target.value)}
+                      />
+                      {(() => {
+                        const q = productPickerQuery.trim().toLowerCase()
+                        const filtered = (q
+                          ? products.filter(p =>
+                              p.description?.toLowerCase().includes(q) ||
+                              p.code?.toLowerCase().includes(q) ||
+                              p.alias?.toLowerCase().includes(q) ||
+                              p.supplier?.toLowerCase().includes(q))
+                          : products
+                        ).slice(0, 30)
+                        return filtered.length > 0 ? (
+                          <div style={S.jobDropdown}>
+                            {filtered.map((p, i) => (
+                              <div
+                                key={`${p.code}-${p.supplier}-${p.description}-${i}`}
+                                style={S.jobDropItem(false)}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff' }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text)' }}
+                                onMouseDown={e => { e.preventDefault(); addPickedProduct(p) }}
+                              >
+                                <div style={{fontWeight:700}}>{p.code} — {p.description}</div>
+                                <div style={{fontSize:11, opacity:.75}}>{p.supplier} · {p.unit}</div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={S.jobDropdown}>
+                            <div style={{padding:'12px 14px', color:'var(--muted)', fontSize:13, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div>
+                          </div>
+                        )
+                      })()}
+                      <div style={{display:'flex', justifyContent:'flex-end', marginTop:6}}>
+                        <button
+                          type="button"
+                          onClick={() => { setProductPickerOpen(false); setProductPickerQuery('') }}
+                          style={{background:'transparent', border:'none', color:'var(--muted)', fontSize:12, fontFamily:'var(--font-head)', letterSpacing:1, cursor:'pointer'}}
+                        >Cancel</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div style={S.field}>
                   <label style={S.fieldLabel}>Job Number <span style={S.requiredStar}>*</span></label>
@@ -1541,142 +1625,6 @@ export default function App() {
                   </button>
                 </div>
               </div>
-            )}
-
-            {!processing && matchResult && !hasMatches && (
-              pendingTools.length > 0 ? (
-                // Tools-only result — no stock product needed
-                <div style={S.cardAccent}>
-                  <div style={S.titleAccent}>Confirm Tool Log</div>
-                  <div style={{...S.hint, marginBottom: 16}}>
-                    No stock products detected — only hand tools. Fill in the details below and save.
-                  </div>
-
-                  {/* Tools detected */}
-                  <div style={{marginBottom:16}}>
-                    <div style={{fontFamily:'var(--font-head)', fontSize:11, fontWeight:700, letterSpacing:1.5, color:'var(--accent)', marginBottom:8}}>
-                      🔧 TOOLS DETECTED
-                    </div>
-                    {pendingTools.map((t, i) => (
-                      <div key={i} style={{
-                        background: 'var(--surface2)', borderRadius: 8, padding: '12px 16px',
-                        marginBottom: 8, border: '1px solid var(--accent)',
-                        display:'flex', justifyContent:'space-between', alignItems:'center', gap:12,
-                      }}>
-                        <div style={{display:'flex', alignItems:'center', gap:8, minWidth:0}}>
-                          <span style={{fontSize:14}}>🔧</span>
-                          <span style={{fontSize:13, color:'var(--text)'}}>{t.name}</span>
-                        </div>
-                        <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4, flexShrink:0}}>
-                          <label style={{...S.fieldLabel, marginBottom:0}}>Qty</label>
-                          <div style={{display:'flex', alignItems:'center', gap:6}}>
-                            <input
-                              style={{...S.fieldInput, width:70, textAlign:'right'}}
-                              type="number"
-                              min="1"
-                              value={t.quantity}
-                              placeholder="1"
-                              onChange={e => setPendingTools(pt => pt.map((x, j) => j === i ? {...x, quantity: e.target.value} : x))}
-                            />
-                            <button
-                              title="Remove this tool"
-                              onClick={() => setPendingTools(pt => pt.filter((_,j) => j !== i))}
-                              style={{
-                                background: 'rgba(220,50,50,0.15)', border: '1px solid rgba(220,50,50,0.4)',
-                                color: '#e55', borderRadius: 6, width: 32, height: 32,
-                                fontSize: 16, cursor: 'pointer', display: 'flex',
-                                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                              }}
-                            >✕</button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Job */}
-                  <div style={S.field}>
-                    <label style={S.fieldLabel}>Job Number <span style={S.requiredStar}>*</span></label>
-                    <div ref={jobSearchRef} style={S.jobComboWrap}>
-                      <input
-                        style={{...S.jobComboInput, borderColor: jobDropOpen ? 'var(--accent)' : (form.job ? 'var(--accent)' : 'var(--border)'), borderRadius: jobDropOpen ? '6px 6px 0 0' : 6}}
-                        placeholder="Type job # or name to search…"
-                        value={jobSearch}
-                        onChange={e => { setJobSearch(e.target.value); setForm(f => ({...f, job: ''})); setJobDropOpen(true) }}
-                        onFocus={() => setJobDropOpen(true)}
-                        autoComplete="off"
-                      />
-                      {jobDropOpen && (() => {
-                        const q = jobSearch.toLowerCase()
-                        const filtered = jobs.filter(j => j.toLowerCase().includes(q))
-                        return filtered.length > 0 ? (
-                          <div style={S.jobDropdown}>
-                            {filtered.map(j => (
-                              <div key={j} style={S.jobDropItem(false)}
-                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff' }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text)' }}
-                                onMouseDown={e => { e.preventDefault(); setForm(f => ({...f, job: j})); setJobSearch(j); setJobDropOpen(false) }}
-                              >{j}</div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div style={S.jobDropdown}>
-                            <div style={{padding:'12px 14px', color:'var(--muted)', fontSize:13, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div>
-                          </div>
-                        )
-                      })()}
-                    </div>
-                    {form.job && <div style={{fontSize:12, color:'var(--accent)', marginTop:4, fontFamily:'var(--font-head)'}}>✓ {form.job}</div>}
-                  </div>
-
-                  {/* Worker name */}
-                  <div style={S.field}>
-                    <label style={S.fieldLabel}>Worker Name <span style={S.requiredStar}>*</span></label>
-                    <input
-                      style={S.fieldInput}
-                      value={form.worker_name}
-                      onChange={e => setForm(f => ({...f, worker_name: e.target.value}))}
-                      placeholder="e.g. Dave Smith"
-                    />
-                  </div>
-
-                  <div style={S.btnRow}>
-                    <button style={S.btnSecondary} onClick={resetCapture}>Cancel</button>
-                    <button
-                      style={S.btnPrimary(!!(form.job.trim() && form.worker_name.trim() && pendingTools.length > 0))}
-                      disabled={!(form.job.trim() && form.worker_name.trim() && pendingTools.length > 0)}
-                      onClick={async () => {
-                        try {
-                          for (const tool of pendingTools) {
-                            const qty = parseInt(tool.quantity) || 1
-                            await fetch('/api/tool-entries', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ tool_name: tool.name, job: form.job, worker_name: form.worker_name, quantity: qty, source: inputMode }),
-                            })
-                          }
-                          if (!basketJob && form.job) { setBasketJob(form.job); setBasketJobSearch(form.job) }
-                          if (!basketWorker && form.worker_name) setBasketWorker(form.worker_name)
-                          showToast(`${pendingTools.length} tool${pendingTools.length > 1 ? 's' : ''} logged ✓`)
-                          loadToolEntries()
-                          setTranscript(''); setTextInput(''); setMatchResult(null); setPendingTools([])
-                          setForm(f => ({ ...f, quantity: '' }))
-                        } catch { showToast('Save failed — try again') }
-                      }}
-                    >
-                      Log Tools ✓
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div style={{...S.card, border:'1px solid var(--danger)'}}>
-                  <div style={{color:'var(--danger)', fontFamily:'var(--font-head)', fontWeight:700, fontSize:16, marginBottom:8}}>No product matched</div>
-                  <div style={{color:'var(--muted)', fontSize:14, marginBottom:16}}>
-                    Try again with a different product name or description.
-                  </div>
-                  <button style={S.btnSecondary} onClick={resetCapture}>Try again</button>
-                </div>
-              )
             )}
 
             {/* ── BASKET PANEL ─────────────────────────────── */}
