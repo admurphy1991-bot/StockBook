@@ -175,8 +175,6 @@ HAND_TOOLS = [
     {"name": "Tusk SDS-Plus Concrete Drill Bit 14mm Cross-Head (TSP 14M)", "cost": 23, "alias": "14mm tusk bit, tusk drill bit 14mm, tsp14m"},
     {"name": "Makita SDS-Plus Spade/Shovel Bit 50mm (D-62446)", "cost": 10, "alias": "scaling chisel, spade bit, flat chisel 50mm, shovel bit"},
     {"name": "Makita Spade/Shovel Bit 60mm (P-24957)", "cost": 58, "alias": "angle chisel, spade bit 60mm, shovel bit 60"},
-    {"name": "Ramset Vacuum Bags", "cost": 157, "alias": "ramset vaccum bags, spit vacuum bags, ramset vac bags, ramset fleece bags, Ramset/Spit Vacuum Cleaner Fleece Bags 5pk"},
-    {"name": "Makita Vacuum Bags", "cost": 70, "alias": "makita vaccum bags, makita dust bags, VC4210 bags, makita fleece bags, Makita Vacuum Fleece Dust Bag 5pk"},
 ]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
@@ -280,6 +278,8 @@ DEFAULT_PRODUCTS = [
     {"code": "11204", "description": "Washers - Trackmaster 00120 (Box of 1,000)", "supplier": "RAMSET", "unit": "BAG", "gl": "2000", "alias": ""},
     {"code": "P8C630", "description": "Pulsa 800 30mm STD pin 07050 (500 per bag)", "supplier": "RAMSET", "unit": "BAG", "gl": "2000", "alias": ""},
     {"code": "P8HC627", "description": "Pulsa 800 27mm Hard Conc pin 07175 (500 per bag)", "supplier": "RAMSET", "unit": "BAG", "gl": "2000", "alias": ""},
+    {"code": "FAB604", "description": "Ramset Vacuum Bags 5pk", "supplier": "RAMSET", "unit": "PACK", "gl": "2000", "alias": "ramset vaccum bags, spit vacuum bags, ramset vac bags, ramset fleece bags, Ramset/Spit Vacuum Cleaner Fleece Bags 5pk"},
+    {"code": "W107418353", "description": "Makita Vacuum Bags 5pk", "supplier": "MAKITA", "unit": "PACK", "gl": "2000", "alias": "makita vaccum bags, makita dust bags, VC4210 bags, makita fleece bags, Makita Vacuum Fleece Dust Bag 5pk"},
     {"code": "VVT500-2", "description": "Allsheet 500T 500T-micron Virgin DPM PE 50m", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": ""},
     {"code": "VVT300", "description": "Allsheet 300T-micron virgin DPM PE 2 x 50m", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": ""},
 ]
@@ -1776,10 +1776,10 @@ Return JSON:
 - If multiple stock products mentioned, include all in matches array, each with their own quantity
 - If a word matches the alias of MORE THAN ONE product (e.g. "swelltite" matches both a bar and a roll, or "sika ua"/"sikadur ua" matches both the 4L and 8L Sikadur UA), set ambiguous: true and include ALL matching products in matches so the user can choose. Never silently pick one size/variant over another when the transcript doesn't specify which.
 - Only match a product when the transcript genuinely overlaps its description or alias text. Sharing just a supplier name (e.g. "sika") is not enough on its own — do not force a match to an unrelated product just because it's the same supplier.
-- NEVER invent, guess, abbreviate, or construct a "code" that isn't copied verbatim from an entry in the PRODUCTS list above. Every object in "matches" must correspond to a real PRODUCTS entry with that exact code. If you can't find an exact PRODUCTS entry for something, do not put it in matches — check whether it's actually in HAND TOOLS instead (many consumables like vacuum bags, drill bits, or filters are listed there, not in PRODUCTS), and if it's in neither list, leave it out entirely rather than fabricating an entry.
+- NEVER invent, guess, abbreviate, or construct a "code" that isn't copied verbatim from an entry in the PRODUCTS list above. Every object in "matches" must correspond to a real PRODUCTS entry with that exact code. If you can't find an exact PRODUCTS entry for something, do not put it in matches — check whether it's actually in HAND TOOLS instead (some consumables like drill bits are listed there, not in PRODUCTS), and if it's in neither list, leave it out entirely rather than fabricating an entry.
 - If no quantity stated for a product, set quantity to null and add "quantity" to missing
 - Put null and add to missing[] for job or worker_name if not in transcript
-- Only include tools that are a clear match (by name or alias) to the HAND TOOLS list. Don't be shy about matching a long or branded tool name just because the transcript only loosely resembles it — if the meaning clearly matches (e.g. "ramset vaccum bags" clearly means the "Ramset Vacuum Bags" tool), include it and copy the "name" field exactly as written in the list. Just never invent a tool name that isn't in the list at all.
+- Only include tools that are a clear match (by name or alias) to the HAND TOOLS list. Don't be shy about matching a long or branded tool name just because the transcript only loosely resembles it — if the meaning clearly matches, include it and copy the "name" field exactly as written in the list. Just never invent a tool name that isn't in the list at all.
 - For tools, if a quantity is stated (e.g. "2 hammers") set quantity accordingly, otherwise default to 1
 - If ONLY tools are mentioned (no stock products), return matches: [] and do NOT add "product" or "quantity" to missing[]
 """}
