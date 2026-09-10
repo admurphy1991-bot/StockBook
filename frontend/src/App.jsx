@@ -2504,7 +2504,9 @@ export default function App() {
 
             {refTab === 'tools' ? (() => {
               const q = refSearch.trim().toLowerCase()
-              const filtered = handTools.filter(t => t.name.toLowerCase().includes(q))
+              const filtered = handTools.filter(t =>
+                t.name.toLowerCase().includes(q) || t.alias?.toLowerCase().includes(q)
+              )
               return filtered.length === 0 ? (
                 <div style={S.empty}>No tools match</div>
               ) : (

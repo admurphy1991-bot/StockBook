@@ -120,63 +120,63 @@ async def startup():
             time.sleep(3)
 
 HAND_TOOLS = [
-    {"name": "Tajima knife", "cost": 18},
-    {"name": "Hammer", "cost": 26},
-    {"name": "Hand saw", "cost": 16},
-    {"name": "Spirit level", "cost": 15},
-    {"name": "Crescent spanner", "cost": 29},
-    {"name": "Pilers", "cost": 12},
-    {"name": "Chalk line", "cost": 24},
-    {"name": "Hack saw", "cost": 6},
-    {"name": "Aviation tin snips", "cost": 29},
-    {"name": "SINTEX R26:1 MS Cartridge Gun", "cost": 53},
-    {"name": "Trowell", "cost": 12},
-    {"name": "Crack patch tool", "cost": 19},
-    {"name": "Pinch bar", "cost": 29},
-    {"name": "Crow bar", "cost": 30},
-    {"name": "Pop riveter", "cost": 75},
-    {"name": "Spatula", "cost": 10},
-    {"name": "Measuring tape", "cost": 20},
-    {"name": "Metal file", "cost": 13},
-    {"name": "Bull nose trowell", "cost": 8},
-    {"name": "Wire brush", "cost": 7},
-    {"name": "Wood chisel", "cost": 23},
-    {"name": "Allen keys", "cost": 25},
-    {"name": "Linbide scraper", "cost": 15},
-    {"name": "Rubber mallet", "cost": 13},
-    {"name": "Scissors", "cost": 20},
-    {"name": "Window scraper", "cost": 9},
-    {"name": "Socket set", "cost": 80},
-    {"name": "Hand spade", "cost": 37},
-    {"name": "Hand shovel", "cost": 70},
-    {"name": "Sledge hammer", "cost": 70},
-    {"name": "Hand pick", "cost": 50},
-    {"name": "Digging bar", "cost": 66},
-    {"name": "Builders set square", "cost": 24},
-    {"name": "Penny roller", "cost": 51},
-    {"name": "Large Membrane roller - 90 mm", "cost": 132},
-    {"name": "Medium Membrane roller - 40 mm", "cost": 49},
-    {"name": "SIEVERT EASYJET PLUS Lighter", "cost": 131},
-    {"name": "steel club hammer", "cost": 32},
-    {"name": "Sterling knife", "cost": 9},
-    {"name": "Small torch lighter", "cost": 131},
-    {"name": "Wire nipper cutters", "cost": 15},
-    {"name": "Hand mallet", "cost": None},
-    {"name": "Striker", "cost": 12},
-    {"name": "Broom", "cost": 40},
-    {"name": "Garden hose", "cost": 50},
-    {"name": "Garden hose fittings", "cost": 4},
-    {"name": "Tool Bag", "cost": 60},
-    {"name": "Makita SDS-Plus Drill Bit 5mm (E-20856)", "cost": 17},
-    {"name": "Makita SDS-Plus Drill Bit 5.5mm (E-20921)", "cost": 14},
-    {"name": "Makita SDS-Plus Drill Bit 10mm (E-21238)", "cost": 19},
-    {"name": "Makita SDS-Plus Drill Bit 12mm (E-21319)", "cost": 22},
-    {"name": "Tusk SDS-Plus Concrete Drill Bit 6mm Solid X-Head (TSX 6S)", "cost": 11},
-    {"name": "Tusk SDS-Plus Concrete Drill Bit 14mm Cross-Head (TSP 14M)", "cost": 23},
-    {"name": "Makita SDS-Plus Spade/Shovel Bit 50mm (D-62446)", "cost": 10},
-    {"name": "Makita Spade/Shovel Bit 60mm (P-24957)", "cost": 58},
-    {"name": "Ramset/Spit Vacuum Cleaner Fleece Bags 5pk (FAB604)", "cost": 157},
-    {"name": "Makita Vacuum Fleece Dust Bag 5pk for VC4210L/M (W107418353)", "cost": 70},
+    {"name": "Tajima knife", "cost": 18, "alias": "utility knife, box cutter, stanley knife"},
+    {"name": "Hammer", "cost": 26, "alias": ""},
+    {"name": "Hand saw", "cost": 16, "alias": ""},
+    {"name": "Spirit level", "cost": 15, "alias": "level, bubble level"},
+    {"name": "Crescent spanner", "cost": 29, "alias": "adjustable wrench, crescent wrench, shifter"},
+    {"name": "Pilers", "cost": 12, "alias": "pliers"},
+    {"name": "Chalk line", "cost": 24, "alias": "chalk reel, snap line"},
+    {"name": "Hack saw", "cost": 6, "alias": ""},
+    {"name": "Aviation tin snips", "cost": 29, "alias": "tin snips, aviation snips, metal snips"},
+    {"name": "SINTEX R26:1 MS Cartridge Gun", "cost": 53, "alias": "sintex gun, cartridge gun, sealant gun, caulking gun"},
+    {"name": "Trowell", "cost": 12, "alias": "trowel"},
+    {"name": "Crack patch tool", "cost": 19, "alias": "crack tool, joint tool"},
+    {"name": "Pinch bar", "cost": 29, "alias": "pry bar"},
+    {"name": "Crow bar", "cost": 30, "alias": "crowbar"},
+    {"name": "Pop riveter", "cost": 75, "alias": "rivet gun, riveter"},
+    {"name": "Spatula", "cost": 10, "alias": ""},
+    {"name": "Measuring tape", "cost": 20, "alias": "tape measure"},
+    {"name": "Metal file", "cost": 13, "alias": "file"},
+    {"name": "Bull nose trowell", "cost": 8, "alias": "bull nose trowel, pointing trowel"},
+    {"name": "Wire brush", "cost": 7, "alias": ""},
+    {"name": "Wood chisel", "cost": 23, "alias": "chisel"},
+    {"name": "Allen keys", "cost": 25, "alias": "hex keys, allen key set"},
+    {"name": "Linbide scraper", "cost": 15, "alias": "carbide scraper, scraper"},
+    {"name": "Rubber mallet", "cost": 13, "alias": ""},
+    {"name": "Scissors", "cost": 20, "alias": ""},
+    {"name": "Window scraper", "cost": 9, "alias": "glass scraper"},
+    {"name": "Socket set", "cost": 80, "alias": "sockets"},
+    {"name": "Hand spade", "cost": 37, "alias": "spade"},
+    {"name": "Hand shovel", "cost": 70, "alias": "shovel"},
+    {"name": "Sledge hammer", "cost": 70, "alias": "sledgehammer"},
+    {"name": "Hand pick", "cost": 50, "alias": "pick, pickaxe"},
+    {"name": "Digging bar", "cost": 66, "alias": "steel bar, tamping bar"},
+    {"name": "Builders set square", "cost": 24, "alias": "set square, framing square"},
+    {"name": "Penny roller", "cost": 51, "alias": "spiked roller, membrane spike roller"},
+    {"name": "Large Membrane roller - 90 mm", "cost": 132, "alias": "large roller, 90mm roller, big membrane roller"},
+    {"name": "Medium Membrane roller - 40 mm", "cost": 49, "alias": "medium roller, 40mm roller"},
+    {"name": "SIEVERT EASYJET PLUS Lighter", "cost": 131, "alias": "sievert lighter, gas torch lighter, easyjet lighter"},
+    {"name": "steel club hammer", "cost": 32, "alias": "club hammer, lump hammer"},
+    {"name": "Sterling knife", "cost": 9, "alias": "sterling utility knife"},
+    {"name": "Small torch lighter", "cost": 131, "alias": "torch lighter, mini torch"},
+    {"name": "Wire nipper cutters", "cost": 15, "alias": "wire cutters, nippers"},
+    {"name": "Hand mallet", "cost": None, "alias": "mallet"},
+    {"name": "Striker", "cost": 12, "alias": "flint striker, spark lighter"},
+    {"name": "Broom", "cost": 40, "alias": ""},
+    {"name": "Garden hose", "cost": 50, "alias": "hose"},
+    {"name": "Garden hose fittings", "cost": 4, "alias": "hose fittings, hose connectors"},
+    {"name": "Tool Bag", "cost": 60, "alias": "kit bag"},
+    {"name": "Makita SDS-Plus Drill Bit 5mm (E-20856)", "cost": 17, "alias": "5mm drill bit, sds bit 5mm, makita 5mm bit"},
+    {"name": "Makita SDS-Plus Drill Bit 5.5mm (E-20921)", "cost": 14, "alias": "5.5mm drill bit, sds bit five point five, makita 5.5mm bit"},
+    {"name": "Makita SDS-Plus Drill Bit 10mm (E-21238)", "cost": 19, "alias": "10mm drill bit, sds bit 10mm, makita 10mm bit"},
+    {"name": "Makita SDS-Plus Drill Bit 12mm (E-21319)", "cost": 22, "alias": "12mm drill bit, sds bit 12mm, makita 12mm bit"},
+    {"name": "Tusk SDS-Plus Concrete Drill Bit 6mm Solid X-Head (TSX 6S)", "cost": 11, "alias": "6mm tusk bit, tusk drill bit 6mm, tsx6s"},
+    {"name": "Tusk SDS-Plus Concrete Drill Bit 14mm Cross-Head (TSP 14M)", "cost": 23, "alias": "14mm tusk bit, tusk drill bit 14mm, tsp14m"},
+    {"name": "Makita SDS-Plus Spade/Shovel Bit 50mm (D-62446)", "cost": 10, "alias": "scaling chisel, spade bit, flat chisel 50mm, shovel bit"},
+    {"name": "Makita Spade/Shovel Bit 60mm (P-24957)", "cost": 58, "alias": "angle chisel, spade bit 60mm, shovel bit 60"},
+    {"name": "Ramset/Spit Vacuum Cleaner Fleece Bags 5pk (FAB604)", "cost": 157, "alias": "ramset vacuum bags, spit vacuum bags, ramset vac bags, ramset fleece bags, dust bags for vacuum"},
+    {"name": "Makita Vacuum Fleece Dust Bag 5pk for VC4210L/M (W107418353)", "cost": 70, "alias": "makita vacuum bags, makita dust bags, VC4210 bags, makita fleece bags"},
 ]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
@@ -1738,7 +1738,7 @@ async def match_product(req: MatchRequest):
     client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
     products_json = json.dumps(_products)
     jobs_json = json.dumps(_jobs)
-    tools_json = json.dumps([t["name"] for t in HAND_TOOLS])
+    tools_json = json.dumps(HAND_TOOLS)
     response = await client.chat.completions.create(
         model="gpt-4o-mini",
         max_tokens=800,
@@ -1753,12 +1753,12 @@ PRODUCTS (match by description, code, or alias):
 JOBS (match job number or name):
 {jobs_json}
 
-HAND TOOLS (match by name, allow for misspellings and abbreviations):
+HAND TOOLS (match by name or alias, allow for misspellings and abbreviations):
 {tools_json}
 
 Extract everything mentioned:
 1. Stock products - match against PRODUCTS list using description, code, or alias. Each product gets its own entry with quantity.
-2. Tools - match any tools mentioned against the HAND TOOLS list. A "blade" could match "Hack saw" or a cutting tool - use best judgement.
+2. Tools - match any tools mentioned against the HAND TOOLS list using name or alias. A "blade" could match "Hack saw" or a cutting tool - use best judgement.
 3. Job - match closest from job list by number or name
 4. Worker name (who took the items)
 
@@ -1776,15 +1776,29 @@ Return JSON:
 - If multiple stock products mentioned, include all in matches array, each with their own quantity
 - If a word matches the alias of MORE THAN ONE product (e.g. "swelltite" matches both a bar and a roll, or "sika ua"/"sikadur ua" matches both the 4L and 8L Sikadur UA), set ambiguous: true and include ALL matching products in matches so the user can choose. Never silently pick one size/variant over another when the transcript doesn't specify which.
 - Only match a product when the transcript genuinely overlaps its description or alias text. Sharing just a supplier name (e.g. "sika") is not enough on its own — do not force a match to an unrelated product just because it's the same supplier.
+- NEVER invent, guess, abbreviate, or construct a "code" that isn't copied verbatim from an entry in the PRODUCTS list above. Every object in "matches" must correspond to a real PRODUCTS entry with that exact code. If you can't find an exact PRODUCTS entry for something, do not put it in matches — check whether it's actually in HAND TOOLS instead (many consumables like vacuum bags, drill bits, or filters are listed there, not in PRODUCTS), and if it's in neither list, leave it out entirely rather than fabricating an entry.
 - If no quantity stated for a product, set quantity to null and add "quantity" to missing
 - Put null and add to missing[] for job or worker_name if not in transcript
-- Only include tools that are a clear match to the HAND TOOLS list
+- Only include tools that are a clear match to the HAND TOOLS list — never invent a tool name either, it must be copied verbatim from the HAND TOOLS list
 - For tools, if a quantity is stated (e.g. "2 hammers") set quantity accordingly, otherwise default to 1
 - If ONLY tools are mentioned (no stock products), return matches: [] and do NOT add "product" or "quantity" to missing[]
 """}
         ]
     )
-    return json.loads(response.choices[0].message.content.strip())
+    data = json.loads(response.choices[0].message.content.strip())
+
+    # Hard guardrail: never trust the model's word for it — drop any "match" whose
+    # code isn't a real PRODUCTS entry, and any "tool" whose name isn't a real
+    # HAND_TOOLS entry. Prompt instructions reduce hallucination but don't prevent
+    # it (see RAMVACBAGS/RAMVBG incidents), so this is enforced in code instead.
+    valid_codes = {p["code"] for p in _products}
+    valid_tool_names = {t["name"] for t in HAND_TOOLS}
+    data["matches"] = [m for m in data.get("matches", []) if m.get("code") in valid_codes]
+    data["tools"] = [t for t in data.get("tools", []) if t.get("name") in valid_tool_names]
+    if len(data["matches"]) < 2:
+        data["ambiguous"] = False
+
+    return data
 
 @app.post("/api/entries")
 async def create_entry(entry: EntryCreate):
