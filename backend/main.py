@@ -1787,13 +1787,26 @@ Return JSON:
     )
     data = json.loads(response.choices[0].message.content.strip())
 
-    # Hard guardrail: never trust the model's word for it — drop any "match" whose
-    # code isn't a real PRODUCTS entry, and any "tool" whose name isn't a real
-    # HAND_TOOLS entry. Prompt instructions reduce hallucination but don't prevent
-    # it (see RAMVACBAGS/RAMVBG incidents), so this is enforced in code instead.
-    valid_codes = {p["code"] for p in _products}
+    # Hard guardrail: never trust the model's word for it. A "match" is only kept if
+    # its code is a real PRODUCTS entry — and even then every field except quantity
+    # is overwritten with the real record, because the model has been seen pairing a
+    # real code with a totally unrelated description (e.g. code RF170, a NURA
+    # sealant, mislabelled as vacuum bags). Same idea for tools: name must be a real
+    # HAND_TOOLS entry. Prompt instructions alone don't prevent this kind of error,
+    # so it's enforced here instead (see RAMVACBAGS/RAMVBG/RF170 incidents).
+    products_by_code = {}
+    for p in _products:
+        products_by_code.setdefault(p["code"], []).append(p)
     valid_tool_names = {t["name"] for t in HAND_TOOLS}
-    data["matches"] = [m for m in data.get("matches", []) if m.get("code") in valid_codes]
+
+    clean_matches = []
+    for m in data.get("matches", []):
+        candidates = products_by_code.get(m.get("code"))
+        if not candidates:
+            continue
+        real = next((c for c in candidates if c["description"].lower() == str(m.get("description", "")).lower()), candidates[0])
+        clean_matches.append({**real, "quantity": m.get("quantity")})
+    data["matches"] = clean_matches
     data["tools"] = [t for t in data.get("tools", []) if t.get("name") in valid_tool_names]
     if len(data["matches"]) < 2:
         data["ambiguous"] = False
