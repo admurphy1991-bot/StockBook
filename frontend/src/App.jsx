@@ -347,6 +347,7 @@ export default function App() {
   const [inputMode, setInputMode] = useState('voice')
   const [textInput, setTextInput] = useState('')
   const [jobs, setJobs] = useState([])
+  const [jobUnlisted, setJobUnlisted] = useState(false)
   const [products, setProducts] = useState([])
   const [vos, setVos] = useState([])
 
@@ -690,7 +691,7 @@ export default function App() {
   function resetCapture() {
     setTranscript(''); setTextInput(''); setMatchResult(null)
     setConfirmedProducts([]); setForm({ job: '', worker_name: '' })
-    setJobSearch(''); setJobDropOpen(false); setPendingTools([])
+    setJobSearch(''); setJobDropOpen(false); setJobUnlisted(false); setPendingTools([])
     setBasket([]); setBasketJob(''); setBasketJobSearch(''); setBasketWorker('')
     setProductPickerOpen(false); setProductPickerQuery('')
   }
@@ -772,6 +773,26 @@ export default function App() {
       showToast('Failed to send — please try again')
     }
     setReportSending(false)
+  }
+
+  async function notifyUnlistedJob(jobNumber) {
+    try {
+      await fetch('https://hook.us2.make.com/k1vpgwnxstveou5913b9776b09gw3fnk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: reporterName.trim() || form.worker_name?.trim() || 'Unknown',
+          issue: `Worker entered a job number that isn't in the job list: "${jobNumber}". Please check it's valid and add it to the job list if so.`,
+          type: 'unlisted_job',
+          job_number: jobNumber,
+          url: window.location.href,
+          reported_at: new Date().toISOString(),
+        }),
+      })
+      showToast('Job not found — team notified ✓')
+    } catch {
+      showToast('Job saved, but the notification failed to send')
+    }
   }
 
   function switchMode(mode) {
@@ -1513,6 +1534,7 @@ export default function App() {
                       onChange={e => {
                         setJobSearch(e.target.value)
                         setForm(f => ({...f, job: ''}))
+                        setJobUnlisted(false)
                         setJobDropOpen(true)
                       }}
                       onFocus={() => setJobDropOpen(true)}
@@ -1533,6 +1555,7 @@ export default function App() {
                                 e.preventDefault()
                                 setForm(f => ({...f, job: j}))
                                 setJobSearch(j)
+                                setJobUnlisted(false)
                                 setJobDropOpen(false)
                               }}
                             >
@@ -1543,13 +1566,31 @@ export default function App() {
                       ) : (
                         <div style={S.jobDropdown}>
                           <div style={{padding:'12px 14px', color:'var(--muted)', fontSize:13, fontFamily:'var(--font-head)', letterSpacing:1}}>NO MATCHES</div>
+                          {jobSearch.trim() && (
+                            <div
+                              style={{...S.jobDropItem(false), color:'var(--accent)', fontFamily:'var(--font-head)', fontSize:12.5, letterSpacing:.3}}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
+                              onMouseDown={e => {
+                                e.preventDefault()
+                                const typed = jobSearch.trim()
+                                setForm(f => ({...f, job: typed}))
+                                setJobSearch(typed)
+                                setJobUnlisted(true)
+                                setJobDropOpen(false)
+                                notifyUnlistedJob(typed)
+                              }}
+                            >
+                              Use "{jobSearch.trim()}" anyway →
+                            </div>
+                          )}
                         </div>
                       )
                     })()}
                   </div>
                   {form.job && (
-                    <div style={{fontSize:12, color:'var(--accent)', marginTop:4, fontFamily:'var(--font-head)'}}>
-                      ✓ {form.job}
+                    <div style={{fontSize:12, color: jobUnlisted ? '#E8A33D' : 'var(--accent)', marginTop:4, fontFamily:'var(--font-head)'}}>
+                      {jobUnlisted ? `⚠ ${form.job} — not in job list, team notified` : `✓ ${form.job}`}
                     </div>
                   )}
                 </div>
