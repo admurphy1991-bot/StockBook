@@ -1738,7 +1738,7 @@ async def match_product(req: MatchRequest):
     client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
     products_json = json.dumps(_products)
     jobs_json = json.dumps(_jobs)
-    tools_json = json.dumps(HAND_TOOLS)
+    tools_json = json.dumps([{"name": t["name"], "alias": t.get("alias", "")} for t in HAND_TOOLS])
     response = await client.chat.completions.create(
         model="gpt-4o-mini",
         max_tokens=800,
@@ -1779,7 +1779,7 @@ Return JSON:
 - NEVER invent, guess, abbreviate, or construct a "code" that isn't copied verbatim from an entry in the PRODUCTS list above. Every object in "matches" must correspond to a real PRODUCTS entry with that exact code. If you can't find an exact PRODUCTS entry for something, do not put it in matches — check whether it's actually in HAND TOOLS instead (many consumables like vacuum bags, drill bits, or filters are listed there, not in PRODUCTS), and if it's in neither list, leave it out entirely rather than fabricating an entry.
 - If no quantity stated for a product, set quantity to null and add "quantity" to missing
 - Put null and add to missing[] for job or worker_name if not in transcript
-- Only include tools that are a clear match to the HAND TOOLS list — never invent a tool name either, it must be copied verbatim from the HAND TOOLS list
+- Only include tools that are a clear match (by name or alias) to the HAND TOOLS list. Don't be shy about matching a long or branded tool name just because the transcript only loosely resembles it — if the meaning clearly matches (e.g. "ramset vacuum bags" clearly means the "Ramset/Spit Vacuum Cleaner Fleece Bags" tool), include it and copy the "name" field exactly as written in the list. Just never invent a tool name that isn't in the list at all.
 - For tools, if a quantity is stated (e.g. "2 hammers") set quantity accordingly, otherwise default to 1
 - If ONLY tools are mentioned (no stock products), return matches: [] and do NOT add "product" or "quantity" to missing[]
 """}
