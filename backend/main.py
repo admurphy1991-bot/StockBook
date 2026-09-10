@@ -175,6 +175,8 @@ HAND_TOOLS = [
     {"name": "Tusk SDS-Plus Concrete Drill Bit 14mm Cross-Head (TSP 14M)", "cost": 23},
     {"name": "Makita SDS-Plus Spade/Shovel Bit 50mm (D-62446)", "cost": 17},
     {"name": "Makita Spade/Shovel Bit 60mm (P-24957)", "cost": None},
+    {"name": "Ramset/Spit Vacuum Cleaner Fleece Bags 5pk (FAB604)", "cost": None},
+    {"name": "Makita Vacuum Fleece Dust Bag 5pk for VC4210L/M (W107418353)", "cost": 104},
 ]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
