@@ -168,15 +168,15 @@ HAND_TOOLS = [
     {"name": "Garden hose fittings", "cost": 4},
     {"name": "Tool Bag", "cost": 60},
     {"name": "Makita SDS-Plus Drill Bit 5mm (E-20856)", "cost": 17},
-    {"name": "Makita SDS-Plus Drill Bit 5.5mm (E-20921)", "cost": 19},
-    {"name": "Makita SDS-Plus Drill Bit 10mm (E-21238)", "cost": 36},
-    {"name": "Makita SDS-Plus Drill Bit 12mm (E-21319)", "cost": 42},
-    {"name": "Tusk SDS-Plus Concrete Drill Bit 6mm Solid X-Head (TSX 6S)", "cost": 16},
+    {"name": "Makita SDS-Plus Drill Bit 5.5mm (E-20921)", "cost": 14},
+    {"name": "Makita SDS-Plus Drill Bit 10mm (E-21238)", "cost": 19},
+    {"name": "Makita SDS-Plus Drill Bit 12mm (E-21319)", "cost": 22},
+    {"name": "Tusk SDS-Plus Concrete Drill Bit 6mm Solid X-Head (TSX 6S)", "cost": 11},
     {"name": "Tusk SDS-Plus Concrete Drill Bit 14mm Cross-Head (TSP 14M)", "cost": 23},
-    {"name": "Makita SDS-Plus Spade/Shovel Bit 50mm (D-62446)", "cost": 17},
-    {"name": "Makita Spade/Shovel Bit 60mm (P-24957)", "cost": None},
-    {"name": "Ramset/Spit Vacuum Cleaner Fleece Bags 5pk (FAB604)", "cost": None},
-    {"name": "Makita Vacuum Fleece Dust Bag 5pk for VC4210L/M (W107418353)", "cost": 104},
+    {"name": "Makita SDS-Plus Spade/Shovel Bit 50mm (D-62446)", "cost": 10},
+    {"name": "Makita Spade/Shovel Bit 60mm (P-24957)", "cost": 58},
+    {"name": "Ramset/Spit Vacuum Cleaner Fleece Bags 5pk (FAB604)", "cost": 157},
+    {"name": "Makita Vacuum Fleece Dust Bag 5pk for VC4210L/M (W107418353)", "cost": 70},
 ]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
