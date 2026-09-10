@@ -167,6 +167,14 @@ HAND_TOOLS = [
     {"name": "Garden hose", "cost": 50},
     {"name": "Garden hose fittings", "cost": 4},
     {"name": "Tool Bag", "cost": 60},
+    {"name": "Makita SDS-Plus Drill Bit 5mm (E-20856)", "cost": 17},
+    {"name": "Makita SDS-Plus Drill Bit 5.5mm (E-20921)", "cost": 19},
+    {"name": "Makita SDS-Plus Drill Bit 10mm (E-21238)", "cost": 36},
+    {"name": "Makita SDS-Plus Drill Bit 12mm (E-21319)", "cost": 42},
+    {"name": "Tusk SDS-Plus Concrete Drill Bit 6mm Solid X-Head (TSX 6S)", "cost": 16},
+    {"name": "Tusk SDS-Plus Concrete Drill Bit 14mm Cross-Head (TSP 14M)", "cost": 23},
+    {"name": "Makita SDS-Plus Spade/Shovel Bit 50mm (D-62446)", "cost": 17},
+    {"name": "Makita Spade/Shovel Bit 60mm (P-24957)", "cost": None},
 ]
 
 # ── In-memory product/job store (seeded from DB config or defaults) ──────────
