@@ -197,6 +197,7 @@ DEFAULT_PRODUCTS = [
     {"code": "ALLRX101", "description": "RX101T Waterstop 6.1lm per roll", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "RX one oh one waterstop, swelling waterstop, hydrophilic strip"},
     {"code": "VRX10210", "description": "Allco - RX102 Waterstop 10.2m", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "RX one oh two waterstop, RX102 strip, allco waterstop ten metre"},
     {"code": "ALLSWTB", "description": "Allco - Swelltite Termination Bar ea", "supplier": "ALLCOWATER", "unit": "ea", "gl": "2000", "alias": "swelltite bar, termination bar, swelltite termination"},
+    {"code": "VSTPOL10.2", "description": "Swelltite Polish 3000 10.2m Roll", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "swelltite polish, polish three thousand, swelltite roll"},
     {"code": "ALLVODS", "description": "Allco - Voltex Super 66.6 DS", "supplier": "ALLCOWATER", "unit": "ROLL", "gl": "2000", "alias": "voltex super, voltex DS, bentonite super sheet"},
     {"code": "ALLWSTG", "description": "Allco - Waterstoppage 25kg bag", "supplier": "ALLCOWATER", "unit": "BAG", "gl": "2000", "alias": "waterstoppage, water stoppage bag, allco grout, chicken shit"},
     {"code": "VCS600", "description": "Cetseal (20oz) 600mls Sausage - Polymeric Sealant/Adhesive", "supplier": "ALLCOWATER", "unit": "600ML", "gl": "2000", "alias": "cetseal sausage, polymeric sealant sausage, cet seal"},
