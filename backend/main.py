@@ -219,6 +219,7 @@ DEFAULT_PRODUCTS = [
     {"code": "497964", "description": "Sika AnchorFix-1 300ml", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sika anchor fix, anchor fix one, sika anchor bolt"},
     {"code": "435005", "description": "Sikadur Injectokit-TH 250g", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sikadur inject kit, injection kit TH, sika inject"},
     {"code": "SIINLV250", "description": "Sikadur Injectokit- LV 250", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sikadur inject LV, low viscosity inject kit, sika LV inject"},
+    {"code": "920045", "description": "Aluminum Injection Packer 10x100mm", "supplier": "", "unit": "ea", "gl": "2000", "alias": "packers, injection packer, aluminium injection packer"},
     {"code": "405BOOM", "description": "Sika Boom 750ml", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sika boom, expanding foam, sika expanding foam"},
     {"code": "444906", "description": "Sika Thinner C Lt (20L)", "supplier": "SIKA", "unit": "EA", "gl": "2000", "alias": "sika thinner twenty litre, sika C thinner large, thinner C big"},
     {"code": "440627", "description": "Sika Blackseal Plus Elastic 20L", "supplier": "SIKA", "unit": "PAIL", "gl": "2000", "alias": "sika blackseal elastic, blackseal plus, sika black seal twenty litre"},
