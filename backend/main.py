@@ -493,7 +493,7 @@ DEFAULT_VOS_CSV = """Job Number,Variation Order Number,Description,Customer Orde
 21148,VO008,KRD - Sika alternative membrane,
 21148,VO009,KRD - RX101T and Cetseal supply only,PUR27963
 21148,VO010,KRD -Freight for Additional OBV Membrane & Roundels ,
-21148,VO011,Mercury Lane Station Box Terminations,SI-001057
+21148,VO011,Mercury Lane Station Box Terminations,SI-001057 
 21148,VO013,TBM Segmented Tunnel Concrete & Injection Repairs ,SI001292
 21148,VO014,KRD - Adit A3 Remedials ,SI001295
 21148,VO015,KTN - MC20/50 HeadWall Tie Back Bar Supply & Detailing ,Email/1603
@@ -509,7 +509,8 @@ DEFAULT_VOS_CSV = """Job Number,Variation Order Number,Description,Customer Orde
 22196,VO002,Grout Fill Vertical Lifting Eyes,SI-001956
 21148,VO024,KRD: Supply of Bluey Injection Hose ,SI-001972
 22196,VO003,Application of Sika Blackseal on precast elements,SI-001985
-21148,VO025,"KTN - Concrete Crack Injection Repairs ",
+21148,VO025,"KTN - Concrete Crack Injection Repairs 
+",
 22196,VO004,AOT - Joint sealant to southern panels - chase cutting,SI-002108
 22196,VO005,Application of Sikalastic 152 for WST facade glazing envelope,SI-002164
 21148,VO026,KRD - Substrate prep for the TBM termination,Email/1309
@@ -524,9 +525,10 @@ DEFAULT_VOS_CSV = """Job Number,Variation Order Number,Description,Customer Orde
 22196,VO007,Aotea - EWS402 Glazing Waterproofing works,SI-002370
 21148,VO034,KRD – RX101(T) & Cetseal Supply 2022,Email/1710
 22196,VO008,AOT - WST Precast Facade panel connection flashing,SI-002401
-22196,VO009,AOT - Facade Closure for Eastern Retail Unit L0,SI-002413
+22196,VO009,AOT - Facade Closure for Eastern Retail Unit L0,SI-002413 
 21148,VO036,KRD - Supply of Butyl Tape to Mercury Lane and Beresford Lane Stations,Email/1611
-21148,VO037,"KRD - Concrete Crack Injection Repairs ",
+21148,VO037,"KRD - Concrete Crack Injection Repairs 
+",
 21148,VO038,KRD - Supply of 75mm Butyl Tape ,Email/2411
 22196,VO010,Aotea - EWS402 Glazing Waterproofing works - East fixes,SI-002556
 21148,VO039,KTN – Southern Headwall Remedial Works ,Email/1612
@@ -535,20 +537,27 @@ DEFAULT_VOS_CSV = """Job Number,Variation Order Number,Description,Customer Orde
 21148,VO040,KTN – MC20/50 Patching Works ,
 21148,VO041,Application of Blackseal Elastic to the precast panels,SI-001282
 22196,VO012,AOT - WST South Elevation RyanRock retention,SI-002969
-22196,VO013,Panel open joint/150mm Seismic Shoe Detail/Nib Alteration,SI-002962
+22196,VO013,Panel open joint/150mm Seismic Shoe Detail/Nib Alteration,SI-002962 
 22196,VO014,B2 Foul water sump coating and screed works,SI-002849
 22196,VO015,Supply & install flashing to close the envelope in EWS402 N&W,SI-002973
 22196,VO016,Façade Baffle Remedial Work,SI-002940
 22196,VO017,Application of Sika 910N Primer to the seismic joint substrate,SI-003046
 22196,VO018,Pipe Penetration temporary waterproofing,SI-003019
 22196,VO019,membrane installation area Zone 3/4 remove water from roof 20/03,SI-003037
-21148,VO042,"KRD- RX101 (T) & Cetseal Supply 2023",SI-003042
-21148,VO043,"MCL - Mapei Planiseal Coating ",
-21148,VO044,"MCL - Pipe Penetration Detailing ",
+R169,VO001,Apartment J concrete repair,SPM-23566
+21148,VO042,"KRD- RX101 (T) & Cetseal Supply 2023
+",SI-003042
+21148,VO043,"MCL - Mapei Planiseal Coating 
+",
+21148,VO044,"MCL - Pipe Penetration Detailing 
+",
 21148,VO045,MCL - Peel n Stick membrate to PVC Waterbar,
-21148,VO046,"MCL - Torch on Membrane Patch Works ",
-21148,VO047,"KRD  - Bluey Hose Connector Supply ",
-21148,VO048,"KTN - MC20/50 Patching Works ",
+21148,VO046,"MCL - Torch on Membrane Patch Works 
+",
+21148,VO047,"KRD  - Bluey Hose Connector Supply 
+",
+21148,VO048,"KTN - MC20/50 Patching Works 
+",
 21148,VO049,Mercury Lane Facade,
 22196,VO020,Roof Waterproofing,7/09/2022
 21148,VO050,Application of Sikalastic 152,SI-003050
@@ -556,111 +565,81 @@ DEFAULT_VOS_CSV = """Job Number,Variation Order Number,Description,Customer Orde
 22196,VO021,Additional Roof Substrate,
 22196,VO022,AOT - SUMP H00 Ceiling / Roof Crack injection works,SI-003140
 22196,VO023,Concrete Grinding and panel upstand repair,SI-003142
-21148,VO052,"KTN - MC20/50 Patching Works ",
+21148,VO052,"KTN - MC20/50 Patching Works 
+",
 21148,VO053,Temporary Sealant on Level 3,SI-003150
 22196,VO024,Wellesley Roof - RAB board temporary sealant,SI-003181
 22196,VO025,Separation Flashing,SI-003183
-23113,VO001,Extra warm roof to gutter and membrane extension to fascia board,SW-SI0001
-22196,VO026,L0 internal air seal works,SI-003243
+22196,VO026,L0 internal air seal works,SI-003243 
 22196,VO027,WST Application of Dowsil Firestop for L3/L4 Joints,SI-003276
 21148,VO054,Air freight,
-22196,VO028,AOT - WST - Installation or Gorter Access Hatch on Roof,SI-003339
-22168,VO001,Stegowrap Penetration Detailing,
-22168,VO002,MHP - Reinstallation of DPM due to Incorrect Setout of Formwork,SI-000022
-22196,VO029,North L1 air seal,SI-003353
+22196,VO028,AOT - WST - Installation or Gorter Access Hatch on Roof,SI-003339 
+22196,VO029,North L1 air seal,SI-003353 
 22196,VO030,WST Façade Structural Cover Plates,SI-003277
 22196,VO031,Temporary Waterproofing to the Deck on L2 East,SI-003377
-23113,VO002,Extend the roof membrane to cover the timber block,SW-SI0002
 22196,VO032,Wellesley roof - substrate drying,SI-003394
 21148,VO056,MC20/50 Dry Crack Repairs ,
 21148,VO057,Mercury Lane Grouting Works ,
-22168,VO003,East Building Footings Pre Pour Assistance & Re Tape ,
 23159,VO001,Canopy Waterproofing Works,COR-000021
-22168,VO004,West Building Stegowrap Remedials ,Email/0507
 22196,VO033,GL32/E Dowsil sealant in 30-50mm gap from L1 to L4,SI-003498
-22168,VO005,Patch Repairs Zone West Building Footings ,Email/2107
-22168,VO006,Pipe penetrations to the North Building  ,Email/2107
-22196,VO034,AOT-VST SI for nib waterproofing,SI-003649
+22196,VO034,AOT-VST SI for nib waterproofing,SI-003649 
 22196,VO035,AOT - WST - 600mm long rainsheilf flashing,SI-003687
 22196,VO036,AOT - Sealing of scuppers through facade panels,SI-003678
-21148,VO058,"Double Sided Tapes for Adit A1 Waterbar ",
-21148,VO059,"Cross Passage Investigation & Injection Works ",
-22168,VO007,East Building Underslab Membrane Remedials & Cleaning of Laps,
-22168,VO008,"East Building Underslab Penetrations ",SITEDIR-97
+21148,VO058,"Double Sided Tapes for Adit A1 Waterbar 
+",
+21148,VO059,"Cross Passage Investigation & Injection Works 
+",
 22196,VO037,AOT - Closure of L1 Western Moisture Barrier,SI-003842
 22196,VO038,Exhaust Flue penetration waterproofing,SI-003870
-22168,VO009,North Building Underslab Service Penetrations Detail ,IR-000123
 21148,VO060,Adit A1 Shaft Downtime ,
 21148,VO061,Mercury Lane Seismic Joints ,
 21148,VO062,KRD - Cavity drainage holes at joint intersections ,
 22196,VO039,AOT - Flashing for Electrical covers,SI-003924
-22168,VO010,West Building - Bituthene to Internal Blockwork Wall ,Email/2209
 22196,VO040,AOT - Sikalastic Application for EWS502 - East Elevation,
 22196,VO041,AOT - WST Skirt flashings for Penthouse Louvres,SI-004022
-22168,VO011,"BEPL-SITEDIR-000147 North Building Preprufe Repairs ",000147
 23159,VO002,Supply and install of temporary wind break to protect Tapered board.,SI-001383
 22196,VO042,Sealant for under parapet buildersworks,SI-004071
 22196,VO043,Repair works Gutter overflow Western side.,SI-004067
-S34131,VO001,"Replacement of Waterbar around L2 Capping beam (Grid 11 & 12) ",SI-000041
-21148,VO063,"MTE - 10FT  Container Repair ",7/9 email
-22168,VO012,North Building - Revised Preprufe Terminations,
-22168,VO013,"East Building - Detailing Pipework with LM3000",
-22168,VO014,"East Building - Stainless Steel Flashings ",
-22168,VO015,"West Building - Slab Penetrations ",
+S34131,VO001,"Replacement of Waterbar around L2 Capping beam (Grid 11 & 12) 
+
+",SI-000041
+21148,VO063,"MTE - 10FT  Container Repair 
+",7/9 email 
 22196,VO044,Proclima solitex to VST soffit,SI-004108
-22168,VO016,North Building Lift Pit 3 Adcor 500 Replacement ,SI-000188
 23245,VO001,Freight costs for the materials from Sika,251023
 23159,VO003,Additional freight cost due to on-site logistics issues (Reimbursement only),
 S34131,VO002,Surface Prep to Grid F Existing Structure ,RFI-000132
 22196,VO045,AOT - Base flashing and overflashing and detailing for MEFH Penetrations through roof,SI-004111
-22168,VO017,West Building Underslab Step Remedials ,TBA
 23245,VO002,Sika MonoTop-352 N fillet and the sealant,Email14/11
 S34131,VO003,Remedial works to damaged waterproofing ,SI-000054
 22196,VO046,Facade Flashings at Gutter level,SI-004211
 S9000,VO001,HSEQ - Admin,
-22168,VO018,Remedials to Loading Bay Slab ,SITEDIR256
-22168,VO019,North Building Stegowrap Remedials ,
-22168,VO020,North Building PC Panel Flashings ,GCOR000409
-22168,VO021,Stegowrap to PolyRock Infills ,
 21148,VO064,MCL – B3 Waler Beam Injection,Email27/11
-22168,VO022,Cardiology - Emseal QuietJoint SHG - New wall to existing window detail,SITEDIR163
 21148,VO065,Temporary PEF Rod Panel Seismic Joint Weatherproofing Supply and Install,SI-004249
-22168,VO023,North Building Lift Pit 1 Preprufe Remedials ,DIR-000267
 22196,VO047,AOT - Sikalastic and Tremco Detailing for TCL Gutter and Fascia,SI-004109
 21148,VO066,Additional Sealant to Louvre Openings,SI-003300
-22168,VO024,North Building Lift Pit 2 & 3 Preprufe Repairs ,SITEDIR270
 21148,VO067,K Rd Crack Injection MC30 ,SI-004258
-22168,VO025,North Building Stegowrap Remedials,Email12/12
-22168,VO026,North Building - Detailing Pipework with LM3000,Email12/12
-22168,VO027,Sealant to Nibs and Precast Panels,
 21148,VO068,Temporary sealant - L3 to Precast,FCR047574
-S34131,VO004,Epoxy Injection for Ground Water,SI-000061
+S34131,VO004,Epoxy Injection for Ground Water,SI-000061 
 23245,VO003,Groutfill the baffle rebate using Sika Monotop 412,SI-001411
 21148,VO069,Temporary torch-on Waterpprofing for rain water pipe at MNL roof Level L3,SI-004400
 23159,VO004,Waterproofing - EBH L2 slab edge to existing building,SI-001773
-22168,VO028,Loading Dock Waterproofing Remedials ,BEPL-SITED
-22168,VO029,"Surface Preparation to Link Building Nibs ",GCOR000045
-22168,VO030,Stegowrap Repairs to Column Slab Pockets,SI: 000383
+R169,VO002,9H potential exterior water leak investigation,25/01EMAIL
 23245,VO004,Precast Panel Concrete repairs,SI-001715
 23245,VO005,Supply and install Sika EMSEAL 150mm to East Concourse Riser,SI-001617
 23159,VO005,Slab repairs to Make Substrate Suitable for Warm Roof,SI-001852
 21148,VO070,Beresford Square Torch On,
-22168,VO031,Lift Pit 2 Preprufe Remedials ,SI-000446
 22196,VO048,Southern Parapet Cap Flashing,SI-004056
-22168,VO032,Additional extra over cost for East building sealant works due to differences in quantities and joint sizes,
 S34131,VO005,Grid EJ Surface Preparation ,Email06/03
 22196,VO049,Removal and Reinstatement of WST roof membrane around gutter droppers,SI-004580
-22168,V001,Lift Pit 1 Waterbar Install ,
 23159,VO007,Temporary membrane for scaffold penetrations to the canopy,SI-002042
 22196,VO050,Application of Sikalastic 152 to Skylight Upstands,SI-004597
 22196,VO051,Application of Sikalastic 152 to Skylight Upstands,SI050090
 S34131,VO006,South Core Membrane Repairs ,000179
 S34131,VO007,Waterproof Services Through Existing Building Wall,SI-000077
 21148,VO071,Planiseal MR Supply to LKA ,PUR59767
-21148,VO072,"Supply & Install of Bitumen Fillet ",SI-004631
-22168,VO033,Temp Works Engineer Time & Soldier Hire for Lift Pit,
-22168,VO034,West Substation Tanking Works ,
-22168,VO035,West Substation Pipe Penetrations  ,
+21148,VO072,"Supply & Install of Bitumen Fillet 
+",SI-004631 
 23245,VO006,Additional Access costs ,
 21148,VO073,Torch On Penetrations to Beresford Square ,
 21148,VO074,Beresford Square Mapelastic Smart ,
@@ -671,35 +650,29 @@ S34131,VO008,Swellable Waterbar to Existing Columns ,-000179
 23159,VO009,Additional Detailing to Plinths L3 Plant room &  to Steel Column over Plinths along Grid EG,SI-001725
 23159,VO010,WP1 - L2FS - L1 Fire Door Works,SI-002170
 22196,VO052,Weather sealant to facade penetrations for lights,SI-004701
-22168,VO036,South Substation ADCOR 500T Replacement ,
 21148,VO077,Mercury Lane Additionall Surface Waterproofing,SI-004716
 23245,VO008,TH01 - Sealing office barrier panels,SI-002154
 23245,VO009,Carpark - Sealing to top of flashing - Lvl1 Gl C4 - E-J,SI-002120
-22168,VO037,East Building - Conclusions WUFI study weep holes precast,
 S34131,VO009,Koolfoam Poly to Triangular Core ,000248
 23245,VO010,Sikalastic 152 coating to Speedramp,SI-002195
 R444,VO001,"P&G associated with contract works valued at $3,338.67",1159/173
-22168,VO038,North  Substation Tanking Works ,
-22168,VO039,North Substation Pipe Penetrations  ,
 R444,VO002,Concrete Slab Edge Repair,ATS No 176
 23159,VO011,Flood testing to roof ,SI-002209
 23245,VO011,PP Grout Fill to C3,SI-002285
 23245,VO012,Sealant at Precast Barrier Ends along Concourse GL J,SI-002265
-R444,VO003,Concrete Slab Chase Repairs 5E & 7A,CI-170
+R444,VO003,Concrete Slab Chase Repairs 5E & 7A,CI-170 
 21148,VO078,Supply and Install of Illmod 600- 30/17- 32,SI-004867
-R444,VO004,"BCA-A Approved Documents FC ",CI-171
-22168,VO040,North Building Nib Remedials,
+R444,VO004,"BCA-A Approved Documents FC 
+
+
+",CI-171
 S34131,VO010,Plug Former Ground Anchor Locations,SI-000093
 23159,VO015,WP1 - L2FS - L1 Fire Door Works,SI-002170
-22168,VO041,"Site Direction - Seismic Joint Works",
-22168,VO042,North Building EMSEAL Boot Remedials ,
-22168,VO043,North Building Nib Bituthene Remedials ,
 22196,VO053,Sealant over fixings - Stacker door steel & Canopy beam brackets,SI-004890
 S34131,VO011,Grid E9 Surface Preparation ,
 23159,VO016,Temporary termination on level 03 ,SI-002333
 23159,VO017,Canopy remedial sump outlet adjustments,SI-000006
 23245,VO013,Temp Roof WP to Progress Comms Rooms,SI-002436
-22168,VO044,NB_Zone 1_Concrete Infill SOG,
 S34131,VO012,Waterstop for the stitches on north core (Core 3) from level 2 to 19,SI-000102
 23245,VO014,Stair 5 & 6 Precast Penetration Seals Around Steel Stubs,SI-002457
 23220,VO001,S34338 - AUT WH Plant room Waterproofing Remedial Works,S34338
@@ -709,24 +682,20 @@ S34131,VO012,Waterstop for the stitches on north core (Core 3) from level 2 to 1
 21148,VO080,MLA L0 - Roller Door Entrance Flashings,LKA-SI-004
 S34131,VO013,Grid F & M1/MB Precast soft Joint Sealant ,
 21148,VO081,KRD MLA Additional Emseal Seismic Sealant,SI-004992
-22168,VO045,Sealant Remedials Weepholes,
-22168,VO046,Supply of Sealant to Services Trades,
-23159,VO021,Waterproofing Coating to Level 02,
 21148,VO082,KRD MLA Additional Cement Waterproofing,SI-005078
 21148,VO083,Additional Western Service Block Waterproofing ,
-22168,VO047,Travel VO from yard to site and site to yard,
 S34131,VO016,Grid F Internal Capping Beam Plastering ,
-22168,VO048,Application of sealant to the flashing,
 23159,VO022,PC69 sealant,SI-002676
 23159,VO023,Decarb 2 - Detailed Design,COR-000850
 23159,VO024,Additional matacryl work to plinths on level 03 roof,CAN508
-22168,VO049,Removal & Reinstatement of Link Bridge Flashings ,
-22168,VO050,Additional seismic joints to East Building,
 S34131,VO014,Micheral Chip to Exposed Membrane ,GCOR-00369
-21148,VO084,"LinkSeal Installation to BSQ",SI-005130
+21148,VO084,"LinkSeal Installation to BSQ
+",SI-005130
 21148,VO085,KRD MLA Precast Cored Hole Repairs,SI-005114
 23245,VO016,Tender to IFC credit,56787542-3
 R444,VO005, Concrete Slab Edge Repairs (curve),CI 219
+S34160,VO001,Casali membrane cap sheet colour confirmation,CI-048
+S34160,VO002,Carpark / site trip reimbursement,Email/1508
 23245,VO017,Tender to IFC ICONCO-VARPS-000,56788190-7
 23245,VO018,Prov Sum Extra value works,56788484-8
 23245,VO019,Provisional Sum for Detailing,56788484-8
@@ -735,32 +704,26 @@ R444,VO005, Concrete Slab Edge Repairs (curve),CI 219
 23245,VO021,"TH01 - Level 4 Stair 1,2 & 3 - Wall Closer Details",SI-002748
 22196,VO054,WST Roof - remedials to waterproofing membrane,SI-005189
 S34131,VO015,Facade & Seismic Joint Works,
-22168,VO051,Grid N3/NG Flashing Remedials,
-22168,VO052,Grid N5 Door Threshold Flashings ,
 23245,VO022,Extra value weep holes to junction of soakers,46
 23245,VO023,Top Soaker to terminate baffle on top of panel joints,47
 21148,VO087,Freight Costs - Emseal WFR2,
 S34131,VO017,Waterproofing Roofing Works,SI-000135
 R444,VO006,Holes through balcony from exiting balustrades,CI223
 23245,VO024,ACO Drain Sealant application,
-22168,VO053,Northern Breakthrough Waterproofing ,
 23245,VO025,Plywood Joints,SI-002839
 23245,VO026,Sikalastic 152 to Sump and Upstand,SI-002840
 23245,VO030,Air Freight Charges ,SI-002748
 23159,VO025,SP2B/Canopy-  Temporary Membrane / Waterproof around Scaffold Pipe / Removal,SI-003200
 S34183,VO001, MH - Volclay to Ground Beams Gridline DY1,SI-324
 23245,VO027,Seal the timber frame on L3 GL J/17-18,SI-002673
-22168,VO054,Sika Floor 400N Coating L1 Stair Landing ,
 S34131,VO018,M-03 - Supply and Install of VaproShield Vapro-SS Flashing Tape Over Nuraply System,SI-000148
 23245,VO028,Speedramp - Crack Repair,SI-002921
 23159,VO026,Waterproofing for tx rooms,SI-003278
 S34131,VO019,Precast Joint at window opening - waterproofing,SI-000150
 23245,VO029,Concourse East & West stairs landing finishes,SI-002947
 23159,VO027,Substrate Repairs prior to Coating Works,Email/2009
-S34131,VO020,"L0 Waterbar Replacement ",SI-000153
-22168,VO055, Grid NA-N6-N9 Flashing Remedials,
-22168,VO056,Balco Seismic Joints,
-22168,VO057,Balco Seismic Joints - Air Freight Charges (East Building),
+S34131,VO020,"L0 Waterbar Replacement 
+",SI-000153
 S34490,VO001,Tanking Penetrations,
 23245,VO031,"Sea freight Cost- Not Included in $512,506.75 Credit",
 S34183,VO002,Pipe Penetrations,
@@ -768,45 +731,35 @@ S34183,VO003,RX101DH to Construction Joints,
 22196,VO055,Application of sealant and sikalastic 152 on blockwall,SI-005300
 S34131,VO021,Temporary Torch On Level 3,SI-000156
 S34131,VO022,Additional cost for spotter,
-23159,VO028,Waterproofing Coating to All other levels,
 S34131,VO023,CR - Grouting Baseplates & Lintel Remedial Works,Email/0210
 23245,VO032,Sea Freight - incl Tender to IFC,56788740
 21148,VO088,MLA East facade sealant colour matching,SI-005384
 S34131,VO024,Supply and install saddle flashing for the termination of the Nuralite system interfacing to the Permatec system,SI-000159
 R444,VO007,Concrete column repairs ,CI-259
-S34443,VO001,Supply of ALU Vapour Barrier & Primer,SI-737
-22168,VO058,North Building Nib Flashing Remedials ,
-22168,VO059,Campus Wide- Sealing Precast Panel penetrations,
-22168,VO060,Breakout Slab Stegowrap Remedials,
 23159,VO029,WP1 - Temporary waterproofing protection,SI-003460
-22168,VO061,Grid NA Door Threshold Remedials ,
 S34131,VO025,L4 Nib Waterproofing Above Glazed Roof,GCOR-00448
 S34131,VO026,Supply and Install of VaproShield Vapro-SS Flashing Tape,SI-000148
 S34183,VO004,Waterbar installation to top of Ground beams,SI-426
 23159,VO030,WP1 Level 2 CHW Plant Room- Fixing of Internia Base into Waterproofed Plinths,SI-003385
 21148,VO090,L3 Mercury Lane Station Waterproofing ,
-22168,VO062,MESH Stage 1 Waterproofing ,
-22168,VO063,Loading Dock Stegowrap DPM,
-S34443,VO002,Nuralite Fixing Plate (Order quantities as per Luke's email #01),SI-850
-22168,VO064,WB/Hallmark - Shop Drawing Review,
-S34443,VO003,Home Building - Gooseneck Order,SI-911
-24110,VO001,Additional waterbar and Sika tape to transformer room polythene,SI-002675
-24110,VO002,Sika bentonite installation to slab cutouts,SI-002741
-24110,VO003,Tanking penetrations as per Sansom Proposal,email23/10
-S34443,VO004,HOME Building - Zone D Pipe Boot Flashings,SI-1008
-R444,VO008,Balcony Joint Infill,CI-182
-22168,VO065,West Building Courtyard Slab DPM,
+R169,VO003,Inspection of the upper floors SW corner,24592.12B.
+R444,VO008,Balcony Joint Infill,CI-182 
 S34131,VO027,Install Ryanspan Pro 50- 30mm Thick,SI-000197
 S34183,VO005,Lift Pit Rectifications,
+S34160,VO001.1,Labour for Vertical material movement,
 23159,VO032,Waterproofing to CLT service penetration,
-R747,VO001,Crack & Substrate Injection,Email20/11
 23159,VO033,WP1 - SP2B/Carousel - Gas Enclosure - Screed to Fall,SI-003592
-22168,VO066,North Building Weep Holes,
 S34182,VO001,Early Tanking Works -ATP ,
-21148,VO091,"Additional EFVM Visits ",
+21148,VO091,"Additional EFVM Visits 
+",
 21148,VO093,B6 Sump Injection & Coating Remedials ,
 21148,VO094,Materials Off Site,
+S34430,VO001,Scaffolding Access (at cost - charge up),
+S34430,VO002,Contingency Sum,
+S34430,VO003,Substrate repairs (if required),
 S34194,VO001,Level 2 Deck waterproofing - Plinth and Infill Details,R710VO026
+S34160,VO004,Roof B Nib Dimension Variance,CI093
+S34160,VO005,Level 35 lift motor roof bin reinforcing steel remediation,CI097
 S34131,VO029,CR: Grouting to Base Plates,SI-000170
 S34131,VO030,CR: Concrete repairs,SI-000170
 S34131,VO031,CR: Structural Columns (Columns to Wall Interface),SI-000170
@@ -814,70 +767,67 @@ S34131,VO032,CR: Grouting of Plates (Plates to Walll Interface),SI-000170
 S34131,VO033,CR: PFC Grouting,SI-000170
 S34131,VO034,CR: Supply Electric Scissor Lift,Email 20/1
 S34183,VO006,MH - Volclay Lift Pit & Ground Beams,
+S34160,VO006,Prototype Waterproofing,ATS 313
 S34131,VO035,Sika AT Façade to the joints between the Precast lids,SI-000239
 S34131,VO036,Temporary Waterproofing,SI-005695
 23159,VO035,PC68 HV Rooms: Temporary bunding and torch on (URGENT),
 S34490,VO002,Aquaron Coating to Upper Concrete Slab ,
 S34490,VO003,Additional Preprufe 300R to Upperslab,
-22168,VO067,Additional Pipe Detailing to Laid Slabs ,
-22168,VO068,Balco Seismic Joints - Air Freight Charges (West Building),
+S34160,VO007,Roller Door Damage,Email10/12
+S34160,VO008,Level 33 existing nib demolition,ATS 280
+S34160,VO009,Joinery Nibs,ATS 302
 23159,VO036,"L1 Temp waterproofing. GL 35, IA, 36A",
-S34248,VO001,"Penetration Detailing to Apartments 301,303,305 & 307 ",
 21148,VO095,BSQ Dwall Waterproofing Injection ,SI-005640
 S34131,VO037,Materials Off Site,
 R444,VO009,Concrete slab chase repairs - Apartment 5E and 7A ,CAN 85
 22196,VO056,Aotea Station Façade Works,
 S34131,VO038,GL-M1 Replace damaged Ryanspan ,SI-0002602
-22168,VO069,Seal doors in south substation,
-22168,VO070,West – Loading Dock Ramp Bituthene Remedials ,
+S34160,VO010, Balcony Substrate Preparation,7767-339
+S34160,VO011,Level 33 north elevations screed remediation,7767-344 
 R444,VO010,New concrete nib - Ground floor,CI-272
 S34593,VO001,Additional Works B2-141 - Dressing room 9,
 S34183,VO007,Sealant works on isolation joints,
 22196,VO057,Waterproofing strip to seismic nib,
 S34131,VO039,Level 3 column dry packing,SI-000273
-S34528,VO001,Nuratrim termination detail – Stage 2,email14/01
-22168,VO072,Install QuietJoint to joint at Room G38,
+S34160,VO012,Nib and Column concrete repair,ATS7767251
+S34160,VO013,L32 2 x scuppers to be squared,ATS7767305
+S34160,VO014,Removal of existing sealant to horizontal & vertical gutter joints ,CAN 84
 S34131,VO040,Volclay Waterstop and Seismic Cover Flashing,SI-000285
-S34443,VO007,Shed - plantroom roof TPO goosenecks,SI-1492
-22168,VO073,Seal gaps between wall and BALCO seismic,
 S34131,VO042,Goose neck for lightning cable,SI-000292
 21148,VO096,Additional ILD Visit South Western Corner ,SI-005771
-21148,VO097,"Additional Protection Sheets to West Elevation Membrane ",SI-005792
+21148,VO097,"Additional Protection Sheets to West Elevation Membrane 
+
+",SI-005792
 S34131,VO043,Mayoral Drive Entry Waterproofing,SI-000291
 22196,VO058,Crowne Plaza Airbridge Waterproof Membrane,SI-005811
-S34443,VO008,Nuratrim to Edge Termination of Aux Roof,SI-1589
-S34443,VO009,Membrane to Aux Roof,SI-1400
 21148,VO098,BSQ precast panel,SI-005809
-S34443,VO010,HOME Building - Warm Roof,SI-1646
 S34131,VO045,Pipe Boot Flashing,SI-000326
-S34443,VO011,Shed Building - Additional Works to Roof,SI- AAN 32
 S34182,VO002,Credit Early Tanking Works - ATP,
-22168,VO074,East Building - Splicing Cabinet 03 Junction Box,
 23159,VO038,Remove existing chevaline dexx ,SI-004215
 21148,VO099,Additional ILD Visit to SW Corner ,
 21148,VO100,BSQ Access Hatch Waterproofing Works ,SI-005809
+S34160,VO015,Level 32 - Panel Joint,AT7767-381
 S34194,VO002,Hiab for Vertical Lifts,VDRCT 311
-S34248,VO002,"Penetration Detailing for Apartments 300,302,304 & 306 ",-022016
+S34160,VO016,Rebate Infills L30 & L31 Joinery Openings,7767-357
 S34131,VO046,Temporary Waterproofing to Roof ,
+S34160,VO017,7767-404 - Balcony precast joint treatment,ATS776 404
+S34160,VO018,Consent Amendment B,7767-394
 22196,VO059,Crowne Plaza Airbridge Waterproof Membrane-Repair at the northeast corner,SI-005892
+S34160,VO019,L33 Slab Edge Packing ,CI163
 S34131,VO047,L1 Grid E9/EA-EB Wall Surface Prep ,
-S34248,VO003,SP1 Stand Down Time ,
 R444,VO011,Concrete Slab Chase  Repairs Unit 7A,CI382
-S34528,VO002,Membrane works,EMAIL2/3
 S34183,VO008,Sikalastic 152 to Window Sill,SI-720
 S34131,VO048,L2 Sealant Joint Against Column ,SI-000291
 21148,VO101,KRD MLA roof chiller plantroom weatherproofing,FCR-060505
-S34248,VO004,"Link Seals to SP3 ",SI-373
 S34490,VO004,Chevaline Dexx to Northern Deck ,
 S34490,VO005,Ardex to Entrance porch ,
-S34528,VO003,Transformer Roof Variation Proposal,Email12/3
-S34443,VO013,Chaveline Dexx to Shed Building L2 LMR room,AAN471
 R344,VO003,Monthly H&S Meeting,
 R344,VO004,Staff Training,
 R344,VO005,HR Meeting,
 S2302,VO001,Monthly H&S Meeting,
 S2302,VO002,Staff Training,
 S2302,VO003,HR Meeting,
+S34160,VO020,Grinding and plastering, CI 167
 S2302,VO004,H&S Committee,
 R344,VO006,H&S Committee,
 S34131,VO049,Vaproshield Tape to Lift Overun ,SI-000377
@@ -890,86 +840,78 @@ S34578,VO001, Air Freight Charge,
 S34183,VO009,Joint Sealant Works,
 S34490,VO006,Pool Services Penetration Detailing ,
 S34323,VO003,Long Service Prezzy cards,
-S34443,VO014,Warm Roof Zone D PIR design issues,Email/2503
-S34443,VO015,Warm Roof Zone D PIR design issues,CAN-451
-S34443,VO016,Nuralite Fixing Plate (Order quantities as per Luke's email #02),SI-2264
-S34443,VO017,DELETION OF NURALITE VAPOUR BARRIER TO HOME BUILDING ROOF – CREDIT,Email/2503
+S34160,VO021,New Existing Transition Junctions Level 30 & 31,AT7767/375
 S34131,VO050,Screed Credit,SI-286
-S34443,VO018,HOME Building - Membrane Patching ,SI-2077
 23159,VO040,Supply and install of Monkey toe foot pads ,SI-004508
 22196,VO061,Sikafloor Multidur EB-31 Coating ,003544
+S34160,VO022,Dry Packing Under Structural Steel Base Plates,CI 169
+S34160,VO023,L30 & 31 Exposed Baseplates,CI 200
 S34194,VO003,L4 Parapet separation flashing,VDRCT-0004
 23159,VO041,Seal as directed areas on pc68 roof,SI-004597
 R444,VO012,Slab Infill for Wastes CMBND,CI425
 23159,VO043,Rain Preperation - Temporary Waterproofing works,SI 4657
 S34182,VO004,EBS Pit - Sikaproof to EBS 125 Credit ,
 S34131,VO051,Roof -Sika Hyflex Facade Sealant,SI-000421
+S34160,VO024,Patch exposed reinforcing to concrete columns,7767-467
 S34593,VO002,Basement Level 2 Kitchen - Remedial Waterproofing,
+S34160,VO025,Nib Extension,AT7767-441
 S34131,VO052,Supply of collars for copper pipe on level 4 roof,SI-000439
 S34182,VO005,Re Detailing of Pipe at Service Pit (Grid D5/H10) ,SI-000708
+S34160,VO026,Patching Concrete Blowout on External Parapets,7767-474
 S34131,VO053,Transformer Room Trench Injection,SI-000468
 S34482,VO001,Lift Pit B1B Structural Toe Changes  ,SI-000112
+S34160,VO027,MV020- L33 north elevation repair to slab edge,7767 -468
 S34490,VO007,Additional Torch on Works,
 S34490,VO008,Additional Works to Pool side/Garden box,
 21148,VO104,BSQ - Station Perimeter Mapelastic Remedials ,
 22196,VO062,Supply of Sikafloor 377 to Air Bridge ,
 S34131,VO054,Level 2 Sealant,SI-000462
-22168,VO075,West - SIKAFloor Coating to Trolley Wash ,
+S34160,VO028,Parking Fee,Email 11/4
 S34323,VO004,H&S meeting Woolworths vouchers,
 S34131,VO055,L4 Mechanical Louver Details ,SI-000327
 S34131,VO056,Supply & Installation of Bitumen Fillets ,SI-000476
 S34131,VO057,Heritage Roof Revised Details ,VPR-000073
-S34248,VO005,Post Applied Bentonite Detailing,SI-420
-23113,VO003,"Roof upstanding penetration, repair, concrete wall and gutter",SW-SI0003
-22168,VO076,North Link Base Bituthene  Remedials,NCR-000172
-22168,VO077,WB - Metcom 7 cladded wall door sealant,
-S34443,VO019,L2 open deck missing penetration,SI-2401
-S34443,VO020,HOME Building - Supply of Allco Barrier Tape,SI-2418
-S34443,VO021,HOME Building - Boot / Gooseneck / Sleeve Order (ROOF),SI-2407
+S34160,VO029,MV 016 level 32 south balcony penetration,CI 195
 22196,VO063,Sikafloor Car Park Deck System to Crown Plaza Airbridge,
-22168,VO078,Application of Dowsil 688 to Penetrations ,
-22168,VO079,Application of sealant around door joints,
 S34131,VO058, Level 4 Diesel Exhaust Flashing,SI-000503
-23159,VO045,"AIAL WP1- Terminal Integration  - Flood testing to remaining gutters",CAN414
+23159,VO045,"AIAL WP1- Terminal Integration  - Flood testing to remaining gutters
+
+",CAN414
 S34131,VO059,Main Entry Canopy Remedial Works to Upstand,SI-000505
 S34131,VO060,Additional Sika Hyflex Sealant - Level 2-5,SI-000504
 S34183,VO010,Sika EMSEAL boot flashing,SI-954
-23113,VO004,Existing Membrane and Exterior Concrete Deck Waterproofing,SI0004
-S34248,VO006,CC Laundry & Pool Room Existing Penetrations Remedials ,SI-530
 S34131,VO061,Sealant to Grid M2 - Abseiling,
 22196,VO064,Additional Waterproofing & Flashings over Exposed Foundations ,
 S34131,VO062,Damage to Nuraply Membrane on Heritage Roof,SI-000512
 S34182,VO006,Sprinkler Valve and SW Chamber to EBS Pit Waterproofing ,
-22168,VO080,WB/Loading Ramp Base Flashing Remedials ,
 21148,VO105,L2 bolts waterproofing,SI-006157
 21148,VO107,Additional Sealant to Lourve Openings,SI-003300
-22168,VO081,NB zone 4 waterproofing and flashing over foundations,
 S34131,VO063,Waterproofing Pipe Penetrations to Vector Ducts ,
 S34194,VO004,CPRW Waterproofing CANS - Combined,VDRCT 421
 S34490,VO009,Powder Room and Storage – Newtons,
 R444,VO013,New Concrete Nib Extension & Concrete Topping,CI-464
+S34160,VO030,Spandrel Soffit Plastering (Levels 31 & 32),ATS7767/52
 S34182,VO007,Additional Works for Sprinkler and Sewer Chamber,SI-000866
 21148,VO108,Waterproofing HDPE Pipes,SI-006215
-S34443,VO022,Seal base plate,SI-2833
 21148,VO109,Northern elevation cores sealant,SI-006220
-S34443,VO023,Seal pre-cast stairs,SI-2298
 S34360,VO001,L2 Meeting room & Office,
-22168,VO082,Sealant around doors using Dowsil 688,
+S34160,VO031,CI251 Precast wall on GL-D West Elevation,CI251
 S34754,VO001,MMH building C88 Manawanui meeting house,WO55351
 S34754,VO002,"Carrington Site  -C03 Rehab Plus, Pt Chev / Ground Floor ",WO55557
-22168,VO083,Sealant to exposed Screws under windows ,
 S34754,VO003,101 Sarsfield Street - Deck leak investigation (Urgent),Email12/06
 S34754,VO004,"Auckland Hospital - Building A01, Support Building AK / 16th Floor",WO #55763
 S34754,VO005,Auckland Hospital - Building A08 Oncology AK,W/O #55896
 S34183,VO011,Sikafloor 2510W to Lower Ground Floor Plant Room Plinths,
-S34183,VO012,"Waterbar installation in Energy Pit - concrete wall and slab joint , pipe penetrations",SI-1121
+S34183,VO012,"Waterbar installation in Energy Pit - concrete wall and slab joint , pipe penetrations",SI-1121 
 R444,VO014,Repair Concrete Nib wall and Saddle flashings aligning to cladding,CI 453
-S34754,VO006,"Greenlane Hospital Building G16 Related work from WO #55612 and WO #55492",WO #56080
+S34754,VO006,"Greenlane Hospital Building G16
+Related work from WO #55612 and WO #55492",WO #56080
 22196,VO065,Planiseal MR Green Concrete Coating ,
 21148,VO110,Beresford Square Mapelastic Smart ,
 S34772,VO001,Temp and final detailing for posts to deck,Email 2306
 S34754,VO007,"56123/ 55007 - Greenlane Hopsital - Building GO4, 6th Floor",WO 56123
 S34754,VO008,"Greenlane Hospital, Building G15 Greenlane / 7th Floor relates to w/order 53116 and 56312",WO #56312
+S34160,VO032,Bostik Dampfix 3 to Level 30 & 31,ATS525
 21148,VO111,Adit A1 Closure Additional Items ,SI-006279
 S34182,VO008,Re-taping of Column Joints,SI-000993
 S34131,VO065,Grid EJ Blockwall Wateproofing ,SI-000601
@@ -977,50 +919,36 @@ S34490,VO010,Swelltite to Retaining Wall Behind Stairs ,
 S34578,VO002,SP1 Level 1 and 2 Grid E+ seismic joint & Emseal,CI#101.20
 S34591,VO001,Reprofiling of Piles,
 S34754,VO009,Greenalne Hospital Building G01 Greenlane,W/O 56556
-22168,VO084,Seal door frames at north substation ,
-22168,VO085,WB-W5/W6 Courtyard Remediate to Waterproofing,
-23113,VO005,Membrane Roof Termination,
+S34160,VO033,Precast Spandrel Grinding ,7767-593
 S34754,VO010,"Auckland Hospital AO1, L16 Plant Room - Tank Room (PR0117)",WO #58171
 23159,VO047,PC68 MSB-B/TX waterproofing protection,SI 5111
 S34131,VO066,Level 2 Courtyard - Exhaust Duct Precast Panel,SI-000657
 23159,VO048,Level 2 Grid IA - Seismic Gap - Install Temporary Roof - Waterproof ,SI-005134
 S34754,VO011,Auckland Hospital L16 -AO1 Support Building,w/o 83828
-S34754,VO012,"Auckland Hospital - Ceiling Leak Investigation A35 - Te Whetu Tawera - Acute Mental Health Unit room 1.156",WOT0084812
+S34754,VO012,"Auckland Hospital - Ceiling Leak Investigation
+A35 - Te Whetu Tawera - Acute Mental Health Unit room 1.156",WOT0084812
 S34131,VO067,Site Waterfeed Waterproofing ,SI-000676
-S34443,VO025,Torch on membrane remedials,SI-3437
 S34131,VO068,L0 Gid EJ Nib Wall Waterstop ,SI-000669
 R444,VO015,Prep work for Concrete Beams on North Balconies,AT1159/926
 S34591,VO002,Bund site concrete/pile upstand with Sika Plug,SI-80
-S34443,VO026,Shed - Canopy Saddle Flashing Detail,SI-3268
-S34754,VO013,Auckland City Hospital A21 - Wall Penetration Repairs,
+S34754,VO013,Auckland City Hospital A21 - Wall Penetration Repairs,WOT0088001
 S34624,VO001,Off-Site Storage Cost,
-22168,VO086,Additional EPDM on east link verticals ,
+S34160,VO034,Roof A and Roof C Council Items,7767-614
 S34591,VO003,Pile 26 Additional Work,SI-92
 S34591,VO004,Pile 58 Remedial Works,SI-98
 23159,VO049,WP1 - SP2C - Level 2 Grid IA - Seismic Gap - Removed Waterproof over the stair plate,SI-005237
-23159,VO050,Chevaline Dexx to Hyd Riser – Level 02,
-23159,VO051,Additional Waterproofing Coating to Ground and Ground Mezz,
 S34183,VO014,Stand By Time,
-S34443,VO027,Metal Yellow Cladding Sealant,SI-3661
+S34160,VO035,Widen concrete Nib,CI 279
 S34591,VO005,Remedial to Pile 4 edges in Zone 3,SI-104
-22168,VO087,WB - Scissor Lift Pit ,
-S34443,VO028,Design Change and Temporary Termination Works Due to Staging,
-S34443,VO029,Credit for VO008 as per revised Nuratrim rate,
-S34528,VO004,Nuraglaze to Stage 1 & 2 Membrane Areas,
+S34160,VO036,Roof A & C cover board fixings 150mm from sheet edges,CI-286
 S34131,VO069,Level 0 Trench in GF Slab,SI-000634
 S34131,VO070,Laundry Services Penetration Waterproofing ,SI-000652
 S34131,VO071,Roof Detailing to Threaded Rods & Steel Posts ,SI-000621
-22168,VO088,North Substation waterproofing remediation,
 R444,VO016,Self levelling credit,Email24/07
 23159,VO052,Water-proofing to Temporary UC Prop Penetration at E4 &E5/VVa,SI-005299
-S34443,VO030,Home Building - Warm Roof Inspection,SI-3730
-S34443,VO031,Torch-on Termination & EPDM Air Seal,SI-3390
-S34443,VO032,Home Building - Open Warm Roof to Inspect Chord Plate,SI-3746
 23245,VO033,Level 4 Office Plant Waterproofing,SI-003357
 S34065,VO001,Z1 - Unbonded Waterproofing Generator Pits,SI-001274
-S34443,VO033,Seal pipes penetration through slab,SI-3676
 23159,VO053,Prep for Column Top Plates on L2 Mezz,SI-005339
-22168,VO089,Nib Remediation to External Doorway Openings,
 S34131,VO072,Waterproofing Membrane to Heritage Parapet Capping,SI-000758
 S34131,VO073,Grid F External Precast Panel Sealant,GCOR-00896
 S34545,VO001,Additional Pile Detailing,SI-000222
@@ -1028,15 +956,9 @@ S34545,VO002,Supply and Install Sika Blackseal/Fosroc Mulseal,SI-000234
 S34772,VO002,Joinery Remedial Waterproofing,
 R444,VO017,Slab extension (level 3 and 5) ,CI-546
 S34591,VO006,Additional detailing to Pipe penetration,SI115
-S34443,VO035,Sealant Between Building and Pavement ,SI-3934
-22168,VO090,West Substation Waterproofing Remedials ,
-S34443,VO036,L2 Pipe Penetrations Waterproofing,SI-1027
 S34545,VO003,Replacement of Waterbars,SI-000286
 S34545,VO004,Additional Waterbars,SI-000286
-S34443,VO037,Home Building - Gooseneck Order for PV DB's,SI-3891
 S34754,VO014,Greenlane Clinical Centre - Head Flashing Repair,WOT0105309
-22168,VO091,New Clean Loading Dock Stegowrap ,
-22168,VO092,Northern and Western Plantroom - Coating,
 S34591,VO007,Pipe Penetration Detailing,
 S34591,VO008,Additional for Preprufe Detailing to Pile Setdown,
 S34545,VO005,EDS Sump Remedials,SI-000442
@@ -1044,28 +966,20 @@ S34131,VO074,Level 4 - Oil spill on roof area - Remedial on Contaminated Waterpr
 S34131,VO075,Chemical Discoloration on Plant Roof Membrane ,SI-000829
 S34194,VO005,Level 2 Deck Generator Structure – Plinths (GCOR-000111),R710VO77
 S34131,VO076,L2 Egress Stair Seal and Flashing,SI-000816
-24110,VO005,H165 insitu concrete HV jointing pit ,SI-4767
 S34323,VO006,Cricket Costs,
-24110,VO006,SP5 PC68 Trench,SI-5426
 S34182,VO009,Waterbars to Level 1,SI-001574
-S34443,VO040,Home Building - Lagged Pipe Detailing,SI-4118
 S34183,VO015,Low profile water for link bridge LG,SI-1505
 S34183,VO016,Waterbars and sealant works in the link bridge pockets and part of the main building,
 R444,VO018,Apartment 2B Concrete Column Remediation,CI 461
-S34443,VO041,HOME Building - Allco Barrier Tape Order,SI-4137
 S34131,VO077,Level 0 Canopy Down Pipe - Tile Penetration Cover Flange,SI000853
-22168,VO093,Seismic Joints - Scope Changes for North & West Buildings,
 S34131,VO078, T Flashing Trim,SI-000871
+S34160,VO037,Precast Concrete Deck Joints,CI-661
 23159,VO058,L2 Mezz anchor plate waterproofing  ,SI-005623
 S34042,VO001,Temporary termination  to Podium Sumps,SI-V-00025
-S34183,VO017,Sikafloor 2510w to Plantroom floor,SI 1262
+S34183,VO017,Sikafloor 2510w to Plantroom floor,SI 1262 
 23159,VO059,L2 grid IA nib waterproofing ,SI-005658
-S34467,VO001,Bitumen Fillets to Plywood Substrate,SI 40
 23159,VO060,L2 E4M platform WPM remedials/repairs,SI-005673
-22168,VO094,Sika QuietJoint SHH - Air Freight Charges ,
 R444,VO019,"Floor Levels In Existing Lobby, New Gym, Entrance",CI 579
-22168,VO096,Overflashing on Grid N5/NJ+ ,
-22168,VO097,West Building Courtyard Flashings,
 S34131,VO079,Supply and install stainless steel door thresholds,SI-000917
 S34545,VO006,Elect - LV Switchroom - GL11 Additional Electrical Conduits,SI-00044
 S34131,VO080,Additional/Change in Scope - Mayoral Drive Entry Waterproofing,SI-000291
@@ -1074,83 +988,73 @@ S34545,VO007,Waterproofing to lift pit wing wall ,SI000322
 S34545,VO008,PVC water bar and additional detailing  ,SI000429
 S34482,VO002,Application of Dowsil 790 to Spandrel Panels,
 S34131,VO082,Provisional Sum for Future Variation Works,
-22168,VO098,Post detail works west plant room,
 22196,VO066,Aotea air bridge BAS expansion joint,
 22196,VO067,Sea freight for BAS Parking Span 150 expansion joint,
 22196,VO068,Supply and apply epoxy grouting to gap between substate and expansion joint,
-S34754,VO015,"A02 - Starship Children's Hospital A02 L1 - HDU Lounge",WOT0121636
-S34754,VO016,"A01 - Support Building Floor: L4 - Level 4",WOT0118127
-S34443,VO043,Home Building - Level 00 Zone 3.3 Fenz Roof,CI 1815
-S34443,VO044,Home Building - CLT Stairwell at Roof Level,SI-4365
+S34754,VO015,"A02 - Starship Children's Hospital
+A02 L1 - HDU Lounge
+
+
+",WOT0121636
+S34754,VO016,"A01 - Support Building
+Floor: L4 - Level 4
+",WOT0118127
 R344,VO007,KiwiRail medicals / Tunnel operations,
 22196,VO069,Aotea foul water sump – Additional Floor Coating (Sikagard 62),SI-006349
 R444,VO020,Concrete nib cut on Ground floor,1159/1209
 R444,VO021,Level 8 Grinding/ Cleaning of balconies,1159/1206
-22168,VO099,Install of compressive foam - loading dock,
-S34443,VO045,Home Building - Roof Peno Size Increase,SI-4414
 R444,VO022,Seal Drilled Scaffold Holes,1159-1243
 R878,VO001,Structural Column Investigation,EMAIL7/10
-R444,VO023," Sikafloor Level 30 ",CI 650
+R444,VO023," Sikafloor Level 30 
+",CI 650
 R878,VO002,Grinding as advsied - M² allowed for - 60m²,Email8/10
 S34545,VO009,GL C Membrane repairs,SI-000493
 21148,VO112,Flashing Around BSQ Louvre Fixing Angle ,FCR-065250
+S34160,VO038,Additional membrane works to Pipe Blocks on Roof A & C as per Babbage’s instruction,
 S34131,VO083,Sikalastic 152 to Entrance Opening ,SI-000943
-22168,VO100,Water Plantroom Floor - Coating,
 S34042,VO002,Prep work for water proofing the podium gutter sump,SI-000278
-S34754,VO017,"A32 - Auckland City Hospital (Main Building)  Level 9",WOT0130811
-22168,VO101,Rectify Waterproofing West Building Loading Dock,
+S34754,VO017,"A32 - Auckland City Hospital (Main Building)  Level 9
+",WOT0130811
 R444,VO024,CI-483 - Ground Floor MV001 APPRVD,CI 483
 23159,VO061,CAN - 844- Additional Detail for Concrete around Unistrut supports,SI-005825
 S34591,VO009,Replacement of waterbar on stitch joint,SI-255
 S34545,VO010,EDS - Removal and reinstatement of water bar,SI-000540
+S34160,VO039,Hydrotech detailing to Balustrade Fixings,
+S34160,VO040,Additional 1 new fixing installed,
+S34160,VO041,Additional kettle hire,
 21148,VO113,TVS & ADIT A1 Drained Floor Injection,
+S34160,VO042,Credit as per agreement with Aspec: VO002-036,
 23159,VO062,Working outside of Ordinary hours to apply the 2 x Topcoats,SI-005840
-S34248,VO007,SP3 Pipe Remedial ,SI-989
 22196,VO070,Application of 11FC Black to the station facade,SI-006576
 R878,VO003,Beam Demolition,Email 20/1
 21148,VO114,SW Mercury Lane Station Corner Reinstatement of Membrane Protection ,
 S34065,VO002,Credit - Original Contract Schedule,
 S34065,VO003,Auckland Airport Domestic Processor Pier & FLB Tanking Works,
+S34160,VO043,Additional Kettle Hire credit,
 S34042,VO003,Additional Grinding for Podium gutters prep,SI-00028
 S34042,VO004,Podium - Gutters Temp Protection Supply,SI-00028
-S34545,VO011, New Rebate Zone 1 preprufe detail  ,SI-000286
-S34545,VO012,Additional Pipe detailing to LV room,SI-00044
+S34545,VO011, New Rebate Zone 1 preprufe detail  ,SI-000286 
+S34545,VO012,Additional Pipe detailing to LV room,SI-00044 
 R444,VO025,Column L2 Repair (RFI 269),CI 503
 R444,VO026,Repair of 7A chase,CI 649
 S34874,VO001,Additional Waterstop,PO 197054
-22168,VO102,Credit for West Building Coating Traxx 2000 Coating Removed from Scope ,
-22168,VO103,Clean Loading Dock DPM SW10-01 ,
-22168,VO104,BALCO Boot Flashings to Breakout Zones ,
 S34543,VO001,Pipe penetrations to perimeter of lift pit/underslab interface,
 S34874,VO002,Commercial Discount ,
-22168,VO105,North Building - Balco Air Freight Charge,
 S34194,VO006,New plywood plinths membrane detailing ,R710/VO088
 S34194,VO007,Stair 4 Vestibule concrete nib at steel beam ,R710/VO089
-S34467,VO002,ILD Testing 2 Additional tests to Upper Gutters ,SI 48
-S34248,VO008,Credit VO-005 Allowances ,
 S34194,VO008,Stair 4 Vestibule reclad (Level 2 deck level),R710VO090
-S34443,VO046,Re-detail around top section of 3qty fan penetration upstands,SI-4578
-24110,VO007,Additional tanking work,
 S34131,VO084,Credit Adjustment - Facade Sealant,
-S34443,VO047,Replace 7 Nuralite Fixing Plates to Level 2 ,SI-4577
 23159,VO063,L2 CHW plantroom WPM remedials,SI-005886
 S34545,VO013,Detailing to piles,
 S34593,VO003,Wintergarden Area Newtons CDM Works ,
 23159,VO066,WP1 - SP2C - Level 1 Grid 35 - ED - VVA - Removed Temporary Waterproof,SI-005900
-S34443,VO048,Reposition of Duct Peno - L3 Roof,SI-4618
-S34443,VO049,Additional Build up to 1qty Roof Fan Upstand,SI-4617
 R444,VO027,Concrete column repairs ground floor.,1159/1323
 23159,VO068,CAN 958 L2 Roller door gap infill around skirting,SI-005771
-22168,VO106,Remove 6GWC-3 Cover Plates & Reinstall,
 21148,VO115,Penetration Infill ,SI-002860
 S34543,VO002,Sealant to block wall to allow MSB to be installed,
 S34545,VO014,Zone 2 repairs due to concrete splatters,
-22168,VO107,West Generator Room Door Sealant ,
 S34042,VO005,Podium - Gutters Temp protection Supply & Sill Protection ,VO-000047
-22168,VO108,Cetcoat to Loading Dock Slab/West Generator Interface ,
-S34443,VO050,Lightning Cable Penetration Through Roof,SI-4732
 S34545,VO015,Zone 2b pour stop ends – Additional CJ tapes and Replacement of Waterbars,
-22168,VO109,Nib Flashing/Window Clash Cuts Works  ,ACXC-00367
 S34631,VO001,Early Works,
 S34545,VO016,Zone 2 - Hole in waterproofing from formwork removal,
 S34591,VO010,Credit: Additional for Preprufe Detailing to Pile Setdown,
@@ -1161,33 +1065,23 @@ S34623,VO001,Auckland Transport Hub - East & West Concourse chase cutting,SI-003
 22196,VO071,D-Wall Injection at BOL Platform,SI-006729
 21148,VO116,UA and sealant application to the fibre glass tank joint,
 R444,VO029,Ground Floor Nib GL 5-6/I,CI 728
-22168,VO110,NB - Door Flashing Remedial,
 S34182,VO010,Sikaproof P to side of beams + Sikaproof A tape termination to DPM ,SI-002415
 S34591,VO011,Sealant Waterproofing details,SI-281
 21148,VO117,Adjust Flashing,SI-004988
 S34482,VO003,HDPE & Termination to Revised Area,
 S34482,VO004,Geofabric & Testing to Revised Dragowrap Scope ,SI-420
 S34482,VO005,Dragowrap Vapour Barrier to B1A & B1B,
-24110,VO008,Sika Seal Tape B & Waterbar to Joints,SI-004692
 S34543,VO003,RX-102 Replacement,SI-4590
-R1059,VO001,UoA Autoclaves Replacement (Subsequent Visits) – Floor Coating – 143 Park Road (Autoclave 1 Only),MCA-1
+R1059,VO001,UoA Autoclaves Replacement (Subsequent Visits) – Floor Coating – 143 Park Road (Autoclave 1 Only),MCA-1 
+S34160,VO044,Hydrotech Repairs,7767-730
 S34578,VO003,MV66 Cross Brace Strengthening,
 23245,VO034,Leak at stair 2,GCOR-03916
 S34482,VO006,Temporary Waterproofing to L3 Columns ,SI-000562
-S34443,VO051,Mechanical Penetration Size Increase - Roof Level H15, SI-4865
 S34543,VO004,GARAGE Building - Matacryl Detailing,SI 4721
 S34482,VO007,Sikadur 42 to Service Pipework ,SI-000550
-22168,VO111,Flashing Cut Outs for Damaged Copper Pipework ,
-R1112,VO001,RPO Protection cost,Email 4/12
-R1112,VO002,Cutting of 400 x 16 SHS Beams,Email4/12
-R1112,VO003,Transporting of 400 x 16 SHS Beams,Email 4/12
-R1112,VO004,Infill of Wall Pockets,Email 4/12
-S34443,VO052,Zone 3 Roof Cowl,SI-4883
-21148,VO118,Mercury Lane - Sealing pipe annulus gap between D-wall and pipes,SI-006847
+21148,VO118,Mercury Lane - Sealing pipe annulus gap between D-wall and pipes,SI-006847 
 S34578,VO004,Seismic upgrade and weathertightness remediation,
-R1112,VO005,Additional Starter Bars in Wing Walls ,Email 5/12
-R1112,VO006,Bridge BR43 MSL Impact Beam Replacement - Additional FRP,Email 5/12
-R626,VO001,Dead time Dec 25,Dec 25
+R626,VO001,Dead time ,Dec 25
 23159,VO070,Drain Connection to mechanical plant,SI-005616
 S34183,VO019,"Credit - VO11, VO13 & VO17",
 S34183,VO020,Sika Floor 2510W,
@@ -1195,15 +1089,8 @@ S34545,VO017,Zone 3 - Replacement Preprufe,SI-000688
 S34194,VO009,Alsan Flashing Quadro Termination Detail to Stairwell,SI-000658
 S34194,VO010,Spotter – Chevaline Coverflexx System ,SI-000655
 S34194,VO011,Level 2 Membrane ILD re- testing ,SI-000656
-22168,VO112,GF - Slab & Window Flashing - Protection Layer on Flashings,
-22168,VO113,Supply of Stegowrap for SC01 Plint & Retaining Wall Foundation ,
-22168,VO114,SW Courtyard Channel Drain Changes,
 23159,VO071,WP1- SP4-L2 Waterproofing remedials.,SI-006038
-R1112,VO007,Sandblasting of Impact Beams,Email 9/12
 22196,VO072,Termination of the existing Wabo Expansion Joint at Planter Box,SI-006838
-R1112,VO008,Corbel Extension,Email10/12
-S34443,VO053,Zone B Roof - CEF2.1 & TEF2.1 Swap,SI-4923
-24110,VO009,Tanking to Additional Trench,SI-004692
 S34482,VO008,Dragowrap Patching Remedials ,
 S34482,VO009,Service Penetrations through Dragowrap & HDPE ,
 S34482,VO010,Additional Termination Bar & Sealant to Dragowrap ,SI-000597
@@ -1212,7 +1099,7 @@ S34482,VO012,Membrane repair to slab thickening ,GCOR-01601
 R1059,VO002,UoA Autoclave 2 & 3 Replacement Coating (SI-7),SI 7
 S34683,VO001,Additional Scope - Tanking,
 S34194,VO012,L2 deck - Stair and ladder plinth membranes,SI-000661
-S34543,VO005,L3/L4 Damaged Waterbar ,SI 4929
+S34543,VO005,L3/L4 Damaged Waterbar ,SI 4929 
 23245,VO035,Chase Cutting East and West Concourse,SI-003475
 22196,VO073,Expansion Joint Wet Seal Rework,SI-006892
 23159,VO072,Membrane Detailing Works to Seismic Junction,
@@ -1222,49 +1109,39 @@ R765,VO001,Common Room Balcony,AKL5053389
 S34772,VO003,Nuratrim Works,
 S34754,VO018,"Greenlane Clinical Centre Building: G16 - Cornwall Complex, - Ground Floor ",WOT0150142
 23159,VO073,Additional Line Marking to Level 02,
-22168,VO115,NB Over Flashings to Ground Beams ,
-S34982,VO001,Concrete fix and remedial works,
+S2302,VO005,Health Checks ,
 S34591,VO012,Membrane Repairs - Damage to waterproofing GL 9,SI-405
 S34065,VO004,Supply and installation of Geo textile,SI-002996
 S34482,VO013,Supply only 2x Scuppers,SI-000670
-S34443,VO054,1m2 Cutout for Lagged Pipe Box,SI-5098
-S34065,VO005,Pipe penetrations through membrane,SI-003273
+S34065,VO005,Pipe penetrations through membrane,SI-003273 
 21148,VO119,BSQ Dwall & Pipe Penetration Works ,SI-006932
-S34528,VO005,Double Layer Membrane to the Gutter ,EMAIL21/01
-S34443,VO055,Nuralite Bracket to Replace,SI-5114
-S34897,VO001,Working After Hours,
 S34228,VO003,Window Leaks,
 S34444,VO001,Detailing of Existing Pipework,Email/2701
-S34443,VO056,Roof Fan Peno,SI-5145
 S34754,VO020,Auckland City Hospital - A08 - Cancer & Blood Services (Oncology),WOT0176495
 S34754,VO021,Greenlane Clinical Centre -G15 - Cornwall Complex,WOT0176393
-S34754,VO022,"Auckland City Hospital A02 - Starship Children's Hospital L7 - Level 7",WOT0175655
+S34754,VO022,"Auckland City Hospital A02 - Starship Children's Hospital
+L7 - Level 7
+
+",WOT0175655
 S34766,VO001,Digging External Pump Chamber ,
-22168,VO116,Plantroom Floor Painting Touch-ups Out of Sequence Works,
-22168,VO117,Re-install ISWM Balco,
 S34042,VO006,Podium - Light Grinding prep for waterproofing,SI-000391
 S34772,VO004,Epoxy Infill to Window Rebate,
-22168,VO118,Additional Penetrations x3,
-R444,VO030,Block wall outside GF west bay window,CI-824
+S34160,VO045,Additional ILD Testing,7767-772
+R444,VO030,Block wall outside GF west bay window,CI-824 
 S34482,VO014,Supply Equus Seperation Layer Tape for Box Gutter Detail,SI-000717
 S34545,VO018,Waterbar replacement zone 3,SI-000911
 S35021,VO001,Supply and installation of Swelltite membrane to exterior garden box,
-S34183,VO021,Staff Entry DPM ,SI-1305
-22168,VO119,N1 Waterfeed Pipe Waterproofing Remedials ,
+S34183,VO021,Staff Entry DPM ,SI-1305 
 S34545,VO019,GL E - Termination Detail,SI-000942
-S34982,VO002,Additional costs - long weekend works,
 S34543,VO008,Aquafin 2K W/Proofing to face of Nib,SI-5238
 23245,VO036,Waterproofing around slab penetrations,SI-003482
-22168,VO120,Fabricate and install Balco cover,
+S34160,VO046,ATS No 7767-788,
 23159,VO074,WP1: L3 Roof - Removeable Walkway Drawings - additional waterproofing,SI-006132
 R444,VO031,Additional nib adjacent to front entry,CI-856
-22168,VO121,NB Stegowrap Protection to Flashings Stage 002 ,GCOR-01709
 22196,VO074,V11 Lift Sump Leak Repairs ,SI-006993
 S34183,VO022,Replace damaged Balco cover plate,SI-2056
 S2302,VO006,Mask fitting,
-S34443,VO058,Nuralite Brackets Tender Allowance Credit,
 S34545,VO020,Zone 4 L1 Slab Works,SI-000993
-S34999,VO001,Supply and Installation of Glass Slider,
 S35023,V001,Travel & Away Allowance,
 S34543,VO009,Garage Building Roofing,
 S34582,VO001,Membrane reinforcement over cracks,
@@ -1272,23 +1149,14 @@ S34582,VO002,Supply and install of bollards,
 S34582,VO003,Supply and Install of Wheelstops,
 S34582,VO004,Scaffolding and Shrink Wrap,
 23159,VO075,WP1 SP4 Waterproofing remedials.,SI-006251
-R1046,VO001,Excess Sika Carbodur BC12 NSM Rods First Floor,Email 25/2
-R1046,VO002,Sika Carbodur BC12 NSM Rods First Floor Change in slot Dimensions,Email25/2
 S34543,VO010,Sealant to Block Walls,SI-5263
 S34466,VO001,Boundary Wall Temporary Waterproofing ,
 S34981,VO001,Back Up Pump Preparation & Installation ,
-22168,VO122,West Generator Remedial Items ,
-S34897,VO002,Extra Mobilisation Cost,
-S34897,VO003,Takanini Station Swelltite Repairs ,
-S34897,VO004,Additional Waterbar to Lift Pit Wall/Slab Interfaces ,
 S34194,VO013,Rainwater Leak from L2 Deck into Golf Lounge - Membrane Plinth Works,P0003974
-R1028,VO001,Investigation,Email27/02
 S34543,VO011,Crash Barrier & Bollard Fixings,SI-5341
-R1104,VO001,Medical Vaccinations and Contractor Inductions,Email2/03
-R1046,VO003,Remedial for damaged mesh near Grid AU on Level 1,SI-65
-R1046,VO004,Remedial penetration works under CAN ST 17 Rev 1.,SI-64
+S34160,VO047,Hydrotech Repair L32 North,ATS No 776
 S34545,VO021,Removal of Preprufe,SI-001050
-S34443,VO060,Zone A Upstand Resize Works,SI-5436
+R1159,VO001,Concrete Repairs ICU North,CVI 126
 23159,VO076,L3 Door Sill Flashings,SI-006253
 S34477,VO001,Additional Costs,
 S34183,VO023,Plant Area Credit,
@@ -1296,34 +1164,17 @@ S34183,VO024,Precast Jointing Variance,
 S34631,VO002,B240 Basement Floor Remediation Works,SI-000564
 S34631,VO003,Blackseal to UC columns,SI-000549
 S34477,VO002,Material Cost Escalation,
-R776,VO001,PS 1 Design for Bulge Repair,48974723
-R1046,VO005,St Lukes Gardens Crack Repairs,SI-74
-R1194,VO001,Concrete repairs to masonry at Stanbeth Building - Helifix,Email 09/3
 S34648,VO001,Grid Z/D - Apply Sikadur-32,SI-58
-R1001,VO001,H47 wall repair ,Email 10/3
-22168,VO123,Procure and install Additional Flashing N-6 ,
 S34591,VO013,Adjust waterproofing terminaton on GL:E,SI-535
-S34443,VO061,Final Nuralite Fixing Bracket Order,SI-5479
-22168,VO124,NB- B3 Breakthrough - Stage 4 MESH- Framing alteration to suit Balco,
-17221,VO001,SVB podium works ,PO 10695
 S34444,VO002,Credit Planter Box Structural Repair Works ,
 S34444,VO003,Revised Planter Box Structural Repairs ,
 S34444,VO004,"Investigation, Digging & Remediation of Planter Beside Entrance Ramp ",
-22168,VO125,Procure and install sacrificial transition flashings,
-22168,VO126,Emseal Gap Filler,
 R878,VO005,Stage 1 Column Reinstatement,SI 11
 S34981,VO002,Supply and install new probes as the previous probes were missing,Email/2003
-22168,VO127,N11 Threshold/Drain Remedials,
-22168,VO128,N6 Equatone Ceiling BALCO Flashing ,
-22168,VO129,Water Based Proofer/Sealer Coating to all exposed concrete- CO-501,
 R937,VO001,Materials  on site,Email23/03
 R878,VO006,Men Change Rooms columns,SI 11
-S34443,VO062,Staff Canopy Deflection - Remedial,SI-5580
-S34443,VO063,5qty Nuralite Brackets,SI-5577
-S34539,VO001,Supply and install Scuppers,SI-571
-R1001,VO002,H47 addition joints repair,Email24/03
+S34539,VO001,Supply and install Scuppers,SI-571 
 S34763,VO001,Credit Value of works - Aquadrain Deletion,
-R1001,VO003,Item 3 - Concrete Repairs,Email25/03
 S34545,VO023,Membrane Termination Detailing with Silcor HB Band of 500mm,
 S34545,VO024,Membrane Detailing of Membrane with Protection Sheet of NPX Layer,
 S34545,VO025,Detailing to Retaining Wall as per Structural Setout,
@@ -1333,160 +1184,92 @@ S34482,VO017,Air Freight - Provisional Sum,
 S34482,VO018,Powder Coating - Provisional Sum,
 23159,VO077,L3 Door Sill Flashings - Installation,SI-006382
 S34582,VO005,Contract/Variation Credits,
-R1046,VO006, Excess Carbodur 1030,Email25/03
 S34543,VO012,Supply and install Nuralite fixing plates ,SI-5480
 S35023,VO001,Additional Negative Panel Detailing,
 S34065,VO006,Installation of asphalt protection to nibs ,GCOR-02138
-S34999,VO002,Agreed on charge value,
-S35070,VO001,Supply Aluminium overflow drain pipe (2x),Email26/3
-S34897,VO005,Credit Voltex/Swelltite to Deleted Scope ,
 22196,VO075,B1 Ceiling & S23 Corridor Leak Review & Remediation ,
 23159,VO078,Air NZ Wedge - Temp Waterproofing,SI-006393
 S34539,VO002,Temporary Waterproofing to Risers L2 and L3,SI-580
 23159,VO079,SP5 L1 & 2 Water Drainage Control,SI-006396
 S34482,VO019,Supply only 2 X 200mm X 75mm Scuppers ,SI-000955
-R776,VO002,Otira May 2026  Works - Sample Repair,49033601
 S34754,VO023,Auckland Hopsital - A01 Support Building L3 Leak Investigation,WOT0209652
 S34183,VO025,Remove seismic cover plates on main link ,SI-2204
 R878,VO007,Grid 6 beam remediation,Email31/03
 R878,VO008,Les Mills Concrete Repairs ( Beam and columns)  ,Email01/04
-S34443,VO064,Slab Waterproofing/membrane Staff ,SI-5676
-22168,VO130,Internal Plant Room Builders Works ,
+S34160,VO048,Down Pipe Apron Boot Flashings ,AKL-505637
 S34539,VO003,Packing sill angles for membrane,SI-605
 S34683,VO002,Penetration Detailing and Temporary Waterproofing,
-R1008,VO001,VO001 - B1 concrete screed,SI-000950
 R344,VO008,2026 Flu Vaccine,
 S35088,VO001,1x outlet & 1x overflow,
-22168,VO131,PC Flashing Infills around Windows,
-22168,VO132,N9/ NF-NE Flashing Extension ,
-R1194,VO002,Masonry Review Additional Areas,SI-12
 23159,VO080,WP1-SP4 L2 East corridor Hydrant cupboard Waterproofing,
 S34591,VO014,Vertical sealant to GL D Precast Panels,SI-609
 S34183,VO026,Sika Fillets to Plant Room,
 S34482,VO020,Level one carpark substrate repairs as required,
 S34477,VO003,Waterbar replacement ,
 S34683,VO003,Gridline 33 Recoat Works,
-S34354,VO001,Site visit/substrate confirmation,SI-000180
-22168,VO133,Northern Plantroom Coating Repairs,
-S35070,VO002,Plantroom Liquid Coating Repairs,
-22168,VO134,Door Bituthene Reinstatement,
-S34443,VO065,Vent Pipe Detailing,SI-5756
-R1046,VO007,"Remove 1C, 1D deck leveling for crack repair",SI-105
 S34591,VO015,Additional detailing to pipe penetration,Email24/03
-S35067,VO001,Site Works,
-22168,VO135,Coating Works,
 S34183,VO027,Reinstate transition flashing,SI-2283
-S34443,VO066,Defect List Works - Zone 5 & 4 Roof,SI-5809
-R1001,VO004,Site work on 9th April 2026,Email19/04
 23159,VO081,Waterproofing to L2 Lounge south and north façade Nibs,SI-006453
 S34183,VO028,Install flashings and seal against existing building - Link 5 & 6,SI 2287
 S34539,VO004,Seal All Penetrations L5,SI-642
 R878,VO009,,
-S34443,VO067,Pipe box and duct upstand remedials (GL20 - Level 3 Roof),SI-5840
 23159,VO082,Level 3 Warm Roof - ILD Retest and repairs to defects as per site instruction,SI-006472
 S34482,VO021,Concrete Repairs to Slab Edge Grid 4 ,SI-001074
-22168,VO136,Loading Dock Roller Door Closure Flashing ,RFI-003525
 S34539,VO005,Sample/Mock-up ,
 S34763,VO002,Membrane Replacement,SI-17
-S34354,VO002,HSE Requirements,
 S34482,VO022,B1 Concrete Screed,SI-000950
 S34631,VO004,Ground Anchor Penetration Detailing Along Gridline SC Capping Beam ,
-S34897,VO006,Glenn Innes Pipe Penetrations to Central Lift Pit ,
-17221,VO002,Concrete corner crack repairs,
-17221,VO003,Southern Vent Building - Additional Works,
-S34982,VO003,Additional Sealant,
 S34582,VO006,Additional Cost Value due to Substrate Undulations & Unevenness,
-S34443,VO068,Gooseneck Tender Allowance Credit ,
-S34443,VO069,LEVEL 00 ZONE 3.3 FENZ ROOF ,CI 1815
-S34884,VO001,Tender to IFC,
 S34482,VO023,Grid H Aquafin 2KM Pipe Penetration Detailing,SI-001088
 S35023,VO002,Sika Guard - Credit ,
 23159,VO083,Waterproofing to level 1 hydraulic riser night works,SI-006495
 S34482,VO024,B2/B1B Precast Seals – extend sealant by 50mm,SI-001096
-S34354,VO003,Additional sealants & adhesives,SI-00185
-S35067,VO002,Surface preparation,
 S34543,VO013,Main & Secondary Core Roof Penetrations,SI-5837
 S34543,VO014,Re-apply matacryl membrane to the top of nib Level 5,SI-5926
 S34772,VO005,Tapered PIR Insulation Works to the Level 3 Area ,
-S34543,VO015,Levels 4&5 new outlet matacryl application,SI-5927
-S34248,VO009,Butynol Gutter Remedials,
-S34884,V001,Changes in Glass Heights along Gride e,
-S34443,VO070,Home Access Roof Requirements,SI5984
-S34884,V002,Pearse Construction - Replacement and additional framing,
+S34543,VO015,Levels 4&5 new outlet matacryl application,SI-5927 
+S34160,VO049,Roof C Membrane Repairs and ILD Re-Test, 7767-841
+R1159,VO002,Damaged Concrete Remedials - ATC230,CANs 19a
 R444,VO032,Balcony Scaffold hole Repair/ Infill,1159/1884
 R444,VO033,Level 7 Balcony Concrete Repair,CI 941
-R1271,VO001,Crack Repair - General Ward Building,Contract
-R1186,VO001,Preparation work prior to membrane installation,S04948
 23159,VO084,"Level 1 wet,mech riser waterproofing patching",SI6552
 S34582,VO007,Credit for Hire of Dehumidifier and Dryer used by Orams,
 S34543,VO016,Matacryl LM to Channel Drains,SI 5992
 S35135,VO001,Additional supply and installation of Voltex membrane around pad footings,
 S34591,VO016,Temporary protection over membrane at GL K 8/K,SI-694
-S34443,VO071,Nuraglaze Tender Allowance Credit,
-S34982,VO004,Additional sealant to the bracket and slab,
-S34624,VO002,UoA - L5 Overflow Works,HA022276
-S34884,V003,Portaloo,
-R747,VO002,Stage 2 - Screeding,S05044
-R747,VO003,Removal of Exisiting Coating,S05044
-R747,VO004,Tenant - Moving out Materials on Roof level,Email19/05
-S34354,VO004,Installation of EPDM to floor joint,
-S34543,VO017,"Reapplication of waterproofing, section of ground to Level 1 ramp",SI-6122
+R1159,VO003,M3 Burns - Exposed Reinforcing,PO5057729
+S34624,VO002,UoA - L6 Overflow Works,HA022276
+S34543,VO017,"Reapplication of waterproofing, section of ground to Level 1 ramp",SI-6122 
 S34539,VO006,Scupper membrane exposed,SI 715
 R444,VO034,Entry Ramp Screed,CI 994
 23159,VO085,WP1  MKT Platform 1 Hatch Ladder Extra  Layer Membrane,SI 6604
-S35036,VO001,Pipe Penetrations Waterbar Installation ,
 22196,VO076,Maintenance Inspection - Expansion Joint,
 R444,VO035,Ground Floor Bay Window Dry Pack,CI 1000
-S35067,VO003,Substrate Preparation (Variation Works) ,
-S35067,VO004,Additional Scope (Electrical Works),
 S34042,VO007,Detailing to additional plinths,
 R1073,VO001,,Email25/5
 R1073,VO002,Additional Bracing Steel Underneath for 20 off plates,Email25/05
-17221,VO004,Additional Scope - Southern Vent Building,
-17221,VO005,Joint Sealer for Expansion Joint in Workshop,
 S34482,VO025,Credit B1A Aquafin - No Access ,
-R1194,VO003,Northern Facade Crack Repairs,N.Facade
-S34897,VO007,Terratuff Coating to Lift Pit Bases ,
-S34897,VO008,Te Mahia Crack Repair on Insitu Columns ,
-S34086,VO001,Asphalt Works,
-S34248,VO010,Lift Pit Repair ,
 R878,VO010,Change Room Refurbishment,SI 50
-S34884,VO002,Additional work to install firecollars & clamp rings to existing plumbing,
 S34582,VO008,Additional cost for stage 3b due to substrate undulations & uneveness,
 S34539,VO007,Temp Waterproofing  Podium Penetrations,SI 729
-S35067,VO005,Additional Scope (Outlets and Fire Collars),
-S35067,VO006,Termination Bar (Credit),
-R747,VO005,Substrate Crack Repairs,Email29/05
 S34910,VO001,Weekly rental charges (04/05/2026 – 01/06/2026),
 S35013,VO001,Transformer Temporary Waterproofing,SI35
 S34543,VO018,Main Core Floor Finishing ,SI-6206
 S34543,VO019,L3 Point Drain,SI-6239
 S34543,VO020,Various Sealant Works,SI-6221
 S34183,VO029,Additional Cetcoat,SI-2447
-S34884,V004,MCB Plumbing & Drainage Work to existing plumbing,
-S34884,V005,MCB Plumbing & Drainage Credit 3 Collars,
-S34884,V006,Pearse Construction - Labour to modify Soffit Framing for plumbing,
 23159,VO086,PC68 Coatings - Remediation of the Mechanical Damage to the Coating Areas,SI-006662
-22168,VO137,N6 Bituthene 3000 Removal & Remediation  ,
-S34443,VO072,Cap sheet to base of Shed to Home Access Ladder,SI-6251
 S34539,VO008,Temporary Waterproof L6,SI-748
 23159,VO087,WP1_SP5 ground floor temp waterproof,SI-006683
-S34884,V007,Credit for Channel Drain- Off the Shelf Channel drain in lieu of Custom order,
 S34631,VO005,Replace waterbar in lift pit,SI-001187
 S34631,VO006,Remedials to the Volclay between GL D/E - 1/2.,SI-001188
-S34754,VO024,Auckland Hospital - A35 Te Whetu Tawera: ACute Mental Health Unit,WOT0247580
+S34754,VO024,Auckland Hospital - A35 Te Whetu Tawera: Acute Mental Health Unit,PO 4259181
 S34543,VO021,ILD Repairs to matacryl areas all levels,SI-6295
 S34543,VO022,Application of Sikadur 31,SI-6249
 R1059,VO003,B41 Floor replacement (UoA B03.B41C) - Main Lab Flooring,Email8/06
-R1046,VO008,Crack Repairs Core Samples,SI 200
-R1046,VO009,Sika Grout 215 between block wall and 300PFC,SI 207
-R1186,VO002,Plaster Block wall ,Email 9/06
 S34323,VO009,Mid Winter party 2026,
-R1194,VO004,Additional work after the facade,Email11/06
-S34884,VO003,Remove and replace existing sealant,
-S34543,VO023,GF to L1 Ramp Works,SI-6329
+S34543,VO023,GF to L1 Ramp Works,SI-6329 
 R444,VO036,Concrete / Mortar Removal - 1B Terrace,1159/2056
-S34443,VO073,Credit - Design Change and Temporary Termination Works Due to Staging,
 23159,VO088,Sita roof and gutter,
 23159,VO089,Additional Gutter Membrane Works,
 S34543,VO024,Chase Cuts & Matacryl to L5,SI-6343
@@ -1494,21 +1277,10 @@ S34482,VO026,Application for sealant to the joint,SI 1231
 S34482,VO027,Installation of Flashing,SI 1237
 R937,VO002,Level 6 Floor Levelling (Ardex K900BF),SI778
 S34183,VO030,Supply and Install HAS04 Cover Plates,CI 1702
-R1046,VO010,"Crack Injection: Cold joints in units 1E,1F,1G and Cracks in unit DG and Retail 4.",SI 210
-S35155,VO001,G04 Investigation remedial works,WOT0250443
 S34183,VO031,Reinstall of cover plates and base members on link 1,SI 2476
-S35054,VO001,Podium Planter Box Remediation,Email17/06
-S35169,VO001,Material Change to Newton 503  Mesh to room ends,Email17/06
 S34183,VO032,Supply and Install flashings on link 2,SI 2457
-S35067,VO007,Tiles on Jacks / direct stick to stairs,Email/1706
-S35067,VO008,Flashing works,Email/1706
-S35067,VO009,Extra over membrane upstand works,Email/1706
-S35067,VO010,Plaster to exposed blockwall - GA,Email/1706
-S35067,VO011,Flat termination bar to perimeter,Email/1706
-S35067,VO012,P & G,Email/1706
 S34183,VO033,Plant Room control joint sealant works,SI 2496
 S34482,VO028,Supply and installation of tape,SI-001285
-R1206,VO001,Carpark Test Area,2340/1
 R765,VO002,Concrete remove and replace ,PO5058837
 S34183,VO034,Defect remedials – damages to coating ,SI-2467
 S34183,VO035,Waitakere Hospital - Seismic joints variation,CAN158&164
@@ -1518,16 +1290,8 @@ S34631,VO009,Foundation Waterstop,SI-000305
 S34975,VO001,Contract Variances,
 22196,VO077,Membrane Repairs to Mechanical Plant Supports,
 S34539,VO009,Small water ingress L1 Podium,SI 777
-22168,VO138,N9 Exposed External Conduit & Pipe Flashing ,
-22168,VO139,NB - Post Plant Install Floor Repairs ,
-22168,VO140,Perimeter Flashing Repairs ,
-22168,VO141,Balco Seismic System,
-22168,VO142,Zone 1 Break Thru Door Level 1,
-R1028,VO002,Basement Concrete Repairs,Email16/06
-S35036,VO002,Sikalastic to BCT Threshold Drains,
-S35036,VO003,"Termination Bar & Sealant to Thermathene Membrane on Grid AA, A1 & A0",
-S34772,VO006,"Nuradeck C to Joinery",Email23/6
-S34884,VO004,Level 2 Soffitt & Garden Level Wardrobe Internal Leak,Email24/6
+S34772,VO006,"Nuradeck C to Joinery
+",Email23/6
 S34578,VO005,Air Freight,
 S34832,VO001,Newtons Waterbar,
 R1213,VO001,"Credit to Allow for Access Scaffolf, including erection, dismantling and 9 weeks rental",Email24/6
@@ -1537,57 +1301,250 @@ R1213,VO002,Swings Stage,Email 24/0
 23159,VO092,A L2 Maintenance platform 3.02 WPM to timber nibs,SI-005860
 S34631,VO010,Detailing to Penetration (upto 200mm dia),
 23159,VO093,Waterproofing to Hydrant pipe inside L2 east corridoor,SI 6417
-S34897,VO009,Sikaflex MS Sealant to the Floor Joints,
-S34086,VO002,Chase cutting to flashings in asphalt ,
-S34086,VO003,H47 Loading Dock Stair Flashing,
-R1294,VO001,Additional Repairs,Email 25/6
-S34884,VO005,Additional Channel Support,
 S34910,VO002,Weekly Rental Charges 02.06.26 to 06.07.26,
 S34910,VO003,Credit for items not completed,
 S34910,VO004,Engineer's Inspection,
 S34910,VO005,P&G Adjustment,
-S35142,VO001,Additional Fixings for Existing Packers to Every Purlin,
-S34443,VO074,Home Building - Redundant roof Penetration - L3 Roof,SI6401
-S34443,VO075,Home Building - Level 43 Roof Torch on Repairs / Patching,SI6400
-S35042,VO001,WO Building Flat membrane - Locate water leak,W/O 119612
 S34754,VO025,Carrington Building C90 Rehab Plus  - Roof Leak Investigation,WOT0259798
 S34545,VO026,Additional Waterproofing to Zone 3 SVR Room,
-S35055,VO001,Contract Credits,
 R937,VO003,Sika Grout 212 to Roof CHS Columns (70N),SI 792
-S34539,VO010,Sika Grout 212 to Roof CHS Columns (70 N),SI 792
-S34884,V008,Credit Variation for Louvre Frams,
+S34539,VO010,Sika Grout 212 to Roof CHS Columns (70 N),SI-792
 S34482,VO029,Canopy Pipe Penetration,SI-001311
-R1194,VO005,North Facade Waste Removal,NorthFacad
-S34884,V009,"Measure and Value variaiton per day- Perimeter scaffolding, Stair access, Loading platform & porta loo hire. (Excludes hire for rubbish chute) ",
-S34884,V010,Engineering cost for the Scaffold as per the original tender value.,
-S34884,V011,Ground Level SS Plate Extra,
-S34884,V012,Commercial Discount - as Agreed (for reduced area of east elevation),
-S35142,V001,RFI #2 - Structural Engineers Advice - Existing Packer Fixings,
-S35142,V002,RFI #3 - Structural Engineers Advice - Soft Spot Remedial,
-S35142,V003,Plywood to upstands,
-S34248,VO011,Butynol Gutter Remedials,SI 1756
 23159,VO094,"Decarb, Sita & Grid 39 Works outside normal working hours",SI-006845
-S34482,VO030,Supply and install coverplates,SI-001338
+S34482,VO030,Supply and lnstall Powdercoated Flashing,SI-001338
 S34482,VO031,Supply and Install welded tray flashing,SI-001330
-23245,VO037,Installation of flashing tape,
-22168,VO143,N-6 Vertical Sealant/Additional Flashing,
+23245,VO037,Application of flashing barrier tape,
 S34539,VO011,Roof overflows,SI 799
-S34543,VO025,"ACO drain, L4 base of ramp to L5",SI-4460
+S34543,VO025,"ACO drain, L4 base of ramp to L5",SI-4460 
 R937,VO004,Lift overrun Grinding,SI 796
 S34539,VO012,Lift overrun,SI 796
-22168,VO144,Flooring Remedials as required plant room,
 S34543,VO026,Final Account Agreement,
 S35013,VO002,Switchroom Penetrations,SI-000059
 S34482,VO032,Build a nib using Sikadur 31CF,SI-001252
-R1008,VO002,Joint Termination Nib,S34482
 23245,VO038,Grinding concrete Nib ,SI-003486
 R765,VO003,Baseplate Grouting,CAN001
-S35197,VO001,Crack Repairs to the Lift Roof Wall,Email 14/0
 S34966,VO001,Alternative Waterbar to Internal Slab Cut Outs ,
 S34966,VO002,SIKA S2 Sealant to Internal Footing Slab Outs ,
 S34966,VO003,Additional Sikaproof A to Internal Footings ,
-S34870,VO001,Offsite Storage for PIR Insulation,SI 2237
+S34870,VO001,Offsite Storage for PIR Insulation,SI-002237
 S34466,VO002,Sikadur 42 Pilecap Repairs ,
+S34947,VO001,Pile Demolition and Repairs ,NTSC 020
+S34183,VO036,Stairs 1 & 2 - Substrate,
+S34975,VO002,Precast Panel Joint Variance,
+23159,VO095,Chevaline Dexx Coating Works (as per agreed measure and value),SI-002364
+S34673,VO001,Gridline E Horizontal Detail Works,SI-14
+23159,VO096,"Credits for VO021, 28, 50 & 51. Reflected now under VO095",Email 8may
+S34543,VO027,"Garage Pipeworks relocation works, SVR room reinstate matacryl system",SI 6426
+23159,VO097,"WP1 - SP5 Remedials to floor
+",SI 6902
+23159,VO098,Repairs to open space damaged areas,SI 6900
+S35010,VO001,A01 Tile resurfacing - stair nosing,Email21/07
+R1315,VO001,Additional  Crack repairs above the original quantities quoted,email22/07
+S34631,VO011,HV Room Penetrations,
+S34631,VO012,Volclay & Waterbar Reworks,SI-001466
+23159,VO099,WP1 SP5 Waterproofing Weekend work,SI006846
+23159,VO100,Reversal of VO091,COR-000029
+S34466,VO003,Waterbar replacement to pile caps ,
+S34466,VO004,Relief Hose Repairs - Lift Pit / Zone 003 ,
+S34539,VO013,Roof level adjustment for PIR,SI-778
+S34482,VO033,Pipe Penetration Through the Asphalt,SI-001291
+S34482,VO034,Carpark Entry Cladding and Nib Protection,SI-001332
+S34832,VO002,Detailing to wall ties through membrane Gridline 1,
+S34631,VO013,"Penetrations ( upto 100 mm Dia, as per Contract Rate)",
+S34631,VO014,RX Waterstop to the Perimeter Slab & Capping Beam as per waterproofing details (to be treated as variation  as noted in the contract and as per approved rate),
+23159,VO101,Capping of Existing Overflows on VVa Parapet,SI-006932
+21148,VO120,Crack repair in R60,
+R1213,VO003,Additioanl Concrete Repairs,CI 002
+S34966,VO004,Additional Mobilisations & As Built Footings  Changes ,
+S34966,VO005,Downtime Waiting for Work Area ,
+S34466,VO005,Additional Geotextile to Lift Pit,
+23159,VO102,Weekend Works - 25/7 & 26/7/26,
+S34889,VO001,Coating to Lift Pit & Thresholds ,
+R1059,VO004,Main lab floor Repairs,SI 9
+S34539,VO014,Wet Vac Roof,SI 838
+S34631,VO015,Bentonite granules to liner wall remedial ,SI-001508
+S34631,VO016,Replacement of Voltex underfloor Gridline 3-6,SI-001509
+S35010,VO002,Glass Balustrade,
+S34754,VO026,Auckland City Hospital - AO01 Support Building L5,WOT0272881
+S34482,VO035,L1 Carpark Fire Door Waterproofing Remedial,SI 1437
+S34482,VO036,Sill detail of door at L1 Carpark -  Curring of Asphalt,SI 1438
+S34578,VO006,Additional Sealant Application,
+R878,VO011,Stage 4 - Building structure repairs,CI 138
+R878,VO012,External Wall Repair Infill,CI 123
+23159,VO103,AC Unit Builders work Detail to PC11 Bridge Roof,SI-006983
+S34870,VO002,Temp waterproofing to level 5 and level 4,SI-002465
+S34183,VO037,Flashing and cetcoat - Link 1 (RFI-1000),SI-2569
+S34183,VO038,Link 2 - Promat cladding,SI-2572
+S34183,VO039,Final Account Settlement,
+S34577,VO001,Install waterbar for transformer room,SI-532
+S34631,VO017,Additional for Swelltite in lieu of Voltex- HV Room,SI-001593
+S34182,VO011,Chevaline dexx to plinths ,SI-006697
+R1315,VO002,Final Crack Map - Last 20%,SI 86
+S34673,VO002,Panel Joints Basement to GF Panel - Illmod600,SI-19
+23159,VO104,Re waterproof CLT where screws required removing for other trade remediation,SI-006997
+R1138,VO001,PST Crack and Small Leak,Email7/8
+S34065,VO007,Rectification of Incorrect Pipe Installation at Ground Floor Slab 14 ,SI-006739
+S34466,VO006,PC Panel Pipe Support Membrane Detailing ,SI-000179
+R1159,VO004,"KF1 Stage 2, Stair 3 area - Exposed Reinforcing and Concrete Repairs",AKL5060287
+S34065,VO008,Temporary Waterproofing Works,SI-006791
+S34482,VO037,Supply 2 rolls of Double stick tape and install on B1B canopy,SI-001483
+S34631,VO018,Corewall Waterstop,VPR-000016
+S34631,VO019,Zone B GL SC Volclay Rectification,SI-001643
+S35110,VO001,Supply and install Nuraglaze coating,Email14/08
+R1356,VO001,Shot blast walkway infill,Email14/08
+S34539,VO015,Custom DP Transition (Membrane Remedial),SI 869
+S34545,VO027,Coverboard protection to zone 1,SI-002556
+R1241,VO001,Site Induction and Visit - 5th August 2026,19/08/2026
+S34956,VO001,Credit - Deletion of Membrane,SI-105
+S34956,VO002,Change of parapet membrane along gridline A,SI-87
+R1367,VO001,Corroded Reinforcement Repairs within the Plenum Chamber,Email20/08
+S34947,VO002,Pile Demolition and Repairs,NTSC 020
+R878,VO013,Louver Opening Preperation,SI 122
+S34577,VO003,Intu-mastic seal around orbi bolt washer holes,SI-582
+S34545,VO028,Zone 5 Level 0 - Preprufe Repairs,SI-002509
+S34477,VO005,Building G Membrane Roofing Scope (Changed to Bitumen Membrane – Refer VO006),Email/1408
+S34477,VO006,Cost uplift due to Double Layer Torch-on Membrane ,Email/2408
+S34182,VO012,Remedial work to WP1 membrane ,SI-007065
+23159,VO105,WP1 - PC11 Bridge Roof Existing Height Safety Access Rail.,SI-007068
+S34466,VO007,Facade Works,
+S34482,VO038,B1 & B2 Canopy ,SI-000708
+S34854,VO001,Extra Mobilisation for Staged Sikalastic 152 work,Email14/08
+S34482,VO039,Chain wire fences + doors for B1a level 1 carpark (AAN-162),SI-001524
+S34482,VO040,Waterproofing of door rebate,SI-001447
+S34466,VO008,Extra Over PC SUM - Pipe Penetrations through Preprufe 300R ,
+S34466,VO009,Extra Over PC - Reinforcing Starters to Grid 7 Wall ,
+S34466,VO010,Membrane Damage Repairs Zone 002/Zone 003 Raft Slab ,
+S34631,VO020,Additional run of waterstop to the tanked areas at the wall construction joint,SI-001521
+S34870,VO003,Waterproof concrete that has been chipped out for façade GL—7 J-J+,SI-002658
+23159,VO106,Additional membrane works to upstands only,SI-006668
+23159,VO107,Waterproofing to Hydrant pipe inside L2 east corridor,SI-006417
+23159,VO108,Seismic detail to L2 Grid 35-VVa,COR-000278
+S35013,VO003,Damaged Membrane Repairs – Building A & B,SI-000079
+S35013,VO004,NIB Membrane Reinstatement,SI-000043
+23159,VO109,Sp5 Level 2 Services Plinth waterproofing,SI-007085
+S34577,VO004,Replacement Horizontal P Seal - Grid J,SI-591
+23159,VO110,"Scope Reduction Credit -  Flood testing to remaining gutters
+
+",CAN414
+22196,VO078,Additional Outlet,
+S35110,VO002,Supply of outlets/overflows,Email/2608
+S34182,VO013,T13-12 Landside Tanking Work,SI-005864
+S9000,VO002,Dead Time - below contract hours,
+R169,VO004,Eden Apartments 13A - Sikadur 52 Injection,Email31/08
+S34539,VO016,Nuralite Gooseneck,SI 887
+22196,VO079,Torch on detail around cable peno,SI-007310
+S34545,VO029,Zone 5 Additional termination detailing,SI-002768
+S34578,VO007,Supply and Install Inseal Tape 3109,ATS No. 48
+S34539,VO017,Cricket Roof Buildup,SI 893
+S35013,VO005,Flue Support Waterproofing - Option 2,
+S35110,VO003,Additional Visit Due to Staging of Works – Beach House Top Flat Roof,
+S35110,VO004,Additional Membrane Detailing to Valleys and Chimneys ,
+R1367,VO002,Wall Coating,PO 62827
+R1148,VO001,"Crack Survey, Classification, Reporting and Repair Scope",2669
+S34482,VO041,Supply only 4ltr Equus Ferroclean ,SI-001540
+S34182,VO014,Cooling frame waterproof detail ,SI-007110
+S34822,VO001,Sikadur UA Concrete Fix to Precast Joints,SI-899
+S34182,VO015,Coating works to steel on northern nibs ,SI-007333
+S35234,VO001,Crack Repairs,Email03/09
+23159,VO111,Review of Symonite fixing proposal (Quintus Slabber email 04.08.26) ARCH - CAN 1186,SI-007120
+S34482,VO042,Laneway R/S Door Opening Aquafin 2KM Repairs ,SI-001563
+S34754,VO027,Carrington Campus - C25 Buchanan Clinic Leak Investigation,WOT0297505
+S34754,VO028,Auckland City Hospital -  A08 Oncology Investigation of leaks,WOT0296899
+S34754,VO029,"Carrington C25 - Buchanan Clinic Room 4, Leak Investigation",WOT0298747
+S34631,VO021,Volclay Removal and Repair Zone B,SI-001849
+R1315,VO003,Crack Cores,SI 124
+S34545,VO030,Adjust termination to new level – Zone 2 stairs,SI-002879
+R1364,VO001,Grouting works /  Steel cutting,PO520-1300
+S34631,VO022,Removal of Newtons on Gridline E,SI-001856
+R1159,VO005,KF1 - Render to base of shearwall,AKL5061209
+R1159,VO006,Grout Install,AKL5061225
+S34477,VO007,Membrane Roofing Penetration Re Detailing,
+S34477,VO008,Membrane Roofing – Central Roof Additional Diverters,
+R1356,VO002,"ADHB Canopy Repairs:
+AO8 Oncology",PO S06021
+R1346,VO001,Spiral Top Cover Repair Tower 1B 2B ,NTSC 033
+S34947,VO003,Pile Demolition,NTC-020
+S34947,VO004,Penetrations,
+R1138,VO002,"Scope of works wiith Rate only
+Main tank - PST3  &4",Email1809
+S34947,VO005,Pile Demolition: Spiral Top Cover Repair Tower 1B 2B,NTSC 033
+R1148,VO002,Crack Repairs 1m down  from top of column,2669112824
+S35190,VO001,Precast wall sealant,SI-000132
+S35234,VO002,Screeding to Channel Drains,
+S35234,VO003,Metal Outlets ,
+S35013,VO006,Waterproofing Membrane to Door Bunds (A2-D2),SI 136
+S34183,VO040,Seal plantroom cable,SI-2645
+S34539,VO018,Temp Waterproofing Risers,SI 934
+23159,VO112,WP1 SP4 L2 remedials,SI-007162
+S35000,VO001,Locating and drilling injection holes,157785
+S34466,VO012,Waterbar Replacement ,SI-000204
+S34631,VO023,Standing Time 24/09 and 25/09 ,SI-001964
+S34577,VO005,Seismic and precast jointing ,
+S35013,VO007,Credit - Deleted Scope,
+R1148,VO003,Concrete Perimeter walls,CAN ST- 01
+R1343,VO001,"Rosedale WWTP RC1 Works
+(admin@seipp.co.nz)",PO 63386
+S35253,VO001,Screed,
+S35253,VO002,Substrate Repairs,
+S35253,VO003,Deck Waterproofing,
+R1138,VO003,PST 3 & 4 Stud Removal,Email28/9
+S35019,VO002,Pipe Penetration Detailing,
+S35019,VO003,Control Joint Detailing,
+S35019,VO004,Aquadrain Protection,
+R1350,VO001,Design Work,49133775
+S34870,VO004,Additional PIR Insulation costs as per latest design,
+S34870,VO005,Additional Waterproofing - Zone 2 Grid 7,
+S34870,VO006,Waterproofing to Zone 2 Level 4,
+S34631,VO024,Volclay Rectification,SI 2009
+R1159,VO007,KF2 Concrete Remedials,AKL 506166
+S34870,VO007,RFI 11 - Warm roof system to Zone 2 Level 2 Risers ,VARPS-0009
+S34870,VO008,Chevaline Dexx to All Risers (Design Change),SI - 3069
+S34870,V001,Zone 1: Level 4,
+S34870,V002,Zone 1: Level 5,
+S34870,V003,Zone 2: Level 4,
+S34870,V004,Zone 2: Level 5,
+S34870,V005,Zone 3: Level 3,
+S34870,V006,Zone 5: Outbuilding,
+S34870,V007,Zone 5: Transformer Roof,
+S34870,V008,All Chevaline Dexx Works,
+S34870,V009,Dewatering,
+S34870,V010,PIR Material Movement - For other trades work,
+S34870,V011,PIR Material - Secure & Packaging,
+S34631,VO025,B230 - Zone B GL/11 Additional Waterbar,SI 2032
+S35258,VO001,Atrium Gap Sealing,Email6/10
+S35258,VO002,L4 Roof gutter ledge wall waterproofing,Email6/10
+S34870,VO009,Bunding Works,Email 7/10
+S34482,VO043,Laneway R/S Doors Shopfront Aquafin Remedials,SI 1649
+S34688,VO001,Testing of Completed Post Detailing,Email7/10
+S34323,VO010,2026 EOY Christmas costs,
+S34323,VO011,2026 Christmas Hampers,
+S34984,VO001,Waterproofing Tanking - Cess Pitt,Email9/10
+R1155,VO001,18-20 Tauraru Tce,SO6243
+R1367,VO003,Bio Bed 2 & 4 Jointing,PO 63779
+S34577,VO006,Remediate Damaged P-seal Gridline 3,SI 678
+S34577,VO007,Cutting slab edge to fit Ryanspan,SI 745
+R1367,VO004,Odour Bed Block Crack Injection,Email13/10
+S34772,VO007,Ardex membrane repair,Email14/10
+R1159,VO008,Concrete Repairs to slab face on stage 3,AKL5062070
+R1356,VO003,ADHB Canopies A & B Tile Removal,S06021
+S34846,VO001,Patch Repair Lift Piles,SI 021
+R1159,VO009,Concrete Footing remedials for block veneer base,AKL 506192
+R1149,VO001,Boundary Wall Remediation,Email16/10
+S34466,VO013,Patch existing sleeve,SI-000232
+S34578,VO008,Adjustment to Air Freight Cost ,
+23159,VO113,Waterproofing coating around new plinth and drain pipe,COR-002719
+R444,VO037,Final Account,Email20/10
+R1138,VO004,Additional Sikagard 7000 PST 3 & 4,Email20/10
+S34477,VO009," Additional screed to 1x balcony and 2x Juliet balconies, Level 1 ",VO-000221
+S34947,VO006,Pile Inspection - Piles 5-8,
+S34688,VO002,Downtime Staff Hours,
+S35013,VO008,Secure Duct Waterproofing & EFVM,SI-000091
+R1148,VO004,Column and top of wall crack injection (final updated),CAN ST19
+S35309,VO001,Investigation works,
+S35309,VO002,Removal and Reinstatement of Bottom Weatherboards,
+S35309,VO003,Install tiles on pedestals,
+S35309,VO004,Upgrade Drainage,
+S34539,VO019,Roof Updates,SI-858
 """
 
 def _load_default_vos():
