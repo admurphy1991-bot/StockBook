@@ -304,6 +304,7 @@ DEFAULT_JOBS = [
     "23245 - AATH Facade Package",
     "S34131 - Lorne Street - Student Accommodation",
     "S34182 - AIAL Domestic Processor - Headhouse",
+    "S34183 - Waitakere Hospital - Tanking",
     "R626 - Mt Eden 101, Concrete Office / Yard",
     "S34228 - JTFJ Costs Mt Eden Road 101",
     "S34266 - Maintenance / Membrane and Admininistration",
@@ -456,6 +457,7 @@ DEFAULT_JOBS = [
     "R1417 - Sale Street, 70 -  Void Breakouts ST00112",
     "S35292 - Jervois Road 97 - Waterproofing",
     "S35294 - Starship Hospital Park RD, 2 -  Seismic Cap Flashing",
+    "R1421 - 97 Jervois Road - Screed Level 9",
     "S35295 - H47 Building - Sansom Annual Inspection",
     "S35300 - Milford School - New 10TS Block and Playground and Block 2 &4b Demo",
     "R1426 - St Cuthberts - Poll Chemical Store Remediation",
@@ -467,6 +469,9 @@ DEFAULT_JOBS = [
     "S2306 - Warranty Work - Sansom Construction Systems Ltd",
     "S35314 - Murphy House - Annual Maintenance Inspection",
     "S35323 - 34 Gabador Place, Mount Wellington - Tanking",
+    "S35325 - H47 Building - Southern Canopy Panel Joints Remedial Works",
+    "S35328 - Hotel Indigo - Membrane Remdial Works",
+    "R1447 - Mangere WWTP 2 - Splitter Box 2",
 ]
 
 # ── Job Variation Orders (VOs) ────────────────────────────────────────────────
