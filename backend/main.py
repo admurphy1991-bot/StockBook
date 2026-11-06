@@ -474,6 +474,15 @@ DEFAULT_JOBS = [
     "R1447 - Mangere WWTP 2 - Splitter Box 2",
 ]
 
+# Jobs that are open in the costing system but must not take stock entries. Applied on top of
+# every jobs refresh, so re-pasting a new CSV export doesn't bring them back.
+EXCLUDED_JOBS = {"19239"}  # use S19239 instead
+
+def _drop_excluded_jobs(jobs):
+    return [j for j in jobs if str(j).split(" - ")[0].strip() not in EXCLUDED_JOBS]
+
+DEFAULT_JOBS = _drop_excluded_jobs(DEFAULT_JOBS)
+
 # ── Job Variation Orders (VOs) ────────────────────────────────────────────────
 # Hardcoded from the latest CSV extract emailed from the job-costing system (no API available).
 # To refresh: replace this block with a new CSV export (Job Number, Variation Order Number,
@@ -1676,10 +1685,10 @@ async def webhook_sync(payload: WebhookSync):
             if val.strip():
                 new_jobs.append(val.strip())
         if new_jobs:
-            _jobs = new_jobs
+            _jobs = _drop_excluded_jobs(new_jobs)
             updated.append(f"jobs: {len(_jobs)} loaded from CSV")
     elif payload.jobs:
-        _jobs = [str(j).strip() for j in payload.jobs if str(j).strip()]
+        _jobs = _drop_excluded_jobs([str(j).strip() for j in payload.jobs if str(j).strip()])
         updated.append(f"jobs: {len(_jobs)} loaded inline")
 
 
