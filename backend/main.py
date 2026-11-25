@@ -4,12 +4,13 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
-import asyncpg, os, json, csv, io, base64, re, secrets
-from datetime import date, datetime
+import asyncpg, os, json, csv, io, base64, re, secrets, asyncio
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 from openai import AsyncOpenAI
 import httpx
 from dayworks_pdf import render_dayworks_pdf
+import jobs_feed
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -1620,6 +1621,49 @@ DEFAULT_VOS = _load_default_vos()
 # In-memory store — overwritten by webhook sync
 _products = list(DEFAULT_PRODUCTS)
 _jobs = list(DEFAULT_JOBS)
+
+# ── Daily jobs refresh from the Sansom AI feed ────────────────────────────────
+# Token comes from the JOBS_FEED_TOKEN Railway variable. Any failure keeps the current list.
+_jobs_meta = {"source": "default", "refreshed_at": None, "last_error": None}
+_jobs_feed_task = None
+
+async def refresh_jobs_from_feed():
+    global _jobs
+    token = os.environ.get(jobs_feed.TOKEN_ENV)
+    if not token:
+        _jobs_meta["last_error"] = f"{jobs_feed.TOKEN_ENV} not set"
+        return False
+    try:
+        new_jobs = _drop_excluded_jobs(await jobs_feed.fetch_jobs(token))
+    except Exception as e:
+        code = getattr(getattr(e, "response", None), "status_code", None)
+        _jobs_meta["last_error"] = f"fetch failed: {type(e).__name__}" + (f" (HTTP {code})" if code else "")
+        return False
+    if not jobs_feed.acceptable(new_jobs, len(_jobs)):
+        _jobs_meta["last_error"] = f"feed rejected: {len(new_jobs)} jobs vs {len(_jobs)} current"
+        return False
+    _jobs = new_jobs
+    _jobs_meta.update(source="feed", refreshed_at=datetime.now(NZ_TZ).isoformat(timespec="seconds"), last_error=None)
+    return True
+
+async def _jobs_feed_loop():
+    await refresh_jobs_from_feed()
+    while True:
+        now = datetime.now(NZ_TZ)
+        target = now.replace(hour=7, minute=35, second=0, microsecond=0)
+        if target <= now:
+            target += timedelta(days=1)
+        await asyncio.sleep((target - now).total_seconds())
+        for _ in range(6):
+            if await refresh_jobs_from_feed():
+                break
+            await asyncio.sleep(1800)
+
+@app.on_event("startup")
+async def start_jobs_feed():
+    global _jobs_feed_task
+    if os.environ.get(jobs_feed.TOKEN_ENV):
+        _jobs_feed_task = asyncio.create_task(_jobs_feed_loop())
 _vos = list(DEFAULT_VOS)
 
 # ── Webhook: sync products & jobs from Google Sheets (published CSV) ─────────
@@ -1706,6 +1750,9 @@ async def webhook_status():
     return {
         "products_count": len(_products),
         "jobs_count": len(_jobs),
+        "jobs_source": _jobs_meta["source"],
+        "jobs_refreshed_at": _jobs_meta["refreshed_at"],
+        "jobs_feed_error": _jobs_meta["last_error"],
         "source": "live (last synced via webhook)" if _products is not DEFAULT_PRODUCTS else "default (hardcoded)"
     }
 
