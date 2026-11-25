@@ -1623,7 +1623,7 @@ _products = list(DEFAULT_PRODUCTS)
 _jobs = list(DEFAULT_JOBS)
 
 # ── Daily jobs refresh from the Sansom AI feed ────────────────────────────────
-# Token comes from the JOBS_FEED_TOKEN Railway variable. Any failure keeps the current list.
+# Token comes from the SANSOM_JOBS_FEED_TOKEN Railway variable. Any failure keeps the current list.
 _jobs_meta = {"source": "default", "refreshed_at": None, "last_error": None}
 _jobs_feed_task = None
 

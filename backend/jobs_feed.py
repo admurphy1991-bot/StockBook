@@ -3,7 +3,7 @@ import csv, io, re
 import httpx
 
 FEED_URL = "https://sansom-ai.vercel.app/api/feeds/jobs"
-TOKEN_ENV = "JOBS_FEED_TOKEN"
+TOKEN_ENV = "SANSOM_JOBS_FEED_TOKEN"
 MIN_JOBS = 100
 MIN_KEEP_RATIO = 0.7
 MAX_LEN = 200
